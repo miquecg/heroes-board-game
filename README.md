@@ -13,7 +13,6 @@ Heroes can move to tiles occupied by enemies but they are always rendered on top
 ### Game mechanics
 - Players are assigned a hero which is spawned on a random walkable tile
 - Random names are assigned to heroes but the player can also choose one
-- If a player connects to the game with a name already used by another player, both will control the same hero
 - Each hero can attack everyone else within the radius of 1 tile around, in all directions plus the tile they are standing on
 - All enemies in range are attacked at the same time
 - One hit is enough to kill. If an enemy attacks you, your hero dies
