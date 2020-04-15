@@ -22,9 +22,9 @@ Heroes can move to tiles occupied by enemies but they are always rendered on top
 ### Implementation rules
 - Each hero is represented by a **GenServer** which holds their position on the grid and the status (alive/dead)
 - Game interaction does *not* have to be “live”. Graphics can be updated every second with a page refresh
-- A web endpoint to play (e.g. `/game`)
+- An endpoint to play (e.g. `/game`)
 - Players can choose their names with query parameters (e.g. `/game?name=Geralt`)
-- Movements input can come from keyboard or HTML buttons
+- Players can use keyboard or HTML buttons for movements
 
 ### Where is the focus …
 - As much vanilla Elixir as possible
