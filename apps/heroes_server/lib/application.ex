@@ -1,15 +1,21 @@
 defmodule HeroesServer do
   @moduledoc """
-  This application keeps each hero status and position on the board.
-  It's also an API for clients to interact with them.
+  This module is the entry point to the server.
+  All game interaction happens through `Hero` GenServer.
   """
 
   use Application
 
   def start(_type, _args) do
-    children = []
-
     opts = [strategy: :one_for_one, name: Heroes.Supervisor]
-    Supervisor.start_link(children, opts)
+    DynamicSupervisor.start_link(opts)
+  end
+
+  def join() do
+    board = Application.fetch_env!(:heroes_server, :board)
+    tile = Board.random_tile(board)
+    {:ok, pid} = DynamicSupervisor.start_child(Heroes.Supervisor, Hero)
+
+    {pid, tile}
   end
 end
