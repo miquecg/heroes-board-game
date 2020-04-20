@@ -19,7 +19,7 @@ defmodule HeroesServer do
     {pid, tile}
   end
 
-  def random_tile(board) do
+  defp random_tile(board) do
     board
     |> Board.tiles()
     |> Enum.random()
