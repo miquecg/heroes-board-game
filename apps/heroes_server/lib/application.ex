@@ -13,13 +13,13 @@ defmodule HeroesServer do
 
   def join() do
     board = Application.fetch_env!(:heroes_server, :board)
-    tile = random_tile(board)
+    tile = start_position(board)
     {:ok, pid} = DynamicSupervisor.start_child(Heroes.Supervisor, Hero)
 
     {pid, tile}
   end
 
-  defp random_tile(board) do
+  defp start_position(board) do
     tiles = board.tiles()
     Enum.random(tiles)
   end
