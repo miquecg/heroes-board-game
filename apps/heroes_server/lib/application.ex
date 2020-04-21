@@ -1,7 +1,6 @@
 defmodule HeroesServer do
   @moduledoc """
-  This module is the entry point to the server.
-  All game interaction happens through `Hero` GenServer.
+  This module is the entry point to start playing the game.
   """
 
   use Application
