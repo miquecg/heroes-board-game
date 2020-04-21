@@ -9,5 +9,5 @@ defmodule Board.Test do
 
   @tiles Board.tiles(@board_spec)
 
-  def tiles(), do: @tiles
+  def tiles, do: @tiles
 end

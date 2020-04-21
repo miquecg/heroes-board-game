@@ -11,7 +11,7 @@ defmodule HeroesServer.AcceptanceTest do
     assert tile != {0, 0}
   end
 
-  defp active_heroes() do
+  defp active_heroes do
     %{active: heroes} = DynamicSupervisor.count_children(Heroes.Supervisor)
     heroes
   end

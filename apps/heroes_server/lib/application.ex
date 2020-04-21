@@ -10,7 +10,7 @@ defmodule HeroesServer do
     DynamicSupervisor.start_link(opts)
   end
 
-  def join() do
+  def join do
     board = Application.fetch_env!(:heroes_server, :board)
     tile = start_position(board)
     {:ok, pid} = DynamicSupervisor.start_child(Heroes.Supervisor, Hero)
