@@ -5,11 +5,10 @@ defmodule HeroesServer.AcceptanceTest do
     assert active_heroes() == 0
 
     Application.put_env(:heroes_server, :board, Board.Test)
-    {_, {x_axis, y_axis} = _tile} = HeroesServer.join()
+    {_, {_x_axis, _y_axis} = tile} = HeroesServer.join()
 
     assert active_heroes() == 1
-    assert x_axis == 1
-    assert y_axis == 0
+    assert tile != {0,0}
   end
 
   defp active_heroes() do
