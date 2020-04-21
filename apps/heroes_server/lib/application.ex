@@ -1,7 +1,6 @@
 defmodule HeroesServer do
   @moduledoc """
-  This module is the entry point to the server.
-  All game interaction happens through `Hero` GenServer.
+  This module is the entry point to start playing the game.
   """
 
   use Application
@@ -11,7 +10,7 @@ defmodule HeroesServer do
     DynamicSupervisor.start_link(opts)
   end
 
-  def join() do
+  def join do
     board = Application.fetch_env!(:heroes_server, :board)
     tile = start_position(board)
     {:ok, pid} = DynamicSupervisor.start_child(Heroes.Supervisor, Hero)

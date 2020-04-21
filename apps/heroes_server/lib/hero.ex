@@ -1,4 +1,9 @@
 defmodule Hero do
+  @moduledoc """
+  Holds hero status (alive or dead) and current position on the board.
+  All player actions during the game happen on this GenServer.
+  """
+
   use GenServer
 
   # Client
