@@ -8,7 +8,7 @@ defmodule HeroesServer.AcceptanceTest do
     {_, {_x_axis, _y_axis} = tile} = HeroesServer.join()
 
     assert active_heroes() == 1
-    assert tile != {0,0}
+    assert tile != {0, 0}
   end
 
   defp active_heroes() do
