@@ -20,10 +20,10 @@ defmodule Board do
   - `walls`: list of `Board.wall`
   """
   @type board_spec :: %__MODULE__.Spec{
-    cols:  pos_integer(),
-    rows:  pos_integer(),
-    walls: list(wall)
-  }
+          cols: pos_integer(),
+          rows: pos_integer(),
+          walls: list(wall)
+        }
 
   defmodule Spec do
     @moduledoc false
@@ -50,8 +50,6 @@ defmodule Board do
   """
   @spec tiles(board_spec) :: list(tile)
   def tiles(%Spec{cols: cols, rows: rows, walls: walls}) do
-    for x <- 0..cols - 1,
-        y <- 0..rows - 1,
-        {x, y} not in walls, do: {x, y}
+    for x <- 0..(cols - 1), y <- 0..(rows - 1), {x, y} not in walls, do: {x, y}
   end
 end
