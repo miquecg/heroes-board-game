@@ -10,8 +10,13 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        elixir: [1.10.2]
+        erlang: [22.3.2]
+        os: [debian-buster-20200224]
     container:
-      image: hexpm/elixir:1.10.2-erlang-22.3.2-debian-buster-20200224
+      image: hexpm/elixir:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
       - name: Install dependencies
