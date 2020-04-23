@@ -5,7 +5,10 @@ defmodule HeroesGame.MixProject do
     [
       apps_path: "apps",
       version: "0.1.0",
-      deps: deps()
+      deps: deps(),
+      dialyzer: [
+        plt_file: {:no_warn, "priv/plts/dialyzer.plt"}
+      ]
     ]
   end
 
