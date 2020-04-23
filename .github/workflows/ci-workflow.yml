@@ -26,6 +26,15 @@ jobs:
           mix deps.get
       - name: Compile project
         run: mix compile --warnings-as-errors
+      - name: Cache priv/plts
+        uses: actions/cache@v1
+        with:
+          path: priv/plts
+          key: plts-${{ matrix.erlang }}-${{ matrix.elixir }}-${{ hashFiles('mix.lock') }}
+          restore-keys: |
+            plts-${{ matrix.erlang }}-${{ matrix.elixir }}-
+      - name: Run dialyzer
+        run: mix dialyzer --format short
       - name: Run Credo
         run: mix credo -a
       - name: Check code formatting
