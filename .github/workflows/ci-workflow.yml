@@ -6,6 +6,9 @@ on:
     types: [opened, reopened, synchronize]
     branches:
       - master
+  push:
+    branches:
+      - master
 
 jobs:
   test:
@@ -19,6 +22,13 @@ jobs:
       image: hexpm/elixir:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
+      - name: Cache deps
+        uses: actions/cache@v1
+        with:
+          path: deps
+          key: deps-${{ hashFiles('mix.lock') }}
+          restore-keys: |
+            deps-
       - name: Install dependencies
         run: |
           mix local.rebar --force
