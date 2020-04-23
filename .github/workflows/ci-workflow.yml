@@ -10,8 +10,13 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        elixir: [1.10.2]
+        erlang: [22.3.2]
+        os: [debian-buster-20200224]
     container:
-      image: hexpm/elixir:1.10.2-erlang-22.3.2-debian-buster-20200224
+      image: hexpm/elixir:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
       - name: Install dependencies
@@ -19,10 +24,20 @@ jobs:
           mix local.rebar --force
           mix local.hex --force
           mix deps.get
-      - name: Analyze code
-        run: |
-          mix compile --warnings-as-errors
-          mix credo -a
-          mix format --check-formatted
+      - name: Compile project
+        run: mix compile --warnings-as-errors
+      - name: Cache priv/plts
+        uses: actions/cache@v1
+        with:
+          path: priv/plts
+          key: plts-${{ matrix.erlang }}-${{ matrix.elixir }}-${{ hashFiles('mix.lock') }}
+          restore-keys: |
+            plts-${{ matrix.erlang }}-${{ matrix.elixir }}-
+      - name: Run dialyzer
+        run: mix dialyzer --format short
+      - name: Run Credo
+        run: mix credo -a
+      - name: Check code formatting
+        run: mix format --check-formatted
       - name: Run tests
         run: mix test

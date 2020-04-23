@@ -1,5 +1,9 @@
+# Top level directories
 /.elixir_ls/
 /_build/
+/priv/plts/*.plt
+/priv/plts/*.plt.hash
+
 deps/
 
 erl_crash.dump
