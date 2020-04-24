@@ -1,14 +1,13 @@
 defmodule HeroesServer.AcceptanceTest do
   use ExUnit.Case, async: true
 
-  test "When a player joins the game a new hero is placed on a random tile" do
+  test "When a player joins the game a new hero is placed on a tile" do
     assert active_heroes() == 0
 
-    Application.put_env(:heroes_server, :board, Board.Test)
-    {_, {_x_axis, _y_axis} = tile} = HeroesServer.join()
+    {_, tile} = HeroesServer.join()
 
     assert active_heroes() == 1
-    assert tile != {0, 0}
+    assert tile == {0, 1}
   end
 
   defp active_heroes do
