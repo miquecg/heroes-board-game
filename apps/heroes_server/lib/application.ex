@@ -3,6 +3,8 @@ defmodule HeroesServer do
   This module is the entry point to start playing the game.
   """
 
+  @app :heroes_server
+
   use Application
 
   def start(_type, _args) do
@@ -11,15 +13,24 @@ defmodule HeroesServer do
   end
 
   def join do
-    board = Application.fetch_env!(:heroes_server, :board)
-    tile = start_position(board)
+    board = board()
+    tile = choose_tile(board)
     {:ok, pid} = DynamicSupervisor.start_child(Heroes.Supervisor, Hero)
 
     {pid, tile}
   end
 
-  defp start_position(board) do
+  defp choose_tile(board) do
     tiles = board.tiles()
-    Enum.random(tiles)
+    tile_chooser().(tiles)
+  end
+
+  defp board, do: Application.fetch_env!(@app, :board)
+
+  defp tile_chooser do
+    case Application.get_env(@app, :start_tile, :randomized) do
+      :randomized -> &Enum.random/1
+      :first -> &Kernel.hd/1
+    end
   end
 end

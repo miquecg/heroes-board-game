@@ -6,11 +6,13 @@ defmodule Hero do
 
   use GenServer
 
-  # Client
+  ## Client
 
   def start_link(_), do: GenServer.start_link(__MODULE__, [])
 
-  # Server (callbacks)
+  def move(_pid, _cmd), do: {0, 1}
+
+  ## Server (callbacks)
 
   @impl true
   def init([]) do
