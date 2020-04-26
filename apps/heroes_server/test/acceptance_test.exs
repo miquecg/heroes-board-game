@@ -13,7 +13,7 @@ defmodule HeroesServer.AcceptanceTest do
     start_tile = {2, 1}
     movements = [:down, :right, :up, :up, :left, :up, :left, :left, :down, :down]
 
-    hero = start_supervised!({Hero, tile: start_tile, board: Board.Test_4x4})
+    hero = start_supervised!({Hero, tile: start_tile, board: Board.Test4x4})
     final_tile = move_hero(hero, movements)
 
     assert final_tile == {0, 1}

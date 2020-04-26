@@ -1,4 +1,4 @@
-defmodule Board.Test_2x2 do
+defmodule Board.Test2x2 do
   @moduledoc """
   Size: 2x2
   Walls: 1
@@ -23,7 +23,7 @@ defmodule Board.Test_2x2 do
   def tiles, do: @tiles
 end
 
-defmodule Board.Test_4x4 do
+defmodule Board.Test4x4 do
   @moduledoc """
   Size: 4x4
   Walls: 0
@@ -40,7 +40,7 @@ defmodule Board.Test_4x4 do
   def tiles, do: @tiles
 end
 
-defmodule Board.Test_4x4_1 do
+defmodule Board.Test4x4w1 do
   @moduledoc """
   Size: 4x4
   Walls: 1
@@ -69,7 +69,7 @@ defmodule Board.Test_4x4_1 do
   def tiles, do: @tiles
 end
 
-defmodule Board.Test_4x4_2 do
+defmodule Board.Test4x4w2 do
   @moduledoc """
   Size: 4x4
   Walls: 2
