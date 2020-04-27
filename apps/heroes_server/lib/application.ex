@@ -15,7 +15,9 @@ defmodule HeroesServer do
   def join do
     board = board()
     tile = choose_tile(board)
-    {:ok, pid} = DynamicSupervisor.start_child(Heroes.Supervisor, Hero)
+
+    opts = [board: board, tile: tile]
+    {:ok, pid} = DynamicSupervisor.start_child(Heroes.Supervisor, {Hero, opts})
 
     {pid, tile}
   end
