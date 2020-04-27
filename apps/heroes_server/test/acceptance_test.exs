@@ -30,6 +30,11 @@ defmodule HeroesServer.AcceptanceTest do
   defp create(id, opts), do: start_supervised!({Hero, opts}, id: id)
 
   defp control(pid, commands) do
-    Enum.reduce(commands, fn cmd, _ -> Hero.control(pid, cmd) end)
+    unwrap = fn cmd ->
+      {:ok, result} = Hero.control(pid, cmd)
+      result
+    end
+
+    Enum.reduce(commands, fn cmd, _ -> unwrap.(cmd) end)
   end
 end
