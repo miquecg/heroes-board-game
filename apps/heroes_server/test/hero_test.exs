@@ -8,19 +8,19 @@ defmodule HeroTest do
     end
 
     test "up", %{hero: pid} do
-      assert {1, 2} = Hero.move(pid, :up)
+      assert {1, 2} = Hero.control(pid, :up)
     end
 
     test "down", %{hero: pid} do
-      assert {1, 0} = Hero.move(pid, :down)
+      assert {1, 0} = Hero.control(pid, :down)
     end
 
     test "right", %{hero: pid} do
-      assert {2, 1} = Hero.move(pid, :right)
+      assert {2, 1} = Hero.control(pid, :right)
     end
 
     test "left", %{hero: pid} do
-      assert {0, 1} = Hero.move(pid, :left)
+      assert {0, 1} = Hero.control(pid, :left)
     end
   end
 end

@@ -17,9 +17,9 @@ defmodule HeroesServer.AcceptanceTest do
     hero_2 = create_hero(:hero_2, opts ++ [board: Board.Test4x4w1])
     hero_3 = create_hero(:hero_3, opts ++ [board: Board.Test4x4w2])
 
-    assert {0, 1} = move_hero(hero_1, movements)
-    assert {0, 0} = move_hero(hero_2, movements)
-    assert {2, 0} = move_hero(hero_3, movements)
+    assert {0, 1} = control(hero_1, movements)
+    assert {0, 0} = control(hero_2, movements)
+    assert {2, 0} = control(hero_3, movements)
   end
 
   defp active_heroes do
@@ -29,7 +29,7 @@ defmodule HeroesServer.AcceptanceTest do
 
   defp create_hero(id, opts), do: start_supervised!({Hero, opts}, id: id)
 
-  defp move_hero(pid, movements) do
-    Enum.reduce(movements, fn cmd, _ -> Hero.move(pid, cmd) end)
+  defp control(pid, commands) do
+    Enum.reduce(commands, fn cmd, _ -> Hero.control(pid, cmd) end)
   end
 end
