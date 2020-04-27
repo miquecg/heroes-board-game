@@ -22,7 +22,8 @@ defmodule Hero do
   ## Client
 
   @doc """
-  Spawns a Hero.
+  Spawn a hero.
+
   Requires options `:board` and `:tile`.
   """
   def start_link(opts) do
