@@ -1,6 +1,10 @@
 defmodule HeroesServer.AcceptanceTest do
   use ExUnit.Case, async: true
 
+  @board_4x4 Board.Test4x4
+  @board_4x4_w1 Board.Test4x4w1
+  @board_4x4_w2 Board.Test4x4w2
+
   test "When a player joins the game a new hero is placed on a tile" do
     start_tile = {0, 1}
 
@@ -13,9 +17,9 @@ defmodule HeroesServer.AcceptanceTest do
     opts = [tile: {2, 1}]
     movements = [:down, :right, :up, :up, :left, :up, :left, :left, :down, :down]
 
-    hero_1 = create(:hero_1, opts ++ [board: Board.Test4x4])
-    hero_2 = create(:hero_2, opts ++ [board: Board.Test4x4w1])
-    hero_3 = create(:hero_3, opts ++ [board: Board.Test4x4w2])
+    hero_1 = create(:hero_1, opts ++ [board: @board_4x4])
+    hero_2 = create(:hero_2, opts ++ [board: @board_4x4_w1])
+    hero_3 = create(:hero_3, opts ++ [board: @board_4x4_w2])
 
     assert {0, 1} = control(hero_1, movements)
     assert {0, 0} = control(hero_2, movements)

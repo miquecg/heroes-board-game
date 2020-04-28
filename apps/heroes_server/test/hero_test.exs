@@ -1,9 +1,11 @@
 defmodule HeroTest do
   use ExUnit.Case, async: true
 
+  @board_4x4 Board.Test4x4
+
   describe "A hero can move one tile" do
     setup do
-      opts = [board: Board.Test4x4, tile: {1, 1}]
+      opts = [board: @board_4x4, tile: {1, 1}]
       [hero: start_supervised!({Hero, opts})]
     end
 
