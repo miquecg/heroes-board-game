@@ -21,6 +21,8 @@ defmodule Board.Test2x2 do
   +---+---+
   """
   def tiles, do: @tiles
+
+  def move(tiles), do: Board.move(tiles, @board_spec)
 end
 
 defmodule Board.Test4x4 do
@@ -38,6 +40,8 @@ defmodule Board.Test4x4 do
   @tiles Board.tiles(@board_spec)
 
   def tiles, do: @tiles
+
+  def move(tiles), do: Board.move(tiles, @board_spec)
 end
 
 defmodule Board.Test4x4w1 do
@@ -67,6 +71,8 @@ defmodule Board.Test4x4w1 do
   +---+---+---+---+
   """
   def tiles, do: @tiles
+
+  def move(tiles), do: Board.move(tiles, @board_spec)
 end
 
 defmodule Board.Test4x4w2 do
@@ -96,4 +102,6 @@ defmodule Board.Test4x4w2 do
   +---+---+---+---+
   """
   def tiles, do: @tiles
+
+  def move(tiles), do: Board.move(tiles, @board_spec)
 end
