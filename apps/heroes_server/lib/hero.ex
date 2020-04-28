@@ -37,5 +37,6 @@ defmodule Hero do
   ## Server (callbacks)
 
   @impl true
+  @spec init(term()) :: {:ok, state}
   def init(state), do: {:ok, state}
 end
