@@ -1,6 +1,6 @@
 defmodule Hero do
   @moduledoc """
-  Holds hero status (alive or dead) and current position on the board.
+  Holds hero status and current position on the board.
   All player actions during the game happen on this GenServer.
   """
 
@@ -9,14 +9,14 @@ defmodule Hero do
   @typep state :: %__MODULE__.State{
            board: module(),
            tile: Board.tile(),
-           status: :alive | :dead
+           alive: boolean()
          }
 
   defmodule State do
     @moduledoc false
 
     @enforce_keys [:board, :tile]
-    defstruct [status: :alive] ++ @enforce_keys
+    defstruct [alive: true] ++ @enforce_keys
   end
 
   ## Client
