@@ -52,4 +52,9 @@ defmodule Board do
   def tiles(%Spec{cols: cols, rows: rows, walls: walls}) do
     for x <- 0..(cols - 1), y <- 0..(rows - 1), {x, y} not in walls, do: {x, y}
   end
+
+  @spec move(%{from: tile, to: tile}, board_spec) :: tile
+  def move(%{from: from_tile, to: to_tile}, %Spec{walls: walls}) do
+    if to_tile in walls, do: from_tile, else: to_tile
+  end
 end

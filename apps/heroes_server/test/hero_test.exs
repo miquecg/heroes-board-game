@@ -1,0 +1,28 @@
+defmodule HeroTest do
+  use ExUnit.Case, async: true
+
+  @board_4x4 Board.Test4x4
+
+  describe "A hero can move one tile" do
+    setup do
+      opts = [board: @board_4x4, tile: {1, 1}]
+      [hero: start_supervised!({Hero, opts})]
+    end
+
+    test "up", %{hero: pid} do
+      assert {:ok, {1, 2}} = Hero.control(pid, :up)
+    end
+
+    test "down", %{hero: pid} do
+      assert {:ok, {1, 0}} = Hero.control(pid, :down)
+    end
+
+    test "right", %{hero: pid} do
+      assert {:ok, {2, 1}} = Hero.control(pid, :right)
+    end
+
+    test "left", %{hero: pid} do
+      assert {:ok, {0, 1}} = Hero.control(pid, :left)
+    end
+  end
+end
