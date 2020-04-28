@@ -39,6 +39,6 @@ defmodule HeroesServer.AcceptanceTest do
       result
     end
 
-    Enum.reduce(commands, fn cmd, _ -> unwrap.(cmd) end)
+    Enum.reduce(commands, :acc, fn cmd, _ -> unwrap.(cmd) end)
   end
 end
