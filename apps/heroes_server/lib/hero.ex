@@ -1,6 +1,6 @@
 defmodule Hero do
   @moduledoc """
-  Holds hero status and current position on the board.
+  Holds hero status and current tile on the board.
   All player actions during the game happen on this GenServer.
   """
 
@@ -10,7 +10,7 @@ defmodule Hero do
 
   @typep state :: %__MODULE__.State{
            board: module(),
-           tile: Board.tile(),
+           tile: Board.Spec.tile(),
            alive: boolean()
          }
 
@@ -40,9 +40,9 @@ defmodule Hero do
   ## Movements
   `:up`, `:down`, `:left` and `:right`.
 
-  Returns current position on the board.
+  Returns current tile on the board.
   """
-  @spec control(GenServer.server(), atom()) :: {:ok, Board.tile()}
+  @spec control(GenServer.server(), atom()) :: {:ok, Board.Spec.tile()}
   def control(pid, cmd), do: GenServer.call(pid, cmd)
 
   ## Server (callbacks)
@@ -59,7 +59,7 @@ defmodule Hero do
     {:reply, {:ok, result}, %{state | tile: result}}
   end
 
-  @spec compute_tile(atom(), Board.tile()) :: Board.tile()
+  @spec compute_tile(atom(), Board.Spec.tile()) :: Board.Spec.tile()
   defp compute_tile(:up, {x, y}), do: {x, y + 1}
   defp compute_tile(:down, {x, y}), do: {x, y - 1}
   defp compute_tile(:left, {x, y}), do: {x - 1, y}
