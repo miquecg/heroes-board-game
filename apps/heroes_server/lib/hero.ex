@@ -48,7 +48,6 @@ defmodule Hero do
   ## Server (callbacks)
 
   @impl true
-  @spec init(term()) :: {:ok, state}
   def init(state), do: {:ok, state}
 
   @impl true
@@ -61,12 +60,13 @@ defmodule Hero do
     {:reply, {:ok, result}, %{state | tile: result}}
   end
 
-  @spec compute(atom(), Board.Spec.tile()) :: Board.Spec.tile()
+  @spec compute(Board.Spec.tile(), atom()) :: Board.Spec.tile()
   defp compute({x, y}, :up), do: {x, y + 1}
   defp compute({x, y}, :down), do: {x, y - 1}
   defp compute({x, y}, :left), do: {x - 1, y}
   defp compute({x, y}, :right), do: {x + 1, y}
 
+  @spec move(Board.Spec.tile(), state) :: Board.Spec.tile()
   defp move(to_tile, %State{tile: from_tile, board: board}) do
     case board.valid?(to_tile) do
       true -> to_tile

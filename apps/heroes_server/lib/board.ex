@@ -53,15 +53,19 @@ defmodule Board do
     for x <- 0..(cols - 1), y <- 0..(rows - 1), {x, y} not in walls, do: {x, y}
   end
 
+  @spec valid?(term(), Spec.t()) :: boolean()
   def valid?({x, y} = point, spec) when is_integer(x) and is_integer(y) do
     validators = [&cols/2, &rows/2, &tile?/2]
     Enum.all?(validators, fn fun -> fun.(point, spec) end)
   end
   def valid?(_, %Spec{}), do: false
 
+  @spec cols({integer(), integer()}, Spec.t()) :: boolean()
   defp cols({x, _}, %Spec{cols: cols}), do: 0 <= x and x < cols
 
+  @spec rows({integer(), integer()}, Spec.t()) :: boolean()
   defp rows({_, y}, %Spec{rows: rows}), do: 0 <= y and y < rows
 
+  @spec tile?({integer(), integer()}, Spec.t()) :: boolean()
   defp tile?(point, %Spec{walls: walls}), do: point not in walls
 end
