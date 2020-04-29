@@ -53,8 +53,15 @@ defmodule Board do
     for x <- 0..(cols - 1), y <- 0..(rows - 1), {x, y} not in walls, do: {x, y}
   end
 
-  @spec move(%{from: Spec.tile(), to: Spec.tile()}, Spec.t()) :: Spec.tile()
-  def move(%{from: from_tile, to: to_tile}, %Spec{walls: walls}) do
-    if to_tile in walls, do: from_tile, else: to_tile
+  def valid?({x, y} = point, spec) when is_integer(x) and is_integer(y) do
+    validators = [&cols/2, &rows/2, &tile?/2]
+    Enum.all?(validators, fn fun -> fun.(point, spec) end)
   end
+  def valid?(_, %Spec{}), do: false
+
+  defp cols({x, _}, %Spec{cols: cols}), do: 0 <= x and x < cols
+
+  defp rows({_, y}, %Spec{rows: rows}), do: 0 <= y and y < rows
+
+  defp tile?(point, %Spec{walls: walls}), do: point not in walls
 end
