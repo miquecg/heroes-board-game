@@ -1,6 +1,6 @@
 defmodule Hero do
   @moduledoc """
-  Holds hero status and current position on the board.
+  Holds hero status and current tile on the board.
   All player actions during the game happen on this GenServer.
   """
 
@@ -10,7 +10,7 @@ defmodule Hero do
 
   @typep state :: %__MODULE__.State{
            board: module(),
-           tile: Board.tile(),
+           tile: Board.Spec.tile(),
            alive: boolean()
          }
 
@@ -40,28 +40,37 @@ defmodule Hero do
   ## Movements
   `:up`, `:down`, `:left` and `:right`.
 
-  Returns current position on the board.
+  Returns current tile on the board.
   """
-  @spec control(GenServer.server(), atom()) :: {:ok, Board.tile()}
+  @spec control(GenServer.server(), atom()) :: {:ok, Board.Spec.tile()}
   def control(pid, cmd), do: GenServer.call(pid, cmd)
 
   ## Server (callbacks)
 
   @impl true
-  @spec init(term()) :: {:ok, state}
   def init(state), do: {:ok, state}
 
   @impl true
-  def handle_call(cmd, _from, %State{tile: tile, board: board} = state) when cmd in @movements do
-    new_tile = compute_tile(cmd, tile)
-    result = board.move(%{from: tile, to: new_tile})
+  def handle_call(cmd, _from, %State{tile: tile} = state) when cmd in @movements do
+    result =
+      tile
+      |> compute(cmd)
+      |> move(state)
 
     {:reply, {:ok, result}, %{state | tile: result}}
   end
 
-  @spec compute_tile(atom(), Board.tile()) :: Board.tile()
-  defp compute_tile(:up, {x, y}), do: {x, y + 1}
-  defp compute_tile(:down, {x, y}), do: {x, y - 1}
-  defp compute_tile(:left, {x, y}), do: {x - 1, y}
-  defp compute_tile(:right, {x, y}), do: {x + 1, y}
+  @spec compute(Board.Spec.tile(), atom()) :: Board.Spec.tile()
+  defp compute({x, y}, :up), do: {x, y + 1}
+  defp compute({x, y}, :down), do: {x, y - 1}
+  defp compute({x, y}, :left), do: {x - 1, y}
+  defp compute({x, y}, :right), do: {x + 1, y}
+
+  @spec move(Board.Spec.tile(), state) :: Board.Spec.tile()
+  defp move(to_tile, %State{tile: from_tile, board: board}) do
+    case board.valid?(to_tile) do
+      true -> to_tile
+      false -> from_tile
+    end
+  end
 end
