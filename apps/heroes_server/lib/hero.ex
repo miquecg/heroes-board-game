@@ -52,16 +52,25 @@ defmodule Hero do
   def init(state), do: {:ok, state}
 
   @impl true
-  def handle_call(cmd, _from, %State{tile: tile, board: board} = state) when cmd in @movements do
-    new_tile = compute_tile(cmd, tile)
-    result = board.move(%{from: tile, to: new_tile})
+  def handle_call(cmd, _from, %State{tile: tile} = state) when cmd in @movements do
+    result =
+      tile
+      |> compute(cmd)
+      |> move(state)
 
     {:reply, {:ok, result}, %{state | tile: result}}
   end
 
-  @spec compute_tile(atom(), Board.Spec.tile()) :: Board.Spec.tile()
-  defp compute_tile(:up, {x, y}), do: {x, y + 1}
-  defp compute_tile(:down, {x, y}), do: {x, y - 1}
-  defp compute_tile(:left, {x, y}), do: {x - 1, y}
-  defp compute_tile(:right, {x, y}), do: {x + 1, y}
+  @spec compute(atom(), Board.Spec.tile()) :: Board.Spec.tile()
+  defp compute({x, y}, :up), do: {x, y + 1}
+  defp compute({x, y}, :down), do: {x, y - 1}
+  defp compute({x, y}, :left), do: {x - 1, y}
+  defp compute({x, y}, :right), do: {x + 1, y}
+
+  defp move(to_tile, %State{tile: from_tile, board: board}) do
+    case board.valid?(to_tile) do
+      true -> to_tile
+      false -> from_tile
+    end
+  end
 end
