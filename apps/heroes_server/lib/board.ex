@@ -58,6 +58,7 @@ defmodule Board do
     validators = [&cols/2, &rows/2, &tile?/2]
     Enum.all?(validators, fn fun -> fun.(point, spec) end)
   end
+
   def valid?(_, %Spec{}), do: false
 
   @spec cols({integer(), integer()}, Spec.t()) :: boolean()
