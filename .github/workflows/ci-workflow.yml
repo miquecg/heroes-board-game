@@ -15,8 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        elixir: [1.10.2]
-        erlang: [22.3.2]
+        elixir: [1.10.3]
+        erlang: [22.3.3]
         os: [debian-buster-20200224]
     container:
       image: hexpm/elixir:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-${{ matrix.os }}
@@ -54,8 +54,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        elixir: [1.10.2]
-        erlang: [22.3.2]
+        elixir: [1.10.3]
+        erlang: [22.3.3]
         os: [debian-buster-20200224]
     container:
       image: hexpm/elixir:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-${{ matrix.os }}
