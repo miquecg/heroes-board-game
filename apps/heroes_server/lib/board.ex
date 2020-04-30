@@ -7,12 +7,12 @@ defmodule Board do
     @moduledoc false
 
     @typedoc """
-    Walkable cell on the grid
+    Walkable cell on the grid.
     """
     @type tile :: {non_neg_integer(), non_neg_integer()}
 
     @typedoc """
-    Cell where heroes cannot walk in
+    Cell where heroes cannot walk in.
     """
     @type wall :: tile
 
@@ -33,7 +33,7 @@ defmodule Board do
   end
 
   @doc """
-  Converts a `Board.Spec` struct into a list of tiles.
+  Convert a `Board.Spec` struct into a list of tiles.
 
   ## Example
   +---+---+---+---+
@@ -53,6 +53,9 @@ defmodule Board do
     for x <- 0..(cols - 1), y <- 0..(rows - 1), {x, y} not in walls, do: {x, y}
   end
 
+  @doc """
+  Check if `point` is a valid tile.
+  """
   @spec valid?(term(), Spec.t()) :: boolean()
   def valid?({x, y} = point, spec) when is_integer(x) and is_integer(y) do
     validators = [&cols/2, &rows/2, &tile?/2]
