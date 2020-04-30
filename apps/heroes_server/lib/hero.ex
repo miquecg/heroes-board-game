@@ -5,6 +5,7 @@ defmodule Hero do
   """
 
   @movements [:up, :down, :left, :right]
+  @commands @movements
 
   use GenServer
 
@@ -20,6 +21,11 @@ defmodule Hero do
     @enforce_keys [:board, :tile]
     defstruct [alive: true] ++ @enforce_keys
   end
+
+  @typedoc """
+  Supported commands for controling a hero.
+  """
+  @type cmd :: :up | :down | :left | :right
 
   ## Client
 
@@ -37,13 +43,18 @@ defmodule Hero do
   @doc """
   Send a command to control a hero.
 
-  ## Movements
-  `:up`, `:down`, `:left` and `:right`.
+  `pid` is the hero reference and `cmd` is an atom of type `t:cmd/0`.
 
-  Returns current tile on the board.
+  Returns `{:ok, tile}` or `{:error, error}` for invalid commands.
   """
-  @spec control(GenServer.server(), atom()) :: {:ok, Board.Spec.tile()}
-  def control(pid, cmd), do: GenServer.call(pid, cmd)
+  @spec control(GenServer.server(), term()) ::
+          {:ok, tile}
+          | {:error, error}
+        when tile: Board.Spec.tile(), error: %BadCommand{}
+  def control(pid, cmd)
+
+  def control(pid, cmd) when cmd in @commands, do: GenServer.call(pid, cmd)
+  def control(_, _), do: {:error, %BadCommand{}}
 
   ## Server (callbacks)
 
