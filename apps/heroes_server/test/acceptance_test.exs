@@ -26,6 +26,10 @@ defmodule HeroesServer.AcceptanceTest do
     assert {2, 0} = control(hero_3, movements)
   end
 
+  test "Heroes are temporary workers" do
+    assert Supervisor.child_spec(Hero, []).restart == :temporary
+  end
+
   defp count do
     %{active: heroes} = DynamicSupervisor.count_children(Heroes.Supervisor)
     heroes
