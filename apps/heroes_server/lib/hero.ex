@@ -7,7 +7,7 @@ defmodule Hero do
   @movements [:up, :down, :left, :right]
   @commands @movements
 
-  use GenServer
+  use GenServer, restart: :temporary
 
   @typep state :: %__MODULE__.State{
            board: module(),
