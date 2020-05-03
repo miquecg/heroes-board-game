@@ -4,6 +4,8 @@ defmodule Game.Hero do
   All player actions during the game happen on this GenServer.
   """
 
+  alias Game.Board
+
   @movements [:up, :down, :left, :right]
   @commands @movements
 

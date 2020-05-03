@@ -1,7 +1,9 @@
-defmodule Board do
+defmodule Game.Board do
   @moduledoc """
   Board struct definition and utility functions to work with them.
   """
+
+  alias __MODULE__
 
   @typedoc """
   Walkable cell on the board.
@@ -31,7 +33,7 @@ defmodule Board do
   defstruct @enforce_keys
 
   @doc """
-  Convert a `Board` struct into a list of tiles.
+  Convert a `Game.Board` struct into a list of tiles.
 
   ## Example
   +---+---+---+---+
@@ -42,6 +44,7 @@ defmodule Board do
   | w |   | w | w |
   +---+---+---+---+
 
+      iex> alias Game.Board
       iex> Board.tiles(%Board{cols: 4, rows: 3, walls: [{0,0},{0,2},{2,0},{2,2},{3,0}]})
       [{0, 1}, {1, 0}, {1, 1}, {1, 2}, {2, 1}, {3, 1}, {3, 2}]
 

@@ -4,6 +4,8 @@ defmodule Board.Test2x2 do
   Walls: 1
   """
 
+  alias Game.Board
+
   @board_spec %Board{
     cols: 2,
     rows: 2,
@@ -31,6 +33,8 @@ defmodule Board.Test4x4 do
   Walls: 0
   """
 
+  alias Game.Board
+
   @board_spec %Board{
     cols: 4,
     rows: 4,
@@ -49,6 +53,8 @@ defmodule Board.Test4x4w1 do
   Size: 4x4
   Walls: 1
   """
+
+  alias Game.Board
 
   @board_spec %Board{
     cols: 4,
@@ -80,6 +86,8 @@ defmodule Board.Test4x4w2 do
   Size: 4x4
   Walls: 2
   """
+
+  alias Game.Board
 
   @board_spec %Board{
     cols: 4,
