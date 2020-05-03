@@ -11,7 +11,7 @@ defmodule Hero do
 
   @typep state :: %__MODULE__.State{
            board: module(),
-           tile: Board.Spec.tile(),
+           tile: Board.tile(),
            alive: boolean()
          }
 
@@ -50,7 +50,7 @@ defmodule Hero do
   @spec control(GenServer.server(), term()) ::
           {:ok, tile}
           | {:error, error}
-        when tile: Board.Spec.tile(), error: %BadCommand{}
+        when tile: Board.tile(), error: %BadCommand{}
   def control(pid, cmd)
 
   def control(pid, cmd) when cmd in @commands, do: GenServer.call(pid, cmd)
@@ -71,13 +71,13 @@ defmodule Hero do
     {:reply, {:ok, result}, %{state | tile: result}}
   end
 
-  @spec compute(Board.Spec.tile(), atom()) :: Board.Spec.tile()
+  @spec compute(Board.tile(), atom()) :: Board.tile()
   defp compute({x, y}, :up), do: {x, y + 1}
   defp compute({x, y}, :down), do: {x, y - 1}
   defp compute({x, y}, :left), do: {x - 1, y}
   defp compute({x, y}, :right), do: {x + 1, y}
 
-  @spec move(Board.Spec.tile(), state) :: Board.Spec.tile()
+  @spec move(Board.tile(), state) :: Board.tile()
   defp move(to_tile, %State{tile: from_tile, board: board}) do
     case board.valid?(to_tile) do
       true -> to_tile

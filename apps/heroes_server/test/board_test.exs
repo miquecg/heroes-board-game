@@ -26,7 +26,7 @@ defmodule BoardTest do
     assert valid?({3, 1})
   end
 
-  test "Anything other than a t:Board.Spec.tile/0 is invalid" do
+  test "Anything other than a t:Board.tile/0 is invalid" do
     refute valid?({0.5, 1})
     refute valid?({:an_atom, "a string"})
   end

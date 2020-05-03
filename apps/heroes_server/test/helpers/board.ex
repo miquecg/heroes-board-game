@@ -4,7 +4,7 @@ defmodule Board.Test2x2 do
   Walls: 1
   """
 
-  @board_spec %Board.Spec{
+  @board_spec %Board{
     cols: 2,
     rows: 2,
     walls: [{0, 0}]
@@ -31,7 +31,7 @@ defmodule Board.Test4x4 do
   Walls: 0
   """
 
-  @board_spec %Board.Spec{
+  @board_spec %Board{
     cols: 4,
     rows: 4,
     walls: []
@@ -50,7 +50,7 @@ defmodule Board.Test4x4w1 do
   Walls: 1
   """
 
-  @board_spec %Board.Spec{
+  @board_spec %Board{
     cols: 4,
     rows: 4,
     walls: [{3, 2}]
@@ -81,7 +81,7 @@ defmodule Board.Test4x4w2 do
   Walls: 2
   """
 
-  @board_spec %Board.Spec{
+  @board_spec %Board{
     cols: 4,
     rows: 4,
     walls: [{1, 2}, {3, 2}]
