@@ -1,15 +1,13 @@
 defmodule HeroTest do
   use ExUnit.Case, async: true
 
-  @board Board.Test4x4
-  @start_tile {1, 1}
-
-  setup do
-    opts = [board: @board, tile: @start_tile]
-    [hero: start_supervised!({Hero, opts})]
-  end
+  @board_4x4 Board.Test4x4
+  @board_4x4_w1 Board.Test4x4w1
+  @board_4x4_w2 Board.Test4x4w2
 
   describe "A hero can move one tile" do
+    setup :create_hero
+
     test "up", %{hero: pid} do
       assert {:ok, {1, 2}} = Hero.control(pid, :up)
     end
@@ -27,9 +25,65 @@ defmodule HeroTest do
     end
   end
 
-  test "Unknown commands return {:error, %BadCommand{}}", %{hero: pid} do
-    assert {:error, %BadCommand{}} = Hero.control(pid, :doowap)
-    assert {:error, %BadCommand{}} = Hero.control(pid, "up")
-    assert {:error, %BadCommand{}} = Hero.control(pid, {1, 2})
+  describe "Hero.control/2 returns {:error, %BadCommand{}} for" do
+    setup :create_hero
+
+    test "wrong atom", %{hero: pid} do
+      assert {:error, %BadCommand{}} = Hero.control(pid, :doowap)
+    end
+
+    test "string command", %{hero: pid} do
+      assert {:error, %BadCommand{}} = Hero.control(pid, "up")
+    end
+
+    test "tuple", %{hero: pid} do
+      assert {:error, %BadCommand{}} = Hero.control(pid, {1, 2})
+    end
+  end
+
+  describe "Heroes can move to any tile but not crossing walls:" do
+    setup do
+      [
+        tile: {2, 1},
+        commands: [:down, :right, :up, :up, :left, :up, :left, :left, :down, :down]
+      ]
+    end
+
+    setup :create_hero
+
+    test "route without walls", %{hero: pid} = context do
+      assert {0, 1} = control(pid, context.commands)
+    end
+
+    @tag board: @board_4x4_w1
+    test "route with one wall", %{hero: pid} = context do
+      assert {0, 0} = control(pid, context.commands)
+    end
+
+    @tag board: @board_4x4_w2
+    test "route with two walls", %{hero: pid} = context do
+      assert {2, 0} = control(pid, context.commands)
+    end
+  end
+
+  test "Heroes are temporary workers" do
+    assert Supervisor.child_spec(Hero, []).restart == :temporary
+  end
+
+  defp create_hero(context) do
+    board = Map.get(context, :board, @board_4x4)
+    tile = Map.get(context, :tile, {1, 1})
+
+    opts = [board: board, tile: tile]
+    [hero: start_supervised!({Hero, opts})]
+  end
+
+  defp control(pid, commands) do
+    unwrap = fn cmd ->
+      {:ok, result} = Hero.control(pid, cmd)
+      result
+    end
+
+    Enum.reduce(commands, :acc, fn cmd, _ -> unwrap.(cmd) end)
   end
 end
