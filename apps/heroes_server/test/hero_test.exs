@@ -1,5 +1,7 @@
-defmodule HeroTest do
+defmodule Game.HeroTest do
   use ExUnit.Case, async: true
+
+  alias Game.Hero
 
   @board_4x4 Board.Test4x4
   @board_4x4_w1 Board.Test4x4w1
@@ -25,7 +27,7 @@ defmodule HeroTest do
     end
   end
 
-  describe "Hero.control/2 returns {:error, %BadCommand{}} for" do
+  describe "Invalid commands return {:error, %BadCommand{}}:" do
     setup :create_hero
 
     test "wrong atom", %{hero: pid} do

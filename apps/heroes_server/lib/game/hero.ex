@@ -1,4 +1,4 @@
-defmodule Hero do
+defmodule Game.Hero do
   @moduledoc """
   Holds hero status and current tile on the board.
   All player actions during the game happen on this GenServer.
@@ -19,6 +19,7 @@ defmodule Hero do
     @moduledoc false
 
     @enforce_keys [:board, :tile]
+
     defstruct [alive: true] ++ @enforce_keys
   end
 

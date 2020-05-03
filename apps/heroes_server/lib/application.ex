@@ -17,7 +17,7 @@ defmodule HeroesServer do
     tile = choose_tile(board)
 
     opts = [board: board, tile: tile]
-    {:ok, pid} = DynamicSupervisor.start_child(Game.Supervisor, {Hero, opts})
+    {:ok, pid} = DynamicSupervisor.start_child(Game.Supervisor, {Game.Hero, opts})
 
     {pid, tile}
   end
