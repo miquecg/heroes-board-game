@@ -1,10 +1,12 @@
-defmodule Board.Test2x2 do
+defmodule GameBoards.Test2x2 do
   @moduledoc """
   Size: 2x2
   Walls: 1
   """
 
-  @board_spec %Board.Spec{
+  alias Game.Board
+
+  @board_spec %Board{
     cols: 2,
     rows: 2,
     walls: [{0, 0}]
@@ -25,13 +27,15 @@ defmodule Board.Test2x2 do
   def valid?(point), do: Board.valid?(point, @board_spec)
 end
 
-defmodule Board.Test4x4 do
+defmodule GameBoards.Test4x4 do
   @moduledoc """
   Size: 4x4
   Walls: 0
   """
 
-  @board_spec %Board.Spec{
+  alias Game.Board
+
+  @board_spec %Board{
     cols: 4,
     rows: 4,
     walls: []
@@ -44,13 +48,15 @@ defmodule Board.Test4x4 do
   def valid?(point), do: Board.valid?(point, @board_spec)
 end
 
-defmodule Board.Test4x4w1 do
+defmodule GameBoards.Test4x4w1 do
   @moduledoc """
   Size: 4x4
   Walls: 1
   """
 
-  @board_spec %Board.Spec{
+  alias Game.Board
+
+  @board_spec %Board{
     cols: 4,
     rows: 4,
     walls: [{3, 2}]
@@ -75,13 +81,15 @@ defmodule Board.Test4x4w1 do
   def valid?(point), do: Board.valid?(point, @board_spec)
 end
 
-defmodule Board.Test4x4w2 do
+defmodule GameBoards.Test4x4w2 do
   @moduledoc """
   Size: 4x4
   Walls: 2
   """
 
-  @board_spec %Board.Spec{
+  alias Game.Board
+
+  @board_spec %Board{
     cols: 4,
     rows: 4,
     walls: [{1, 2}, {3, 2}]

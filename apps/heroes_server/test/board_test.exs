@@ -1,6 +1,8 @@
-defmodule BoardTest do
+defmodule Game.BoardTest do
   use ExUnit.Case, async: true
-  doctest Board
+  doctest Game.Board
+
+  @board GameBoards.Test4x4
 
   @doc """
                 X
@@ -26,12 +28,12 @@ defmodule BoardTest do
     assert valid?({3, 1})
   end
 
-  test "Anything other than a t:Board.Spec.tile/0 is invalid" do
+  test "Anything other than a t:Game.Board.tile/0 is invalid" do
     refute valid?({0.5, 1})
     refute valid?({:an_atom, "a string"})
   end
 
   defp valid?(point) do
-    Board.Test4x4.valid?(point)
+    @board.valid?(point)
   end
 end

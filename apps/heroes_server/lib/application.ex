@@ -8,7 +8,7 @@ defmodule HeroesServer do
   use Application
 
   def start(_type, _args) do
-    opts = [strategy: :one_for_one, name: Heroes.Supervisor]
+    opts = [strategy: :one_for_one, name: Game.Supervisor]
     DynamicSupervisor.start_link(opts)
   end
 
@@ -17,7 +17,7 @@ defmodule HeroesServer do
     tile = choose_tile(board)
 
     opts = [board: board, tile: tile]
-    {:ok, pid} = DynamicSupervisor.start_child(Heroes.Supervisor, {Hero, opts})
+    {:ok, pid} = DynamicSupervisor.start_child(Game.Supervisor, {Game.Hero, opts})
 
     {pid, tile}
   end

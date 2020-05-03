@@ -1,9 +1,12 @@
-defmodule HeroTest do
+defmodule Game.HeroTest do
   use ExUnit.Case, async: true
 
-  @board_4x4 Board.Test4x4
-  @board_4x4_w1 Board.Test4x4w1
-  @board_4x4_w2 Board.Test4x4w2
+  alias Game.Hero
+  alias GameError.BadCommand
+
+  @board_4x4 GameBoards.Test4x4
+  @board_4x4_w1 GameBoards.Test4x4w1
+  @board_4x4_w2 GameBoards.Test4x4w2
 
   describe "A hero can move one tile" do
     setup :create_hero
@@ -25,18 +28,18 @@ defmodule HeroTest do
     end
   end
 
-  describe "Hero.control/2 returns {:error, %BadCommand{}} for" do
+  describe "Heroes return error when commands are" do
     setup :create_hero
 
-    test "wrong atom", %{hero: pid} do
+    test "invalid atoms", %{hero: pid} do
       assert {:error, %BadCommand{}} = Hero.control(pid, :doowap)
     end
 
-    test "string command", %{hero: pid} do
+    test "converted to strings", %{hero: pid} do
       assert {:error, %BadCommand{}} = Hero.control(pid, "up")
     end
 
-    test "tuple", %{hero: pid} do
+    test "{x, y} points", %{hero: pid} do
       assert {:error, %BadCommand{}} = Hero.control(pid, {1, 2})
     end
   end
