@@ -4,9 +4,9 @@ defmodule Game.HeroTest do
   alias Game.Hero
   alias GameError.BadCommand
 
-  @board_4x4 Board.Test4x4
-  @board_4x4_w1 Board.Test4x4w1
-  @board_4x4_w2 Board.Test4x4w2
+  @board_4x4 GameBoards.Test4x4
+  @board_4x4_w1 GameBoards.Test4x4w1
+  @board_4x4_w2 GameBoards.Test4x4w2
 
   describe "A hero can move one tile" do
     setup :create_hero

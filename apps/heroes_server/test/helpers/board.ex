@@ -1,4 +1,4 @@
-defmodule Board.Test2x2 do
+defmodule GameBoards.Test2x2 do
   @moduledoc """
   Size: 2x2
   Walls: 1
@@ -27,7 +27,7 @@ defmodule Board.Test2x2 do
   def valid?(point), do: Board.valid?(point, @board_spec)
 end
 
-defmodule Board.Test4x4 do
+defmodule GameBoards.Test4x4 do
   @moduledoc """
   Size: 4x4
   Walls: 0
@@ -48,7 +48,7 @@ defmodule Board.Test4x4 do
   def valid?(point), do: Board.valid?(point, @board_spec)
 end
 
-defmodule Board.Test4x4w1 do
+defmodule GameBoards.Test4x4w1 do
   @moduledoc """
   Size: 4x4
   Walls: 1
@@ -81,7 +81,7 @@ defmodule Board.Test4x4w1 do
   def valid?(point), do: Board.valid?(point, @board_spec)
 end
 
-defmodule Board.Test4x4w2 do
+defmodule GameBoards.Test4x4w2 do
   @moduledoc """
   Size: 4x4
   Walls: 2

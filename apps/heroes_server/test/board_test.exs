@@ -2,6 +2,8 @@ defmodule Game.BoardTest do
   use ExUnit.Case, async: true
   doctest Game.Board
 
+  @board GameBoards.Test4x4
+
   @doc """
                 X
       +---+---+---+---+
@@ -32,6 +34,6 @@ defmodule Game.BoardTest do
   end
 
   defp valid?(point) do
-    Board.Test4x4.valid?(point)
+    @board.valid?(point)
   end
 end
