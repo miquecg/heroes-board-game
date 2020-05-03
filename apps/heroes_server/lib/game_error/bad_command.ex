@@ -1,3 +1,3 @@
-defmodule BadCommand do
+defmodule GameError.BadCommand do
   defexception message: "Invalid control command for Hero"
 end

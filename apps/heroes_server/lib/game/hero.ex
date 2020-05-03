@@ -5,6 +5,7 @@ defmodule Game.Hero do
   """
 
   alias Game.Board
+  alias GameError.BadCommand
 
   @movements [:up, :down, :left, :right]
   @commands @movements
