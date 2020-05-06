@@ -4,6 +4,7 @@ defmodule Game.Board do
   """
 
   alias __MODULE__
+  alias Game.BoardRange
 
   @typedoc """
   Walkable cell on the board.
@@ -52,6 +53,15 @@ defmodule Game.Board do
   @spec tiles(t) :: list(tile)
   def tiles(%Board{cols: cols, rows: rows, walls: walls}) do
     for x <- 0..(cols - 1), y <- 0..(rows - 1), {x, y} not in walls, do: {x, y}
+  end
+
+  def attack_range({x, y}, %Board{cols: cols, rows: rows}) do
+    x_min = max(x - 1, 0)
+    x_max = min(x + 1, cols - 1)
+    y_min = max(y - 1, 0)
+    y_max = min(y + 1, rows - 1)
+
+    %BoardRange{h: x_min..x_max, v: y_min..y_max}
   end
 
   @doc """
