@@ -7,7 +7,7 @@ defmodule Game.Board do
   alias Game.BoardRange
 
   @typedoc """
-  Walkable cell on the board.
+  Walkable board cell
   """
   @type tile :: {non_neg_integer(), non_neg_integer()}
 
