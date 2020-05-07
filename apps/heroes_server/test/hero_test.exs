@@ -82,7 +82,7 @@ defmodule Game.HeroTest do
 
     @tag enemy: {0, 0}
     test "{0, 0}", %{hero: pid} = context do
-      assert :dead = GenServer.call(pid, {:attack, context.range})
+      assert {:ok, :dead} = GenServer.call(pid, {:attack, context.range})
     end
   end
 
