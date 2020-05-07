@@ -1,6 +1,6 @@
 defmodule Game.BoardRange do
   @moduledoc """
-  A board subset represented as cell ranges.
+  Range of cells in a board.
   """
 
   alias __MODULE__
