@@ -73,12 +73,25 @@ defmodule Game.HeroTest do
     assert Supervisor.child_spec(Hero, []).restart == :temporary
   end
 
+  describe "A hero on tile {1, 1} dies when attacked by an enemy on tile" do
+    setup :create_hero
+
+    setup %{board: board, enemy: tile} do
+      [range: board.attack_range(tile)]
+    end
+
+    @tag enemy: {0, 0}
+    test "{0, 0}", %{hero: pid} = context do
+      assert {:ok, :dead} = GenServer.call(pid, {:attack, context.range})
+    end
+  end
+
   defp create_hero(context) do
     board = Map.get(context, :board, @board_4x4)
     tile = Map.get(context, :tile, {1, 1})
 
     opts = [board: board, tile: tile]
-    [hero: start_supervised!({Hero, opts})]
+    [hero: start_supervised!({Hero, opts})] ++ opts
   end
 
   defp control(pid, commands) do

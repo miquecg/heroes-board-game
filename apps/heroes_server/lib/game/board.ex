@@ -4,9 +4,10 @@ defmodule Game.Board do
   """
 
   alias __MODULE__
+  alias Game.BoardRange
 
   @typedoc """
-  Walkable cell on the board.
+  Walkable board cell
   """
   @type tile :: {non_neg_integer(), non_neg_integer()}
 
@@ -55,22 +56,30 @@ defmodule Game.Board do
   end
 
   @doc """
-  Check if `point` is a valid tile in `board`.
+  Calculate an attack range given a tile.
   """
-  @spec valid?(term(), t) :: boolean()
-  def valid?({x, y} = point, board) when is_integer(x) and is_integer(y) do
-    validators = [&cols/2, &rows/2, &tile?/2]
-    Enum.all?(validators, fn fun -> fun.(point, board) end)
+  @spec attack_range(tile, t) :: BoardRange.t()
+  def attack_range({x, y}, %Board{cols: cols, rows: rows}) do
+    x_min = max(x - 1, 0)
+    x_max = min(x + 1, cols - 1)
+    y_min = max(y - 1, 0)
+    y_max = min(y + 1, rows - 1)
+
+    %BoardRange{h: x_min..x_max, v: y_min..y_max}
   end
 
-  def valid?(_, %Board{}), do: false
+  @doc """
+  Check if `point` is a valid tile in board.
+  """
+  @spec valid?({integer(), integer()}, t) :: boolean()
+  def valid?({x, y} = point, %Board{cols: cols, rows: rows, walls: walls})
+      when is_integer(x) and is_integer(y) do
+    checks = [
+      0 <= x and x < cols,
+      0 <= y and y < rows,
+      point not in walls
+    ]
 
-  @spec cols({integer(), integer()}, t) :: boolean()
-  defp cols({x, _}, %Board{cols: cols}), do: 0 <= x and x < cols
-
-  @spec rows({integer(), integer()}, t) :: boolean()
-  defp rows({_, y}, %Board{rows: rows}), do: 0 <= y and y < rows
-
-  @spec tile?({integer(), integer()}, t) :: boolean()
-  defp tile?(point, %Board{walls: walls}), do: point not in walls
+    Enum.all?(checks)
+  end
 end
