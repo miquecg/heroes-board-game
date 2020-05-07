@@ -55,6 +55,10 @@ defmodule Game.Board do
     for x <- 0..(cols - 1), y <- 0..(rows - 1), {x, y} not in walls, do: {x, y}
   end
 
+  @doc """
+  Calculate an attack range given a tile.
+  """
+  @spec attack_range(tile, t) :: BoardRange.t()
   def attack_range({x, y}, %Board{cols: cols, rows: rows}) do
     x_min = max(x - 1, 0)
     x_max = min(x + 1, cols - 1)
