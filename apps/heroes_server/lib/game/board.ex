@@ -77,8 +77,6 @@ defmodule Game.Board do
     Enum.all?(validators, fn fun -> fun.(point, board) end)
   end
 
-  def valid?(_, %Board{}), do: false
-
   @spec cols({integer(), integer()}, t) :: boolean()
   defp cols({x, _}, %Board{cols: cols}), do: 0 <= x and x < cols
 

@@ -30,11 +30,6 @@ defmodule Game.BoardTest do
     assert valid?({3, 1})
   end
 
-  test "Anything other than a t:Game.Board.tile/0 is invalid" do
-    refute valid?({0.5, 1})
-    refute valid?({:an_atom, "a string"})
-  end
-
   describe "Attack range from tile" do
     setup %{tile: tile} do
       range = @board.attack_range(tile)
