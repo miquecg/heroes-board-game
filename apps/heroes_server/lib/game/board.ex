@@ -69,20 +69,17 @@ defmodule Game.Board do
   end
 
   @doc """
-  Check if `point` is a valid tile in `board`.
+  Check if `point` is a valid tile in board.
   """
-  @spec valid?(term(), t) :: boolean()
-  def valid?({x, y} = point, board) when is_integer(x) and is_integer(y) do
-    validators = [&cols/2, &rows/2, &tile?/2]
-    Enum.all?(validators, fn fun -> fun.(point, board) end)
+  @spec valid?({integer(), integer()}, t) :: boolean()
+  def valid?({x, y} = point, %Board{cols: cols, rows: rows, walls: walls})
+      when is_integer(x) and is_integer(y) do
+    checks = [
+      0 <= x and x < cols,
+      0 <= y and y < rows,
+      point not in walls
+    ]
+
+    Enum.all?(checks)
   end
-
-  @spec cols({integer(), integer()}, t) :: boolean()
-  defp cols({x, _}, %Board{cols: cols}), do: 0 <= x and x < cols
-
-  @spec rows({integer(), integer()}, t) :: boolean()
-  defp rows({_, y}, %Board{rows: rows}), do: 0 <= y and y < rows
-
-  @spec tile?({integer(), integer()}, t) :: boolean()
-  defp tile?(point, %Board{walls: walls}), do: point not in walls
 end
