@@ -75,6 +75,11 @@ defmodule Game.Hero do
     {:reply, {:ok, result}, %{state | tile: result}}
   end
 
+  @impl true
+  def handle_call({:attack, _}, _from, state) do
+    {:reply, {:ok, :dead}, state}
+  end
+
   @spec compute(Board.tile(), atom()) :: Board.tile()
   defp compute({x, y}, :up), do: {x, y + 1}
   defp compute({x, y}, :down), do: {x, y - 1}
