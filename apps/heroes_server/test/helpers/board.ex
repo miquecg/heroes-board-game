@@ -29,6 +29,29 @@ defmodule GameBoards.Test2x2 do
   def valid?(point), do: Board.valid?(point, @board_spec)
 end
 
+defmodule GameBoards.Test3x2 do
+  @moduledoc """
+  Size: 3x2
+  Walls: 0
+  """
+
+  alias Game.Board
+
+  @board_spec %Board{
+    cols: 3,
+    rows: 2,
+    walls: []
+  }
+
+  @tiles Board.tiles(@board_spec)
+
+  def tiles, do: @tiles
+
+  def attack_range(point), do: Board.attack_range(point, @board_spec)
+
+  def valid?(point), do: Board.valid?(point, @board_spec)
+end
+
 defmodule GameBoards.Test4x4 do
   @moduledoc """
   Size: 4x4
