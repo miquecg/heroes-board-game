@@ -55,6 +55,12 @@ defmodule Game.Board do
     for x <- 0..(cols - 1), y <- 0..(rows - 1), {x, y} not in walls, do: {x, y}
   end
 
+  def move({x, y}, :up), do: {x, y + 1}
+  def move({x, y}, :down), do: {x, y - 1}
+  def move({x, y}, :left), do: {x - 1, y}
+  def move({x, y}, :right), do: {x + 1, y}
+
+
   @doc """
   Calculate an attack range given a tile.
   """

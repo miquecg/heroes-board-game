@@ -70,6 +70,8 @@ defmodule GameBoards.Test4x4 do
 
   def tiles, do: @tiles
 
+  def move(tile, direction), do: Board.move(tile, direction)
+
   def attack_range(point), do: Board.attack_range(point, @board_spec)
 
   def valid?(point), do: Board.valid?(point, @board_spec)
