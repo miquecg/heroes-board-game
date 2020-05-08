@@ -7,6 +7,17 @@ defmodule Game.BoardTest do
   @board_3x2 GameBoards.Test3x2
   @board_4x4 GameBoards.Test4x4
 
+  @tag tile: {2, 1}
+  @tag board: @board_4x4
+  test "Up, down, left and right movements", %{board: board, tile: tile} do
+    move = & board.move(tile, &1)
+
+    assert {2, 2} = move.(:up)
+    assert {2, 0} = move.(:down)
+    assert {1, 1} = move.(:left)
+    assert {3, 1} = move.(:right)
+  end
+
   describe "Tiles on edges when board is" do
     setup %{board: board} do
       [check_fn: &board.valid?/1]
