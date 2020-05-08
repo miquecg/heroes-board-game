@@ -6,16 +6,28 @@ defmodule Game.BoardTest do
 
   @board_3x2 GameBoards.Test3x2
   @board_4x4 GameBoards.Test4x4
+  @board_4x4_w2 GameBoards.Test4x4w2
 
-  @tag tile: {2, 1}
-  @tag board: @board_4x4
-  test "Up, down, left and right movements", %{board: board, tile: tile} do
-    move = & board.move(tile, &1)
+  describe "Board rules for movements:" do
+    setup %{board: board}, do: [move_fn: &board.move/2]
+    setup :set_tile
 
-    assert {2, 2} = move.(:up)
-    assert {2, 0} = move.(:down)
-    assert {1, 1} = move.(:left)
-    assert {3, 1} = move.(:right)
+    @tag tile: {2, 1}
+    @tag board: @board_4x4
+    test "up, down, left and right move one tile", %{move_fn: move} do
+      assert {2, 2} = move.(:up)
+      assert {2, 0} = move.(:down)
+      assert {1, 1} = move.(:left)
+      assert {3, 1} = move.(:right)
+    end
+
+    @tag board: @board_4x4_w2
+    test "a wall cannot be crossed from any side", %{move_fn: move} do
+      assert {1, 1} = move.({1, 1}, :up)
+      assert {1, 3} = move.({1, 3}, :down)
+      assert {2, 2} = move.({2, 2}, :left)
+      assert {2, 2} = move.({2, 2}, :right)
+    end
   end
 
   describe "Tiles on edges when board is" do
@@ -121,4 +133,7 @@ defmodule Game.BoardTest do
       refute in_range?.({3, 4})
     end
   end
+
+  defp set_tile(%{tile: tile, move_fn: move}), do: [move_fn: &move.(tile, &1)]
+  defp set_tile(_), do: :ok
 end
