@@ -40,7 +40,7 @@ defmodule Game.BoardRangeTest do
   +---+---+---+---+
   | ⠀ | X | ✓ | ✓ |
   +---+---+---+---+
-  | ⠀ | ⠀ | ✓ | ✓ |
+  | ⠀ | ⠀ | ✓ | ✓ | X
   +---+---+---+---+
   |   |   |   | X |
   +---+---+---+---+
@@ -57,5 +57,6 @@ defmodule Game.BoardRangeTest do
     refute in_range?.({1, 3})
     refute in_range?.({3, 1})
     refute in_range?.({3, 4})
+    refute in_range?.({4, 2})
   end
 end
