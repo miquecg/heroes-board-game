@@ -24,11 +24,9 @@ defmodule GameBoards.Test2x2 do
   """
   def tiles, do: @tiles
 
-  def play(tile, move), do: Board.play(tile, move, @board_spec)
-
   def attack_range(point), do: Board.attack_range(point, @board_spec)
 
-  def valid?(point), do: Board.valid?(point, @board_spec)
+  def play(tile, move), do: Board.play(tile, move, @board_spec)
 end
 
 defmodule GameBoards.Test3x2 do
@@ -49,11 +47,9 @@ defmodule GameBoards.Test3x2 do
 
   def tiles, do: @tiles
 
-  def play(tile, move), do: Board.play(tile, move, @board_spec)
-
   def attack_range(point), do: Board.attack_range(point, @board_spec)
 
-  def valid?(point), do: Board.valid?(point, @board_spec)
+  def play(tile, move), do: Board.play(tile, move, @board_spec)
 end
 
 defmodule GameBoards.Test4x4 do
@@ -74,11 +70,9 @@ defmodule GameBoards.Test4x4 do
 
   def tiles, do: @tiles
 
-  def play(tile, move), do: Board.play(tile, move, @board_spec)
-
   def attack_range(point), do: Board.attack_range(point, @board_spec)
 
-  def valid?(point), do: Board.valid?(point, @board_spec)
+  def play(tile, move), do: Board.play(tile, move, @board_spec)
 end
 
 defmodule GameBoards.Test4x4w1 do
@@ -111,11 +105,9 @@ defmodule GameBoards.Test4x4w1 do
   """
   def tiles, do: @tiles
 
-  def play(tile, move), do: Board.play(tile, move, @board_spec)
-
   def attack_range(point), do: Board.attack_range(point, @board_spec)
 
-  def valid?(point), do: Board.valid?(point, @board_spec)
+  def play(tile, move), do: Board.play(tile, move, @board_spec)
 end
 
 defmodule GameBoards.Test4x4w2 do
@@ -148,9 +140,7 @@ defmodule GameBoards.Test4x4w2 do
   """
   def tiles, do: @tiles
 
-  def play(tile, move), do: Board.play(tile, move, @board_spec)
-
   def attack_range(point), do: Board.attack_range(point, @board_spec)
 
-  def valid?(point), do: Board.valid?(point, @board_spec)
+  def play(tile, move), do: Board.play(tile, move, @board_spec)
 end

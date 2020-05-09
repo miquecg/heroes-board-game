@@ -61,6 +61,19 @@ defmodule Game.Board do
   end
 
   @doc """
+  Calculate an attack range given a tile.
+  """
+  @spec attack_range(tile, t) :: BoardRange.t()
+  def attack_range({x, y}, %Board{cols: cols, rows: rows}) do
+    x_min = max(x - 1, 0)
+    x_max = min(x + 1, cols - 1)
+    y_min = max(y - 1, 0)
+    y_max = min(y + 1, rows - 1)
+
+    %BoardRange{h: x_min..x_max, v: y_min..y_max}
+  end
+
+  @doc """
   Play a `move` in a `board`.
 
   `tile` is the starting point.
@@ -94,33 +107,5 @@ defmodule Game.Board do
       next in walls -> current
       true -> next
     end
-  end
-
-  @doc """
-  Calculate an attack range given a tile.
-  """
-  @spec attack_range(tile, t) :: BoardRange.t()
-  def attack_range({x, y}, %Board{cols: cols, rows: rows}) do
-    x_min = max(x - 1, 0)
-    x_max = min(x + 1, cols - 1)
-    y_min = max(y - 1, 0)
-    y_max = min(y + 1, rows - 1)
-
-    %BoardRange{h: x_min..x_max, v: y_min..y_max}
-  end
-
-  @doc """
-  Check if `point` is a valid tile in board.
-  """
-  @spec valid?({integer(), integer()}, t) :: boolean()
-  def valid?({x, y} = point, %Board{cols: cols, rows: rows, walls: walls})
-      when is_integer(x) and is_integer(y) do
-    checks = [
-      0 <= x and x < cols,
-      0 <= y and y < rows,
-      point not in walls
-    ]
-
-    Enum.all?(checks)
   end
 end
