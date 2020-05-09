@@ -21,6 +21,17 @@ defmodule Game.BoardTest do
       assert {3, 1} = move.(:right)
     end
 
+    @doc """
+    +---+---+---+---+
+    |   | ⠀ |   | ⠀ |
+    +---+---+---+---+
+    |   | W |   | W |
+    +---+---+---+---+
+    |   |   |   |   |
+    +---+---+---+---+
+    |   |   |   |   |
+    +---+---+---+---+
+    """
     @tag board: @board_4x4_w2
     test "a wall cannot be crossed from any side", %{move_fn: move} do
       assert {1, 1} = move.({1, 1}, :up)
