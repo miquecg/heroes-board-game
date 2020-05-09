@@ -76,54 +76,6 @@ defmodule Game.BoardTest do
     end
   end
 
-  describe "Tiles on edges when board is" do
-    setup %{board: board} do
-      [check_fn: &board.valid?/1]
-    end
-
-    @doc """
-                X
-      +---+---+---+---+
-      |   | ⠀ | ✓ | ⠀ |
-      +---+---+---+---+
-      |   | ⠀ |   |   |
-      +---+---+---+---+
-      |   |   |   | ✓ | X
-      +---+---+---+---+
-    X | ✓ |   |   |   |
-      +---+---+---+---+
-        X
-    """
-    @tag board: @board_4x4
-    test "symmetric", %{check_fn: valid?} do
-      refute valid?.({-1, 0})
-      refute valid?.({0, -1})
-      refute valid?.({2, 4})
-      refute valid?.({4, 1})
-
-      assert valid?.({0, 0})
-      assert valid?.({2, 3})
-      assert valid?.({3, 1})
-    end
-
-    @doc """
-      X
-    +---+---+---+
-    | ✓ |   |   |
-    +---+---+---+
-    |   |   | ✓ | X
-    +---+---+---+
-    """
-    @tag board: @board_3x2
-    test "asymmetric", %{check_fn: valid?} do
-      assert valid?.({0, 1})
-      refute valid?.({0, 2})
-
-      assert valid?.({2, 0})
-      refute valid?.({3, 0})
-    end
-  end
-
   defp set_tile(%{tile: tile, move_fn: move}), do: [move_fn: &move.(tile, &1)]
   defp set_tile(_), do: :ok
 end
