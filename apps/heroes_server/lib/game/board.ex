@@ -55,11 +55,33 @@ defmodule Game.Board do
     for x <- 0..(cols - 1), y <- 0..(rows - 1), {x, y} not in walls, do: {x, y}
   end
 
-  def move({x, y}, :up), do: {x, y + 1}
-  def move({x, y}, :down), do: {x, y - 1}
-  def move({x, y}, :left), do: {x - 1, y}
-  def move({x, y}, :right), do: {x + 1, y}
+  def move(tile, direction, board) do
+    tile
+    |> movement(direction)
+    |> validate(board)
+  end
 
+  defp movement({x, y} = current, direction) do
+    next =
+      case direction do
+        :up -> {x, y + 1}
+        :down -> {x, y - 1}
+        :left -> {x - 1, y}
+        :right -> {x + 1, y}
+      end
+
+    %{from: current, to: next}
+  end
+
+  defp validate(%{from: current, to: {x, y} = next}, %Board{cols: cols, rows: rows, walls: walls})
+       when is_integer(x) and is_integer(y) do
+    cond do
+      x < 0 or x >= cols -> current
+      y < 0 or y >= rows -> current
+      next in walls -> current
+      true -> next
+    end
+  end
 
   @doc """
   Calculate an attack range given a tile.
