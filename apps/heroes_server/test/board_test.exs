@@ -7,7 +7,7 @@ defmodule Game.BoardTest do
   @board_4x4_w2 GameBoards.Test4x4w2
 
   describe "Rules for movements:" do
-    setup %{board: board}, do: [move_fn: &board.move/2]
+    setup %{board: board}, do: [move_fn: &board.play/2]
     setup :set_tile
 
     @tag tile: {2, 1}

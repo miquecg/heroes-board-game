@@ -55,15 +55,15 @@ defmodule Game.Board do
     for x <- 0..(cols - 1), y <- 0..(rows - 1), {x, y} not in walls, do: {x, y}
   end
 
-  def move(tile, direction, board) do
+  def play(tile, move, board) do
     tile
-    |> movement(direction)
+    |> compute(move)
     |> validate(board)
   end
 
-  defp movement({x, y} = current, direction) do
+  defp compute({x, y} = current, move) do
     next =
-      case direction do
+      case move do
         :up -> {x, y + 1}
         :down -> {x, y - 1}
         :left -> {x - 1, y}
