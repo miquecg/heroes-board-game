@@ -7,8 +7,7 @@ defmodule Game.Hero do
   alias Game.Board
   alias GameError.BadCommand
 
-  @movements [:up, :down, :left, :right]
-  @commands @movements
+  @commands [:up, :down, :left, :right]
 
   use GenServer, restart: :temporary
 
@@ -26,11 +25,6 @@ defmodule Game.Hero do
     defstruct [alive: true] ++ @enforce_keys
   end
 
-  @typedoc """
-  Supported commands for controling a hero.
-  """
-  @type cmd :: :up | :down | :left | :right
-
   ## Client
 
   @doc """
@@ -47,7 +41,8 @@ defmodule Game.Hero do
   @doc """
   Send a command to control a hero.
 
-  `pid` is the hero reference and `cmd` is an atom of type `t:cmd/0`.
+  `pid` is the hero reference.
+  `cmd` is of type `t:Game.Board.moves/0`.
 
   Returns `{:ok, tile}` or `{:error, error}` for invalid commands.
   """
@@ -57,7 +52,7 @@ defmodule Game.Hero do
         when tile: Board.tile(), error: %BadCommand{}
   def control(pid, cmd)
 
-  def control(pid, cmd) when cmd in @commands, do: GenServer.call(pid, cmd)
+  def control(pid, cmd) when cmd in @commands, do: GenServer.call(pid, {:play, cmd})
   def control(_, _), do: {:error, %BadCommand{}}
 
   ## Server (callbacks)
@@ -66,11 +61,8 @@ defmodule Game.Hero do
   def init(state), do: {:ok, state}
 
   @impl true
-  def handle_call(cmd, _from, %State{tile: tile} = state) when cmd in @movements do
-    result =
-      tile
-      |> compute(cmd)
-      |> move(state)
+  def handle_call({:play, move}, _from, %State{tile: tile, board: board} = state) do
+    result = board.play(tile, move)
 
     {:reply, {:ok, result}, %{state | tile: result}}
   end
@@ -78,19 +70,5 @@ defmodule Game.Hero do
   @impl true
   def handle_call({:attack, _}, _from, state) do
     {:reply, {:ok, :dead}, state}
-  end
-
-  @spec compute(Board.tile(), atom()) :: Board.tile()
-  defp compute({x, y}, :up), do: {x, y + 1}
-  defp compute({x, y}, :down), do: {x, y - 1}
-  defp compute({x, y}, :left), do: {x - 1, y}
-  defp compute({x, y}, :right), do: {x + 1, y}
-
-  @spec move(Board.tile(), state) :: Board.tile()
-  defp move(to_tile, %State{tile: from_tile, board: board}) do
-    case board.valid?(to_tile) do
-      true -> to_tile
-      false -> from_tile
-    end
   end
 end
