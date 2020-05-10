@@ -74,7 +74,7 @@ defmodule Game.Board do
   end
 
   @doc """
-  Play a `move` in a `board`.
+  Play a `move`.
 
   `tile` is the starting point.
   """
