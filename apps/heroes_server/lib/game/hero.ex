@@ -32,11 +32,7 @@ defmodule Game.Hero do
 
   Requires options `:board` and `:tile`.
   """
-  def start_link(opts) do
-    board = Keyword.fetch!(opts, :board)
-    tile = Keyword.fetch!(opts, :tile)
-    GenServer.start_link(__MODULE__, %State{board: board, tile: tile})
-  end
+  def start_link(opts), do: GenServer.start_link(__MODULE__, opts)
 
   @doc """
   Send a command to control a hero.
@@ -58,7 +54,13 @@ defmodule Game.Hero do
   ## Server (callbacks)
 
   @impl true
-  def init(state), do: {:ok, state}
+  @spec init(keyword()) :: {:ok, state}
+  def init(opts) do
+    board = Keyword.fetch!(opts, :board)
+    {_, _} = tile = Keyword.fetch!(opts, :tile)
+
+    {:ok, %State{board: board, tile: tile}}
+  end
 
   @impl true
   def handle_call({:play, move}, _from, %State{tile: tile, board: board} = state) do
