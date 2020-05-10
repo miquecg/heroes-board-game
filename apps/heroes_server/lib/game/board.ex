@@ -33,6 +33,11 @@ defmodule Game.Board do
 
   defstruct @enforce_keys
 
+  @typedoc """
+  Allowed movements.
+  """
+  @type moves :: :up | :down | :left | :right
+
   @doc """
   Convert a `Game.Board` struct into a list of tiles.
 
@@ -69,17 +74,38 @@ defmodule Game.Board do
   end
 
   @doc """
-  Check if `point` is a valid tile in board.
-  """
-  @spec valid?({integer(), integer()}, t) :: boolean()
-  def valid?({x, y} = point, %Board{cols: cols, rows: rows, walls: walls})
-      when is_integer(x) and is_integer(y) do
-    checks = [
-      0 <= x and x < cols,
-      0 <= y and y < rows,
-      point not in walls
-    ]
+  Play a `move`.
 
-    Enum.all?(checks)
+  `tile` is the starting point.
+  """
+  @spec play(tile, moves, t) :: tile
+  def play(tile, move, board) do
+    tile
+    |> compute(move)
+    |> validate(board)
+  end
+
+  @spec compute(tile, moves) :: %{from: tile, to: {integer(), integer()}}
+  defp compute({x, y} = current, move) do
+    next =
+      case move do
+        :up -> {x, y + 1}
+        :down -> {x, y - 1}
+        :left -> {x - 1, y}
+        :right -> {x + 1, y}
+      end
+
+    %{from: current, to: next}
+  end
+
+  @spec validate(%{from: tile, to: {integer(), integer()}}, t) :: tile
+  defp validate(%{from: current, to: {x, y} = next}, %Board{cols: cols, rows: rows, walls: walls})
+       when is_integer(x) and is_integer(y) do
+    cond do
+      x < 0 or x >= cols -> current
+      y < 0 or y >= rows -> current
+      next in walls -> current
+      true -> next
+    end
   end
 end
