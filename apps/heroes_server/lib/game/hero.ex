@@ -66,8 +66,9 @@ defmodule Game.Hero do
   @impl true
   def handle_call({:play, move}, _from, %State{tile: tile, board: board} = state) do
     result = board.play(tile, move)
+    new_range = board.attack_range(result)
 
-    {:reply, {:ok, result}, %{state | tile: result}}
+    {:reply, {:ok, result}, %{state | tile: result, attack_range: new_range}}
   end
 
   @impl true
