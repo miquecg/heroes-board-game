@@ -4,7 +4,7 @@ defmodule Game.Hero do
   All player actions during the game happen on this GenServer.
   """
 
-  alias Game.Board
+  alias Game.{Board, BoardRange}
   alias GameError.BadCommand
 
   @commands [:up, :down, :left, :right]
@@ -14,6 +14,7 @@ defmodule Game.Hero do
   @typep state :: %__MODULE__.State{
            board: module(),
            tile: Board.tile(),
+           attack_range: BoardRange.t(),
            alive: boolean()
          }
 
@@ -22,7 +23,7 @@ defmodule Game.Hero do
 
     @enforce_keys [:board, :tile]
 
-    defstruct [alive: true] ++ @enforce_keys
+    defstruct [:attack_range, alive: true] ++ @enforce_keys
   end
 
   ## Client
@@ -57,9 +58,9 @@ defmodule Game.Hero do
   @spec init(keyword()) :: {:ok, state}
   def init(opts) do
     board = Keyword.fetch!(opts, :board)
-    {_, _} = tile = Keyword.fetch!(opts, :tile)
+    tile = Keyword.fetch!(opts, :tile)
 
-    {:ok, %State{board: board, tile: tile}}
+    {:ok, %State{board: board, tile: tile, attack_range: board.attack_range(tile)}}
   end
 
   @impl true
@@ -70,7 +71,16 @@ defmodule Game.Hero do
   end
 
   @impl true
-  def handle_call({:attack, _}, _from, state) do
-    {:reply, {:ok, :dead}, state}
+  def handle_call({:attack, enemy}, _from, %State{attack_range: attack_range} = state) do
+    state =
+      case BoardRange.member?(attack_range, enemy) do
+        true -> %{state | alive: false}
+        false -> state
+      end
+
+    {:reply, {:ok, living_status(state)}, state}
   end
+
+  defp living_status(%State{alive: true}), do: :alive
+  defp living_status(%State{alive: false}), do: :dead
 end
