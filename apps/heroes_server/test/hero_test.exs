@@ -57,33 +57,50 @@ defmodule Game.HeroTest do
     setup :create_hero
 
     @tag enemy: {0, 0}
-    test "Attack from tile {0, 0}", %{hero: pid} = context do
+    test "Attack from {0, 0}", %{hero: pid} = context do
       assert {:ok, :dead} = GenServer.call(pid, {:attack, context.enemy})
     end
 
     @tag enemy: {0, 2}
-    test "Attack from tile {0, 2}", %{hero: pid} = context do
+    test "Attack from {0, 2}", %{hero: pid} = context do
       assert {:ok, :dead} = GenServer.call(pid, {:attack, context.enemy})
     end
 
     @tag enemy: {1, 1}
-    test "Attack from tile {1, 1}", %{hero: pid} = context do
+    test "Attack from {1, 1}", %{hero: pid} = context do
       assert {:ok, :dead} = GenServer.call(pid, {:attack, context.enemy})
     end
 
     @tag enemy: {1, 3}
-    test "Attack from tile {1, 3}", %{hero: pid} = context do
+    test "Attack from {1, 3}", %{hero: pid} = context do
       assert {:ok, :alive} = GenServer.call(pid, {:attack, context.enemy})
     end
 
     @tag enemy: {2, 1}
-    test "Attack from tile {2, 1}", %{hero: pid} = context do
+    test "Attack from {2, 1}", %{hero: pid} = context do
       assert {:ok, :dead} = GenServer.call(pid, {:attack, context.enemy})
     end
 
     @tag enemy: {3, 1}
-    test "Attack from tile {3, 1}", %{hero: pid} = context do
+    test "Attacks from {3, 1} moving the hero", %{hero: pid} = context do
       assert {:ok, :alive} = GenServer.call(pid, {:attack, context.enemy})
+
+      {:ok, {2, 1}} = Hero.control(pid, :right)
+
+      assert {:ok, :dead} = GenServer.call(pid, {:attack, context.enemy})
+    end
+
+    @tag enemy: {3, 3}
+    test "Attacks from {3, 3} moving the hero", %{hero: pid} = context do
+      assert {:ok, :alive} = GenServer.call(pid, {:attack, context.enemy})
+
+      {:ok, {2, 1}} = Hero.control(pid, :right)
+
+      assert {:ok, :alive} = GenServer.call(pid, {:attack, context.enemy})
+
+      {:ok, {2, 2}} = Hero.control(pid, :up)
+
+      assert {:ok, :dead} = GenServer.call(pid, {:attack, context.enemy})
     end
   end
 
