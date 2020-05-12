@@ -53,16 +53,32 @@ defmodule Game.HeroTest do
     end
   end
 
-  describe "A hero on tile {1, 1} dies when attacked by an enemy on tile" do
+  describe "A hero can be killed by enemies in a radius of one tile." do
     setup :create_hero
 
-    setup %{board: board, enemy: tile} do
-      [range: board.attack_range(tile)]
+    @tag enemy: {0, 0}
+    test "Attack from tile {0, 0}", %{hero: pid} = context do
+      assert {:ok, :dead} = GenServer.call(pid, {:attack, context.enemy})
     end
 
-    @tag enemy: {0, 0}
-    test "{0, 0}", %{hero: pid} = context do
-      assert {:ok, :dead} = GenServer.call(pid, {:attack, context.range})
+    @tag enemy: {0, 2}
+    test "Attack from tile {0, 2}", %{hero: pid} = context do
+      assert {:ok, :dead} = GenServer.call(pid, {:attack, context.enemy})
+    end
+
+    @tag enemy: {1, 1}
+    test "Attack from tile {1, 1}", %{hero: pid} = context do
+      assert {:ok, :dead} = GenServer.call(pid, {:attack, context.enemy})
+    end
+
+    @tag enemy: {2, 1}
+    test "Attack from tile {2, 1}", %{hero: pid} = context do
+      assert {:ok, :dead} = GenServer.call(pid, {:attack, context.enemy})
+    end
+
+    @tag enemy: {2, 2}
+    test "Attack from tile {2, 2}", %{hero: pid} = context do
+      assert {:ok, :dead} = GenServer.call(pid, {:attack, context.enemy})
     end
   end
 
