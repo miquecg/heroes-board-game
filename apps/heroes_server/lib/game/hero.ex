@@ -9,6 +9,9 @@ defmodule Game.Hero do
 
   @commands [:up, :down, :left, :right]
 
+  @alive_status :alive
+  @dead_status :dead
+
   use GenServer, restart: :temporary
 
   @typep state :: %__MODULE__.State{
@@ -72,6 +75,12 @@ defmodule Game.Hero do
   end
 
   @impl true
+  # Update to Elixir 1.11 `map.field` syntax in guards
+  def handle_call({:attack, _}, _from, %State{alive: false} = state) do
+    {:reply, {:ok, @dead_status}, state}
+  end
+
+  @impl true
   def handle_call({:attack, enemy}, _from, %State{attack_range: attack_range} = state) do
     state =
       case BoardRange.member?(attack_range, enemy) do
@@ -82,6 +91,6 @@ defmodule Game.Hero do
     {:reply, {:ok, living_status(state)}, state}
   end
 
-  defp living_status(%State{alive: true}), do: :alive
-  defp living_status(%State{alive: false}), do: :dead
+  defp living_status(%State{alive: true}), do: @alive_status
+  defp living_status(%State{alive: false}), do: @dead_status
 end
