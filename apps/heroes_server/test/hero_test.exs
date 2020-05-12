@@ -104,6 +104,15 @@ defmodule Game.HeroTest do
     end
   end
 
+  describe "A dead hero" do
+    setup :create_hero
+
+    test "remains dead", %{hero: pid} do
+      assert {:ok, :dead} = GenServer.call(pid, {:attack, {1, 2}})
+      assert {:ok, :dead} = GenServer.call(pid, {:attack, {2, 0}})
+    end
+  end
+
   describe "A hero returns error when commands are" do
     setup :create_hero
 
