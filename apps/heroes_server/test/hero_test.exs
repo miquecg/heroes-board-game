@@ -53,6 +53,22 @@ defmodule Game.HeroTest do
     end
   end
 
+  describe "A hero can attack all other heroes at the same time." do
+    setup :create_hero
+
+    test "Hero kills one of two enemies", %{hero: pid, board: board} do
+      opts = [board: board]
+      enemy_out_of_reach = start_supervised!({Hero, [tile: {3, 0}] ++ opts}, id: :enemy_1)
+      enemy_within_reach = start_supervised!({Hero, [tile: {2, 2}] ++ opts}, id: :enemy_2)
+
+      assert {:ok, :attack} = Hero.control(pid, :attack)
+      :timer.sleep(50)
+
+      assert {:error, :noop} = Hero.control(enemy_within_reach, :right)
+      assert {:ok, :attack} = Hero.control(enemy_out_of_reach, :attack)
+    end
+  end
+
   describe "A hero can be killed by an enemy attack within a radius of one tile:" do
     setup :create_hero
 
@@ -119,6 +135,7 @@ defmodule Game.HeroTest do
       assert {:ok, :dead} = GenServer.call(pid, {:attack, {1, 2}})
 
       assert {:error, :noop} = Hero.control(pid, :right)
+      assert {:error, :noop} = Hero.control(pid, :attack)
     end
   end
 
