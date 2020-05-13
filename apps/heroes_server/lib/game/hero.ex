@@ -44,15 +44,19 @@ defmodule Game.Hero do
   `pid` is the hero reference.
   `cmd` is of type `t:Game.Board.moves/0`.
 
-  Returns `{:ok, tile}` or `{:error, error}` for invalid commands.
+  Returns `{:ok, tile}` or `{:error, :noop}`
+  when hero is dead and cannot execute more commands.
+
+  For invalid commands returns exception
+  `GameError.BadCommand` in the error tuple.
   """
   @spec control(GenServer.server(), term()) ::
           {:ok, tile}
           | {:error, error}
-        when tile: Board.tile(), error: %BadCommand{}
+        when tile: Board.tile(), error: :noop | %BadCommand{}
   def control(pid, cmd)
 
-  def control(pid, cmd) when cmd in @commands, do: GenServer.call(pid, {:play, cmd})
+  def control(pid, cmd) when cmd in @commands, do: GenServer.call(pid, {:command, cmd})
   def control(_, _), do: {:error, %BadCommand{}}
 
   ## Server (callbacks)
@@ -67,7 +71,12 @@ defmodule Game.Hero do
   end
 
   @impl true
-  def handle_call({:play, move}, _from, %State{tile: tile, board: board} = state) do
+  def handle_call({:command, _}, _from, %State{alive: false} = state) do
+    {:reply, {:error, :noop}, state}
+  end
+
+  @impl true
+  def handle_call({:command, move}, _from, %State{tile: tile, board: board} = state) do
     result = board.play(tile, move)
     new_range = board.attack_range(result)
 

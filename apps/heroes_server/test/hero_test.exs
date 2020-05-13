@@ -108,8 +108,17 @@ defmodule Game.HeroTest do
     setup :create_hero
 
     test "remains dead", %{hero: pid} do
+      assert {:ok, :alive} = GenServer.call(pid, {:attack, {3, 1}})
       assert {:ok, :dead} = GenServer.call(pid, {:attack, {1, 2}})
+
       assert {:ok, :dead} = GenServer.call(pid, {:attack, {2, 0}})
+    end
+
+    test "cannot perform any action", %{hero: pid} do
+      assert {:ok, :alive} = GenServer.call(pid, {:attack, {3, 1}})
+      assert {:ok, :dead} = GenServer.call(pid, {:attack, {1, 2}})
+
+      assert {:error, :noop} = Hero.control(pid, :right)
     end
   end
 
