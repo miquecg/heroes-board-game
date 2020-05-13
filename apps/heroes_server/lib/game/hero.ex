@@ -91,16 +91,12 @@ defmodule Game.Hero do
 
   @impl true
   def handle_call({:attack, enemy}, _from, %State{attack_range: attack_range} = state) do
-    state =
+    {living_status, state} =
       case BoardRange.member?(attack_range, enemy) do
-        true -> %{state | alive: false}
-        false -> state
+        true -> {@dead_status, %{state | alive: false}}
+        false -> {@alive_status, state}
       end
 
-    {:reply, {:ok, living_status(state)}, state}
+    {:reply, {:ok, living_status}, state}
   end
-
-  @spec living_status(state) :: :alive | :dead
-  defp living_status(%State{alive: true}), do: @alive_status
-  defp living_status(%State{alive: false}), do: @dead_status
 end
