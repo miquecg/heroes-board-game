@@ -91,6 +91,7 @@ defmodule Game.Hero do
     {:reply, {:ok, living_status(state)}, state}
   end
 
+  @spec living_status(state) :: :alive | :dead
   defp living_status(%State{alive: true}), do: @alive_status
   defp living_status(%State{alive: false}), do: @dead_status
 end
