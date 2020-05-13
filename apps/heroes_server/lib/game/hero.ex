@@ -45,7 +45,7 @@ defmodule Game.Hero do
   `cmd` is of type `t:Game.Board.moves/0`.
 
   Returns `{:ok, tile}` or `{:error, :noop}`
-  when hero is dead and cannot execute more commands.
+  when hero is dead and cannot execute any command.
 
   For invalid commands returns exception
   `GameError.BadCommand` in the error tuple.
