@@ -9,7 +9,8 @@ defmodule Game.Hero do
   alias Game.{Board, BoardRange}
   alias GameError.BadCommand
 
-  @commands [:up, :down, :left, :right]
+  @moves [:up, :down, :left, :right]
+  @actions [:play, :broadcast]
 
   @alive_status :alive
   @dead_status :dead
@@ -42,21 +43,36 @@ defmodule Game.Hero do
   Send a command to control a hero.
 
   `pid` is the hero reference.
-  `cmd` is of type `t:Game.Board.moves/0`.
+  `cmd` is of type `t:Game.Board.moves/0`
+  or atom `:attack`.
 
-  Returns `{:ok, tile}` or `{:error, :noop}`
-  when hero is dead and cannot execute any command.
+  Returns `{:ok, tile}`, `{:ok, :launched}`
+  or `{:error, :noop}` when hero is dead and
+  cannot execute any command.
 
   For invalid commands returns exception
   `GameError.BadCommand` in the error tuple.
   """
   @spec control(GenServer.server(), term()) ::
-          {:ok, tile}
+          {:ok, tile | :launched}
           | {:error, error}
         when tile: Board.tile(), error: :noop | %BadCommand{}
   def control(pid, cmd)
 
-  def control(pid, cmd) when cmd in @commands, do: GenServer.call(pid, {:command, cmd})
+  def control(pid, cmd) when cmd in @moves, do: GenServer.call(pid, {:play, cmd})
+
+  def control(pid, :attack) do
+    children = Supervisor.which_children(Game.HeroSupervisor)
+
+    enemies =
+      Enum.flat_map(children, fn
+        {_, ^pid, :worker, [__MODULE__]} -> []
+        {_, hero, :worker, [__MODULE__]} -> [hero]
+      end)
+
+    GenServer.call(pid, {:broadcast, enemies})
+  end
+
   def control(_, _), do: {:error, %BadCommand{}}
 
   ## Server (callbacks)
@@ -71,12 +87,12 @@ defmodule Game.Hero do
   end
 
   @impl true
-  def handle_call({:command, _}, _from, %State{alive: false} = state) do
+  def handle_call({msg, _}, _from, %State{alive: false} = state) when msg in @actions do
     {:reply, {:error, :noop}, state}
   end
 
   @impl true
-  def handle_call({:command, move}, _from, %State{tile: tile, board: board} = state) do
+  def handle_call({:play, move}, _from, %State{tile: tile, board: board} = state) do
     result = board.play(tile, move)
     new_range = board.attack_range(result)
 
