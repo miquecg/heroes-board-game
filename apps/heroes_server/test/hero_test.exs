@@ -58,14 +58,14 @@ defmodule Game.HeroTest do
 
     test "Hero kills one of two enemies", %{hero: pid, board: board} do
       opts = [board: board]
-      enemy_out_of_reach = start_supervised!({Hero, [tile: {3, 0}] ++ opts}, id: :enemy_1)
-      enemy_within_reach = start_supervised!({Hero, [tile: {2, 2}] ++ opts}, id: :enemy_2)
+      enemy_within_reach = start_supervised!({Hero, [tile: {2, 2}] ++ opts}, id: :enemy_in)
+      enemy_out_of_reach = start_supervised!({Hero, [tile: {3, 0}] ++ opts}, id: :enemy_out)
 
-      assert {:ok, :attack} = Hero.control(pid, :attack)
-      :timer.sleep(50)
+      assert {:ok, :launched} = Hero.control(pid, :attack)
+      :timer.sleep(20)
 
       assert {:error, :noop} = Hero.control(enemy_within_reach, :right)
-      assert {:ok, :attack} = Hero.control(enemy_out_of_reach, :attack)
+      assert {:ok, {3, 1}} = Hero.control(enemy_out_of_reach, :up)
     end
   end
 
