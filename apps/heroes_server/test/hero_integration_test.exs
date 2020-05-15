@@ -22,7 +22,8 @@ defmodule Game.HeroIntegrationTest do
 
     assert {:error, :noop} = Hero.control(enemy_within_reach, :right)
     assert {:ok, {3, 1}} = Hero.control(enemy_out_of_reach, :up)
-    end
+    assert {:ok, {0, 1}} = Hero.control(hero, :left)
+  end
 
   defp create_hero(board, tile) do
     child = {Hero, [board: board, tile: tile]}
