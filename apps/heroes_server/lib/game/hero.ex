@@ -4,6 +4,8 @@ defmodule Game.Hero do
   All player actions during the game happen on this GenServer.
   """
 
+  use GenServer, restart: :temporary
+
   alias Game.{Board, BoardRange}
   alias GameError.BadCommand
 
@@ -11,8 +13,6 @@ defmodule Game.Hero do
 
   @alive_status :alive
   @dead_status :dead
-
-  use GenServer, restart: :temporary
 
   @typep state :: %__MODULE__.State{
            board: module(),
