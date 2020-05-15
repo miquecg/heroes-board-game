@@ -74,49 +74,49 @@ defmodule Game.HeroTest do
 
     @tag enemy: {0, 0}
     test "attack from {0, 0}", %{hero: pid} = context do
-      assert {:ok, :dead} = GenServer.call(pid, {:attack, context.enemy})
+      assert :dead = GenServer.call(pid, {:attack, context.enemy})
     end
 
     @tag enemy: {0, 2}
     test "attack from {0, 2}", %{hero: pid} = context do
-      assert {:ok, :dead} = GenServer.call(pid, {:attack, context.enemy})
+      assert :dead = GenServer.call(pid, {:attack, context.enemy})
     end
 
     @tag enemy: {1, 1}
     test "attack from {1, 1}", %{hero: pid} = context do
-      assert {:ok, :dead} = GenServer.call(pid, {:attack, context.enemy})
+      assert :dead = GenServer.call(pid, {:attack, context.enemy})
     end
 
     @tag enemy: {1, 3}
     test "attack from {1, 3}", %{hero: pid} = context do
-      assert {:ok, :alive} = GenServer.call(pid, {:attack, context.enemy})
+      assert :alive = GenServer.call(pid, {:attack, context.enemy})
     end
 
     @tag enemy: {2, 1}
     test "attack from {2, 1}", %{hero: pid} = context do
-      assert {:ok, :dead} = GenServer.call(pid, {:attack, context.enemy})
+      assert :dead = GenServer.call(pid, {:attack, context.enemy})
     end
 
     @tag enemy: {3, 1}
     test "two attacks from {3, 1}, hero moving in between", %{hero: pid} = context do
-      assert {:ok, :alive} = GenServer.call(pid, {:attack, context.enemy})
+      assert :alive = GenServer.call(pid, {:attack, context.enemy})
 
       {:ok, {2, 1}} = Hero.control(pid, :right)
 
-      assert {:ok, :dead} = GenServer.call(pid, {:attack, context.enemy})
+      assert :dead = GenServer.call(pid, {:attack, context.enemy})
     end
 
     @tag enemy: {3, 3}
     test "three attacks from {3, 3}, hero moving in between", %{hero: pid} = context do
-      assert {:ok, :alive} = GenServer.call(pid, {:attack, context.enemy})
+      assert :alive = GenServer.call(pid, {:attack, context.enemy})
 
       {:ok, {2, 1}} = Hero.control(pid, :right)
 
-      assert {:ok, :alive} = GenServer.call(pid, {:attack, context.enemy})
+      assert :alive = GenServer.call(pid, {:attack, context.enemy})
 
       {:ok, {2, 2}} = Hero.control(pid, :up)
 
-      assert {:ok, :dead} = GenServer.call(pid, {:attack, context.enemy})
+      assert :dead = GenServer.call(pid, {:attack, context.enemy})
     end
   end
 
@@ -124,15 +124,15 @@ defmodule Game.HeroTest do
     setup :create_hero
 
     test "remains dead", %{hero: pid} do
-      assert {:ok, :alive} = GenServer.call(pid, {:attack, {3, 1}})
-      assert {:ok, :dead} = GenServer.call(pid, {:attack, {1, 2}})
+      assert :alive = GenServer.call(pid, {:attack, {3, 1}})
+      assert :dead = GenServer.call(pid, {:attack, {1, 2}})
 
-      assert {:ok, :dead} = GenServer.call(pid, {:attack, {2, 0}})
+      assert :dead = GenServer.call(pid, {:attack, {2, 0}})
     end
 
     test "cannot perform any action", %{hero: pid} do
-      assert {:ok, :alive} = GenServer.call(pid, {:attack, {3, 1}})
-      assert {:ok, :dead} = GenServer.call(pid, {:attack, {1, 2}})
+      assert :alive = GenServer.call(pid, {:attack, {3, 1}})
+      assert :dead = GenServer.call(pid, {:attack, {1, 2}})
 
       assert {:error, :noop} = Hero.control(pid, :right)
       assert {:error, :noop} = Hero.control(pid, :attack)

@@ -86,7 +86,7 @@ defmodule Game.Hero do
   @impl true
   # Update to Elixir 1.11 `map.field` syntax in guards
   def handle_call({:attack, _}, _from, %State{alive: false} = state) do
-    {:reply, {:ok, @dead_status}, state}
+    {:reply, @dead_status, state}
   end
 
   @impl true
@@ -97,6 +97,6 @@ defmodule Game.Hero do
         false -> {@alive_status, state}
       end
 
-    {:reply, {:ok, living_status}, state}
+    {:reply, living_status, state}
   end
 end
