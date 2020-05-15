@@ -101,6 +101,13 @@ defmodule Game.Hero do
   end
 
   @impl true
+  def handle_call({:broadcast, enemies}, _from, %State{tile: tile} = state) do
+    args = [tile, enemies]
+    Task.Supervisor.async_nolink(Game.TaskSupervisor, __MODULE__, :stream_task, args)
+    {:reply, {:ok, :launched}, state}
+  end
+
+  @impl true
   # Update to Elixir 1.11 `map.field` syntax in guards
   def handle_call({:attack, _}, _from, %State{alive: false} = state) do
     {:reply, @dead_status, state}
@@ -115,5 +122,22 @@ defmodule Game.Hero do
       end
 
     {:reply, living_status, state}
+  end
+
+  @spec stream_task(Board.tile(), list) :: :ok
+  def stream_task(tile, enemies) do
+    opts = [ordered: false]
+
+    stream =
+      Task.Supervisor.async_stream_nolink(
+        Game.TaskSupervisor,
+        enemies,
+        GenServer,
+        :call,
+        [{:attack, tile}],
+        opts
+      )
+
+    Stream.run(stream)
   end
 end
