@@ -10,12 +10,18 @@ defmodule Game.HeroIntegrationTest do
     :ok = Application.start(:heroes_server)
   end
 
-  test "A hero can attack all enemies at the same time" do
-    new_hero = &create_hero(GameBoards.Test4x4, &1)
+  setup context do
+    for tile <- context.tiles, into: %{} do
+      hero = create_hero(GameBoards.Test4x4, tile)
+      {tile, hero}
+    end
+  end
 
-    hero = new_hero.({1, 1})
-    enemy_within_reach = new_hero.({2, 2})
-    enemy_out_of_reach = new_hero.({3, 0})
+  @tag tiles: [{1, 1}, {2, 2}, {3, 0}]
+  test "A hero can attack all enemies at the same time", context do
+    hero = Map.get(context, {1, 1})
+    enemy_within_reach = Map.get(context, {2, 2})
+    enemy_out_of_reach = Map.get(context, {3, 0})
 
     assert {:ok, :launched} = Hero.control(hero, :attack)
     :timer.sleep(10)
