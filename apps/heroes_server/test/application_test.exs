@@ -10,7 +10,7 @@ defmodule HeroesServerTest do
   end
 
   defp count do
-    %{active: heroes} = DynamicSupervisor.count_children(Game.Supervisor)
+    %{active: heroes} = DynamicSupervisor.count_children(Game.HeroSupervisor)
     heroes
   end
 end
