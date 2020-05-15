@@ -101,6 +101,11 @@ defmodule Game.Hero do
   end
 
   @impl true
+  def handle_call({:broadcast, []}, _from, %State{} = state) do
+    {:reply, {:ok, :launched}, state}
+  end
+
+  @impl true
   def handle_call({:broadcast, enemies}, _from, %State{tile: tile} = state) do
     args = [tile, enemies]
     Task.Supervisor.async_nolink(Game.TaskSupervisor, __MODULE__, :stream_task, args)
