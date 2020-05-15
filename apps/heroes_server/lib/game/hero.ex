@@ -87,6 +87,7 @@ defmodule Game.Hero do
   end
 
   @impl true
+  # Update to Elixir 1.11 `map.field` syntax in guards
   def handle_call({msg, _}, _from, %State{alive: false} = state) when msg in @actions do
     {:reply, {:error, :noop}, state}
   end
