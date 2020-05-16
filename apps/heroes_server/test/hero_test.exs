@@ -53,16 +53,73 @@ defmodule Game.HeroTest do
     end
   end
 
-  describe "A hero on tile {1, 1} dies when attacked by an enemy on tile" do
+  describe "A hero can be killed by an enemy attack within a radius of one tile:" do
     setup :create_hero
 
-    setup %{board: board, enemy: tile} do
-      [range: board.attack_range(tile)]
+    @tag enemy: {0, 0}
+    test "attack from {0, 0}", %{hero: pid} = context do
+      assert :dead = GenServer.call(pid, {:attack, context.enemy})
     end
 
-    @tag enemy: {0, 0}
-    test "{0, 0}", %{hero: pid} = context do
-      assert {:ok, :dead} = GenServer.call(pid, {:attack, context.range})
+    @tag enemy: {0, 2}
+    test "attack from {0, 2}", %{hero: pid} = context do
+      assert :dead = GenServer.call(pid, {:attack, context.enemy})
+    end
+
+    @tag enemy: {1, 1}
+    test "attack from {1, 1}", %{hero: pid} = context do
+      assert :dead = GenServer.call(pid, {:attack, context.enemy})
+    end
+
+    @tag enemy: {1, 3}
+    test "attack from {1, 3}", %{hero: pid} = context do
+      assert :alive = GenServer.call(pid, {:attack, context.enemy})
+    end
+
+    @tag enemy: {2, 1}
+    test "attack from {2, 1}", %{hero: pid} = context do
+      assert :dead = GenServer.call(pid, {:attack, context.enemy})
+    end
+
+    @tag enemy: {3, 1}
+    test "two attacks from {3, 1}, hero moving in between", %{hero: pid} = context do
+      assert :alive = GenServer.call(pid, {:attack, context.enemy})
+
+      {:ok, {2, 1}} = Hero.control(pid, :right)
+
+      assert :dead = GenServer.call(pid, {:attack, context.enemy})
+    end
+
+    @tag enemy: {3, 3}
+    test "three attacks from {3, 3}, hero moving in between", %{hero: pid} = context do
+      assert :alive = GenServer.call(pid, {:attack, context.enemy})
+
+      {:ok, {2, 1}} = Hero.control(pid, :right)
+
+      assert :alive = GenServer.call(pid, {:attack, context.enemy})
+
+      {:ok, {2, 2}} = Hero.control(pid, :up)
+
+      assert :dead = GenServer.call(pid, {:attack, context.enemy})
+    end
+  end
+
+  describe "A dead hero" do
+    setup :create_hero
+
+    test "remains dead", %{hero: pid} do
+      assert :alive = GenServer.call(pid, {:attack, {3, 1}})
+      assert :dead = GenServer.call(pid, {:attack, {1, 2}})
+
+      assert :dead = GenServer.call(pid, {:attack, {2, 0}})
+    end
+
+    test "cannot perform any action", %{hero: pid} do
+      assert :alive = GenServer.call(pid, {:attack, {3, 1}})
+      assert :dead = GenServer.call(pid, {:attack, {1, 2}})
+
+      assert {:error, :noop} = Hero.control(pid, :right)
+      assert {:error, :noop} = Hero.control(pid, :attack)
     end
   end
 
