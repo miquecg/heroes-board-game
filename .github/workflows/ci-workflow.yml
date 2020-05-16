@@ -16,10 +16,10 @@ jobs:
     strategy:
       matrix:
         elixir: [1.10.3]
-        erlang: [22.3.3]
+        erlang: [22.3.4]
         os: [debian-buster-20200224]
     container:
-      image: hexpm/elixir:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-${{ matrix.os }}
+      image: hexpm/elixir-amd64:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
       - name: Cache deps
@@ -55,10 +55,10 @@ jobs:
     strategy:
       matrix:
         elixir: [1.10.3]
-        erlang: [22.3.3]
+        erlang: [22.3.4]
         os: [debian-buster-20200224]
     container:
-      image: hexpm/elixir:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-${{ matrix.os }}
+      image: hexpm/elixir-amd64:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
