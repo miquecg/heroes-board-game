@@ -129,7 +129,18 @@ defmodule Game.Hero do
     {:reply, living_status, state}
   end
 
-  @spec stream_task(Board.tile(), list) :: :ok
+  @impl true
+  def handle_info({task_ref, :done}, %State{} = state) do
+    Process.demonitor(task_ref, [:flush])
+    {:noreply, state}
+  end
+
+  @impl true
+  def handle_info({:DOWN, _down_ref, :process, _pid, _reason}, %State{} = state) do
+    {:noreply, state}
+  end
+
+  @spec stream_task(Board.tile(), list) :: :done
   def stream_task(tile, enemies) do
     opts = [ordered: false]
 
@@ -144,5 +155,6 @@ defmodule Game.Hero do
       )
 
     Stream.run(stream)
+    :done
   end
 end
