@@ -6,6 +6,8 @@ defmodule Game.Hero do
 
   use GenServer, restart: :temporary
 
+  require Logger
+
   alias Game.{Board, BoardRange}
   alias GameError.BadCommand
 
@@ -136,7 +138,8 @@ defmodule Game.Hero do
   end
 
   @impl true
-  def handle_info({:DOWN, _down_ref, :process, _pid, _reason}, %State{} = state) do
+  def handle_info({:DOWN, _down_ref, :process, _pid, reason}, %State{} = state) do
+    Logger.warn("Attack failed with reason: #{inspect(reason)}", tag: :task_down)
     {:noreply, state}
   end
 
