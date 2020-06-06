@@ -58,7 +58,6 @@ defmodule Game.Board do
     end
   end
 
-  @doc false
   defp create(opts) do
     %Board{
       cols: Keyword.fetch!(opts, :cols),
