@@ -1,4 +1,4 @@
-defmodule GameBoards.Test2x2 do
+defmodule GameBoards.Test2x2w1 do
   @moduledoc """
   Size: 2x2
   Walls: 1
