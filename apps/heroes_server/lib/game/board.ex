@@ -38,6 +38,27 @@ defmodule Game.Board do
   """
   @type moves :: :up | :down | :left | :right
 
+  @doc false
+  defmacro __using__(opts) do
+    board_spec = create(opts)
+    tiles = tiles(board_spec)
+
+    quote do
+      def spec, do: unquote(Macro.escape(board_spec))
+
+      def tiles, do: unquote(tiles)
+    end
+  end
+
+  @doc false
+  defp create(opts) do
+    %Board{
+      cols: Keyword.fetch!(opts, :cols),
+      rows: Keyword.fetch!(opts, :rows),
+      walls: Keyword.fetch!(opts, :walls)
+    }
+  end
+
   @doc """
   Convert a `Game.Board` struct into a list of tiles.
 

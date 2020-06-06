@@ -144,3 +144,10 @@ defmodule GameBoards.Test4x4w2 do
 
   def play(tile, move), do: Board.play(tile, move, @board_spec)
 end
+
+defmodule GameBoards.TestMacro do
+  use Game.Board,
+    cols: 6,
+    rows: 4,
+    walls: []
+end
