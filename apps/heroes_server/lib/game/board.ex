@@ -44,9 +44,17 @@ defmodule Game.Board do
     tiles = tiles(board_spec)
 
     quote do
-      def spec, do: unquote(Macro.escape(board_spec))
+      alias Game.Board
+
+      @board_spec unquote(Macro.escape(board_spec))
+
+      def spec, do: @board_spec
 
       def tiles, do: unquote(tiles)
+
+      def attack_range(tile), do: Board.attack_range(tile, @board_spec)
+
+      def play(tile, move), do: Board.play(tile, move, @board_spec)
     end
   end
 
