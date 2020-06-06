@@ -41,7 +41,7 @@ defmodule Game.Board do
   @doc false
   defmacro __using__(opts) do
     board_spec = create(opts)
-    tiles = tiles(board_spec)
+    tiles = generate(board_spec)
 
     quote do
       alias Game.Board
@@ -68,7 +68,7 @@ defmodule Game.Board do
   end
 
   @doc """
-  Convert a `Game.Board` struct into a list of tiles.
+  Generate all tiles in a board.
 
   ## Example
   +---+---+---+---+
@@ -80,12 +80,12 @@ defmodule Game.Board do
   +---+---+---+---+
 
       iex> alias Game.Board
-      iex> Board.tiles(%Board{cols: 4, rows: 3, walls: [{0,0},{0,2},{2,0},{2,2},{3,0}]})
+      iex> Board.generate(%Board{cols: 4, rows: 3, walls: [{0,0},{0,2},{2,0},{2,2},{3,0}]})
       [{0, 1}, {1, 0}, {1, 1}, {1, 2}, {2, 1}, {3, 1}, {3, 2}]
 
   """
-  @spec tiles(t) :: list(tile)
-  def tiles(%Board{cols: cols, rows: rows, walls: walls}) do
+  @spec generate(t) :: list(tile)
+  def generate(%Board{cols: cols, rows: rows, walls: walls}) do
     for x <- 0..(cols - 1), y <- 0..(rows - 1), {x, y} not in walls, do: {x, y}
   end
 
