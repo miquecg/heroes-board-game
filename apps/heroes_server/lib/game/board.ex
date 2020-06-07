@@ -5,6 +5,7 @@ defmodule Game.Board do
 
   alias __MODULE__
   alias Game.BoardRange
+  alias GameError.InvalidSize
 
   @typedoc """
   Walkable board cell
@@ -59,11 +60,25 @@ defmodule Game.Board do
   end
 
   defp create(opts) do
-    %Board{
-      cols: Keyword.fetch!(opts, :cols),
-      rows: Keyword.fetch!(opts, :rows),
-      walls: Keyword.fetch!(opts, :walls)
-    }
+    with {:ok, cols} <- proper_size?(opts, :cols),
+         {:ok, rows} <- proper_size?(opts, :rows)
+    do
+      %Board{
+        cols: cols,
+        rows: rows,
+        walls: Keyword.fetch!(opts, :walls)
+      }
+    end
+  end
+
+  defp proper_size?(opts, size) do
+    value = Keyword.fetch!(opts, size)
+
+    if is_integer(value) and value > 0 do
+      {:ok, value}
+    else
+      raise InvalidSize, [{size, Macro.to_string(value)}]
+    end
   end
 
   @doc """
