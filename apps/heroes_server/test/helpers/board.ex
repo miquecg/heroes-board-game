@@ -89,10 +89,3 @@ defmodule GameBoards.Test4x4w2 do
     rows: 4,
     walls: [{1, 2}, {3, 2}]
 end
-
-defmodule GameBoards.TestMacro do
-  use Game.Board,
-    cols: 6,
-    rows: 4,
-    walls: []
-end
