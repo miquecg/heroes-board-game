@@ -66,7 +66,7 @@ defmodule Game.Board do
       %Board{
         cols: cols,
         rows: rows,
-        walls: Keyword.fetch!(opts, :walls)
+        walls: Keyword.get(opts, :walls, [])
       }
     end
   end

@@ -30,8 +30,7 @@ defmodule GameBoards.Test3x2 do
 
   use Game.Board,
     cols: 3,
-    rows: 2,
-    walls: []
+    rows: 2
 end
 
 defmodule GameBoards.Test4x4 do
@@ -42,8 +41,7 @@ defmodule GameBoards.Test4x4 do
 
   use Game.Board,
     cols: 4,
-    rows: 4,
-    walls: []
+    rows: 4
 end
 
 defmodule GameBoards.Test4x4w1 do
