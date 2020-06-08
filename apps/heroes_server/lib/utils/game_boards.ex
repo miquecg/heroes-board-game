@@ -4,7 +4,7 @@ defmodule Utils.GameBoards do
   """
 
   alias Game.Board
-  alias GameError.InvalidSize
+  alias GameError.BadSize
 
   @doc false
   defmacro __using__(opts) do
@@ -13,6 +13,7 @@ defmodule Utils.GameBoards do
       rows: get(opts, :rows),
       walls: get(opts, :walls)
     }
+
     tiles = Board.generate(board_spec)
 
     quote do
@@ -34,13 +35,14 @@ defmodule Utils.GameBoards do
     walls = Keyword.get(opts, :walls, [])
     MapSet.new(walls)
   end
+
   defp get(opts, size) do
     value = Keyword.fetch!(opts, size)
 
     if is_integer(value) and value > 0 do
       value
     else
-      raise InvalidSize, [{size, Macro.to_string(value)}]
+      raise BadSize, [{size, Macro.to_string(value)}]
     end
   end
 end
