@@ -6,5 +6,5 @@ config :logger,
 config :logger, :console, level: :info
 
 config :heroes_server,
-  board: GameBoards.Test2x2,
+  board: GameBoards.Test2x2w1,
   start_tile: :first

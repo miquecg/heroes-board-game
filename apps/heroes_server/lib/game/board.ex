@@ -21,12 +21,12 @@ defmodule Game.Board do
 
   - `cols`: number of columns
   - `rows`: number of rows
-  - `walls`: list of `t:wall/0`
+  - `walls`: `MapSet` of `t:wall/0`
   """
   @type t :: %__MODULE__{
           cols: pos_integer(),
           rows: pos_integer(),
-          walls: list(wall)
+          walls: MapSet.t(wall)
         }
 
   @enforce_keys [:cols, :rows, :walls]
@@ -39,24 +39,10 @@ defmodule Game.Board do
   @type moves :: :up | :down | :left | :right
 
   @doc """
-  Convert a `Game.Board` struct into a list of tiles.
-
-  ## Example
-  +---+---+---+---+
-  | w | ⠀ | w | ⠀ |
-  +---+---+---+---+
-  |   |   |   |   |
-  +---+---+---+---+
-  | w |   | w | w |
-  +---+---+---+---+
-
-      iex> alias Game.Board
-      iex> Board.tiles(%Board{cols: 4, rows: 3, walls: [{0,0},{0,2},{2,0},{2,2},{3,0}]})
-      [{0, 1}, {1, 0}, {1, 1}, {1, 2}, {2, 1}, {3, 1}, {3, 2}]
-
+  Generate all tiles in a board.
   """
-  @spec tiles(t) :: list(tile)
-  def tiles(%Board{cols: cols, rows: rows, walls: walls}) do
+  @spec generate(t) :: list(tile)
+  def generate(%Board{cols: cols, rows: rows, walls: walls}) do
     for x <- 0..(cols - 1), y <- 0..(rows - 1), {x, y} not in walls, do: {x, y}
   end
 
