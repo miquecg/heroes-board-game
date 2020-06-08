@@ -33,6 +33,26 @@ defmodule GameBoards.Test3x2 do
     rows: 2
 end
 
+defmodule GameBoards.Test4x3w5 do
+  @moduledoc """
+  Size: 4x3
+  Walls: 5
+
+  +---+---+---+---+
+  | W | ⠀ | W | ⠀ |
+  +---+---+---+---+
+  |   |   |   |   |
+  +---+---+---+---+
+  | W |   | W | W |
+  +---+---+---+---+
+  """
+
+  use Utils.GameBoards,
+    cols: 4,
+    rows: 3,
+    walls: [{0, 0}, {0, 2}, {2, 0}, {2, 2}, {3, 0}]
+end
+
 defmodule GameBoards.Test4x4 do
   @moduledoc """
   Size: 4x4
