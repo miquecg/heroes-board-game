@@ -21,12 +21,12 @@ defmodule Game.Board do
 
   - `cols`: number of columns
   - `rows`: number of rows
-  - `walls`: list of `t:wall/0`
+  - `walls`: `MapSet` of `t:wall/0`
   """
   @type t :: %__MODULE__{
           cols: pos_integer(),
           rows: pos_integer(),
-          walls: list(wall)
+          walls: MapSet.t(wall)
         }
 
   @enforce_keys [:cols, :rows, :walls]

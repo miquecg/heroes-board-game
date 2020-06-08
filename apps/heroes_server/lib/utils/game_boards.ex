@@ -8,7 +8,11 @@ defmodule Utils.GameBoards do
 
   @doc false
   defmacro __using__(opts) do
-    board_spec = create(opts)
+    board_spec = %Board{
+      cols: get(opts, :cols),
+      rows: get(opts, :rows),
+      walls: get(opts, :walls)
+    }
     tiles = Board.generate(board_spec)
 
     quote do
@@ -26,23 +30,15 @@ defmodule Utils.GameBoards do
     end
   end
 
-  defp create(opts) do
-    with {:ok, cols} <- valid_size?(opts, :cols),
-         {:ok, rows} <- valid_size?(opts, :rows)
-    do
-      %Board{
-        cols: cols,
-        rows: rows,
-        walls: Keyword.get(opts, :walls, [])
-      }
-    end
+  defp get(opts, :walls) do
+    walls = Keyword.get(opts, :walls, [])
+    MapSet.new(walls)
   end
-
-  defp valid_size?(opts, size) do
+  defp get(opts, size) do
     value = Keyword.fetch!(opts, size)
 
     if is_integer(value) and value > 0 do
-      {:ok, value}
+      value
     else
       raise InvalidSize, [{size, Macro.to_string(value)}]
     end
