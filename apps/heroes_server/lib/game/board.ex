@@ -5,7 +5,6 @@ defmodule Game.Board do
 
   alias __MODULE__
   alias Game.BoardRange
-  alias GameError.InvalidSize
 
   @typedoc """
   Walkable board cell
@@ -38,48 +37,6 @@ defmodule Game.Board do
   Allowed movements.
   """
   @type moves :: :up | :down | :left | :right
-
-  @doc false
-  defmacro __using__(opts) do
-    board_spec = create(opts)
-    tiles = generate(board_spec)
-
-    quote do
-      alias Game.Board
-
-      @board_spec unquote(Macro.escape(board_spec))
-
-      def spec, do: @board_spec
-
-      def tiles, do: unquote(tiles)
-
-      def attack_range(tile), do: Board.attack_range(tile, @board_spec)
-
-      def play(tile, move), do: Board.play(tile, move, @board_spec)
-    end
-  end
-
-  defp create(opts) do
-    with {:ok, cols} <- proper_size?(opts, :cols),
-         {:ok, rows} <- proper_size?(opts, :rows)
-    do
-      %Board{
-        cols: cols,
-        rows: rows,
-        walls: Keyword.get(opts, :walls, [])
-      }
-    end
-  end
-
-  defp proper_size?(opts, size) do
-    value = Keyword.fetch!(opts, size)
-
-    if is_integer(value) and value > 0 do
-      {:ok, value}
-    else
-      raise InvalidSize, [{size, Macro.to_string(value)}]
-    end
-  end
 
   @doc """
   Generate all tiles in a board.
