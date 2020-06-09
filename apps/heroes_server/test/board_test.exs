@@ -11,16 +11,12 @@ defmodule Game.BoardTest do
 
   describe "Creating a board struct" do
     test "requires cols, rows and optionally walls" do
-      blank_board = Board.new(cols: 4, rows: 1)
+      board_2x5_blank = Board.new(cols: 2, rows: 5)
+      board_2x5_walls = Board.new(cols: 2, rows: 5, walls: [{0, 0}, {1, 4}])
 
-      assert %Board{cols: 4, rows: 1, walls: empty} = blank_board
-      assert empty = MapSet.new([])
-
-      blocked_tiles = [{0, 0}, {1, 4}]
-      board = Board.new(cols: 2, rows: 5, walls: blocked_tiles)
-
-      assert %Board{cols: 2, rows: 5, walls: walls} = board
-      assert walls = MapSet.new(blocked_tiles)
+      assert %Board{} = board_2x5_blank
+      assert %Board{} = board_2x5_walls
+      refute board_2x5_blank == board_2x5_walls
     end
 
     test "without required options raises KeyError" do
