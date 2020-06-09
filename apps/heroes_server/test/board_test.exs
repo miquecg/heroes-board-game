@@ -50,14 +50,13 @@ defmodule Game.BoardTest do
 
   describe "Tile generation on" do
     @tag board: @board_3x2
-    test "3x2 board without walls", %{board: board} do
-      assert contains?(board, [{0, 0}, {0, 1}, {1, 0}, {1, 1}, {2, 0}, {2, 1}])
+    test "3x2 blank board", %{board: board} do
+      assert_tiles(board, [{0, 0}, {0, 1}, {1, 0}, {1, 1}, {2, 0}, {2, 1}])
     end
 
     @tag board: @board_4x3_w5
     test "4x3 board with 5 walls", %{board: board} do
-      assert contains?(board, [{0, 1}, {1, 0}, {1, 1}, {1, 2}, {2, 1}, {3, 1}, {3, 2}])
-      refute contains?(board, board.spec.walls)
+      assert_tiles(board, [{0, 1}, {1, 0}, {1, 1}, {1, 2}, {2, 1}, {3, 1}, {3, 2}])
     end
   end
 
@@ -117,11 +116,11 @@ defmodule Game.BoardTest do
     end
   end
 
-  defp contains?(board, candidates) do
-    tiles = MapSet.new(board.tiles())
-    expected = MapSet.new(candidates)
+  defp assert_tiles(board, candidates) do
+    tiles = Enum.sort(board.tiles())
+    expected = Enum.sort(candidates)
 
-    MapSet.equal?(tiles, expected)
+    assert tiles == expected
   end
 
   defp set_tile(%{tile: tile, move_fn: move}), do: [move_fn: &move.(tile, &1)]
