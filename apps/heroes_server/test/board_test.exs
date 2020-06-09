@@ -1,21 +1,58 @@
 defmodule Game.BoardTest do
   use ExUnit.Case, async: true
 
+  alias Game.Board
+  alias GameError.BadSize
+
   @board_3x2 GameBoards.Test3x2
   @board_4x3_w5 GameBoards.Test4x3w5
   @board_4x4 GameBoards.Test4x4
   @board_4x4_w2 GameBoards.Test4x4w2
 
+  describe "Creating a board struct" do
+    test "requires cols, rows and optionally walls" do
+      board_2x5_blank = Board.new(cols: 2, rows: 5)
+      board_2x5_walls = Board.new(cols: 2, rows: 5, walls: [{0, 0}, {1, 4}])
+
+      assert %Board{} = board_2x5_blank
+      assert %Board{} = board_2x5_walls
+      refute board_2x5_blank == board_2x5_walls
+    end
+
+    test "without required options raises KeyError" do
+      assert_raise KeyError, fn ->
+        Board.new(rows: 3)
+      end
+
+      assert_raise KeyError, fn ->
+        Board.new(cols: 1, walls: [])
+      end
+    end
+
+    test "with non positive integers for cols and rows raises BadSize" do
+      assert_raise BadSize, fn ->
+        Board.new(cols: 3, rows: -1)
+      end
+
+      assert_raise BadSize, fn ->
+        Board.new(cols: 0, rows: 2)
+      end
+
+      assert_raise BadSize, fn ->
+        Board.new(cols: 4, rows: 5.0)
+      end
+    end
+  end
+
   describe "Tile generation on" do
     @tag board: @board_3x2
-    test "3x2 board without walls", %{board: board} do
-      assert contains?(board, [{0, 0}, {0, 1}, {1, 0}, {1, 1}, {2, 0}, {2, 1}])
+    test "3x2 blank board", %{board: board} do
+      assert_tiles(board, [{0, 0}, {0, 1}, {1, 0}, {1, 1}, {2, 0}, {2, 1}])
     end
 
     @tag board: @board_4x3_w5
     test "4x3 board with 5 walls", %{board: board} do
-      assert contains?(board, [{0, 1}, {1, 0}, {1, 1}, {1, 2}, {2, 1}, {3, 1}, {3, 2}])
-      refute contains?(board, board.spec.walls)
+      assert_tiles(board, [{0, 1}, {1, 0}, {1, 1}, {1, 2}, {2, 1}, {3, 1}, {3, 2}])
     end
   end
 
@@ -75,11 +112,11 @@ defmodule Game.BoardTest do
     end
   end
 
-  defp contains?(board, candidates) do
-    tiles = MapSet.new(board.tiles())
-    expected = MapSet.new(candidates)
+  defp assert_tiles(board, candidates) do
+    tiles = Enum.sort(board.tiles())
+    expected = Enum.sort(candidates)
 
-    MapSet.equal?(tiles, expected)
+    assert tiles == expected
   end
 
   defp set_tile(%{tile: tile, move_fn: move}), do: [move_fn: &move.(tile, &1)]
