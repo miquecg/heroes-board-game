@@ -18,12 +18,12 @@ defmodule Game.Board do
   @type wall :: tile
 
   @opaque t :: %__MODULE__{
-            cols: pos_integer(),
-            rows: pos_integer(),
+            x_max: non_neg_integer(),
+            y_max: non_neg_integer(),
             walls: MapSet.t(wall)
           }
 
-  @enforce_keys [:cols, :rows, :walls]
+  @enforce_keys [:x_max, :y_max, :walls]
 
   defstruct @enforce_keys
 
@@ -41,8 +41,8 @@ defmodule Game.Board do
   @spec new(keyword()) :: t
   def new(opts) do
     %Board{
-      cols: fetch!(opts, :cols),
-      rows: fetch!(opts, :rows),
+      x_max: fetch!(opts, :cols) - 1,
+      y_max: fetch!(opts, :rows) - 1,
       walls: get(opts, :walls)
     }
   end
@@ -68,19 +68,19 @@ defmodule Game.Board do
   Generate all tiles in a board.
   """
   @spec generate(t) :: list(tile)
-  def generate(%Board{cols: cols, rows: rows, walls: walls}) do
-    for x <- 0..(cols - 1), y <- 0..(rows - 1), {x, y} not in walls, do: {x, y}
+  def generate(%Board{x_max: x_max, y_max: y_max, walls: walls}) do
+    for x <- 0..x_max, y <- 0..y_max, {x, y} not in walls, do: {x, y}
   end
 
   @doc """
   Calculate an attack range given a tile.
   """
   @spec attack_range(tile, t) :: BoardRange.t()
-  def attack_range({x, y}, %Board{cols: cols, rows: rows}) do
+  def attack_range({x, y}, %Board{} = board) do
     x_min = max(x - 1, 0)
-    x_max = min(x + 1, cols - 1)
+    x_max = min(x + 1, board.x_max)
     y_min = max(y - 1, 0)
-    y_max = min(y + 1, rows - 1)
+    y_max = min(y + 1, board.y_max)
 
     %BoardRange{h: x_min..x_max, v: y_min..y_max}
   end
@@ -111,11 +111,15 @@ defmodule Game.Board do
   end
 
   @spec validate(%{from: tile, to: {integer(), integer()}}, t) :: tile
-  defp validate(%{from: current, to: {x, y} = next}, %Board{cols: cols, rows: rows, walls: walls})
+  defp validate(%{from: current, to: {x, y} = next}, %Board{
+         x_max: x_max,
+         y_max: y_max,
+         walls: walls
+       })
        when is_integer(x) and is_integer(y) do
     cond do
-      x < 0 or x >= cols -> current
-      y < 0 or y >= rows -> current
+      x < 0 or x > x_max -> current
+      y < 0 or y > y_max -> current
       next in walls -> current
       true -> next
     end
