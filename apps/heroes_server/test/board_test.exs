@@ -1,10 +1,52 @@
 defmodule Game.BoardTest do
   use ExUnit.Case, async: true
 
+  alias Game.Board
+  alias GameError.BadSize
+
   @board_3x2 GameBoards.Test3x2
   @board_4x3_w5 GameBoards.Test4x3w5
   @board_4x4 GameBoards.Test4x4
   @board_4x4_w2 GameBoards.Test4x4w2
+
+  describe "Creating a board struct" do
+    test "requires cols, rows and optionally walls" do
+      blank_board = Board.new(cols: 4, rows: 1)
+
+      assert %Board{cols: 4, rows: 1, walls: empty} = blank_board
+      assert empty = MapSet.new([])
+
+      blocked_tiles = [{0, 0}, {1, 4}]
+      board = Board.new(cols: 2, rows: 5, walls: blocked_tiles)
+
+      assert %Board{cols: 2, rows: 5, walls: walls} = board
+      assert walls = MapSet.new(blocked_tiles)
+    end
+
+    test "without required options raises KeyError" do
+      assert_raise KeyError, fn ->
+        Board.new(rows: 3)
+      end
+
+      assert_raise KeyError, fn ->
+        Board.new(cols: 1, walls: [])
+      end
+    end
+
+    test "with non positive integers for cols and rows raises BadSize" do
+      assert_raise BadSize, fn ->
+        Board.new(cols: 3, rows: -1)
+      end
+
+      assert_raise BadSize, fn ->
+        Board.new(cols: 0, rows: 2)
+      end
+
+      assert_raise BadSize, fn ->
+        Board.new(cols: 4, rows: 5.0)
+      end
+    end
+  end
 
   describe "Tile generation on" do
     @tag board: @board_3x2
