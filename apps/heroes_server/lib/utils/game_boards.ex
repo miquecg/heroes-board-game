@@ -5,7 +5,6 @@ defmodule Utils.GameBoards do
 
   alias Game.{Board, BoardRange}
 
-  @callback spec :: Board.t()
   @callback tiles :: list(Board.tile())
   @callback attack_range(Board.tile()) :: BoardRange.t()
   @callback play(Board.tile(), Board.moves()) :: Board.tile()
@@ -21,9 +20,6 @@ defmodule Utils.GameBoards do
       alias Game.Board
 
       @board_spec unquote(Macro.escape(board_spec))
-
-      @impl true
-      def spec, do: @board_spec
 
       @impl true
       def tiles, do: unquote(tiles)
