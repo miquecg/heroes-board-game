@@ -4,8 +4,11 @@ defmodule GameError.BadSize do
   defexception [:message]
 
   @impl true
-  def exception([{size, value}]) when is_atom(size) and is_binary(value) do
-    msg = "Invalid board dimensions, got #{size}: #{value}"
+  def exception(info) do
+    {:ok, size} = Keyword.fetch(info, :size)
+    {:ok, value} = Keyword.fetch(info, :value)
+
+    msg = "Invalid board dimensions, got #{size}: #{inspect(value)}"
     %BadSize{message: msg}
   end
 end

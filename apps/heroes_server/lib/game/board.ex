@@ -5,6 +5,7 @@ defmodule Game.Board do
 
   alias __MODULE__
   alias Game.BoardRange
+  alias GameError.BadSize
 
   @typedoc """
   Walkable board cell
@@ -37,6 +38,38 @@ defmodule Game.Board do
   Allowed movements.
   """
   @type moves :: :up | :down | :left | :right
+
+  @doc """
+  Create a board struct from given options.
+
+  Requires a positive number of `cols`, `rows`
+  and optionally a list of `t:wall/0`.
+  """
+  @spec new(keyword()) :: t
+  def new(opts) do
+    %Board{
+      cols: fetch!(opts, :cols),
+      rows: fetch!(opts, :rows),
+      walls: get(opts, :walls)
+    }
+  end
+
+  @spec fetch!(keyword(), atom()) :: pos_integer()
+  defp fetch!(opts, size) do
+    value = Keyword.fetch!(opts, size)
+
+    if is_integer(value) and value > 0 do
+      value
+    else
+      raise BadSize, size: size, value: value
+    end
+  end
+
+  @spec get(keyword(), :walls) :: MapSet.t(wall)
+  defp get(opts, :walls) do
+    walls = Keyword.get(opts, :walls, [])
+    MapSet.new(walls)
+  end
 
   @doc """
   Generate all tiles in a board.

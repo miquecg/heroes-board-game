@@ -4,7 +4,6 @@ defmodule Utils.GameBoards do
   """
 
   alias Game.{Board, BoardRange}
-  alias GameError.BadSize
 
   @callback spec :: Board.t()
   @callback tiles :: list(Board.tile())
@@ -13,12 +12,7 @@ defmodule Utils.GameBoards do
 
   @doc false
   defmacro __using__(opts) do
-    board_spec = %Board{
-      cols: get(opts, :cols),
-      rows: get(opts, :rows),
-      walls: get(opts, :walls)
-    }
-
+    board_spec = Board.new(opts)
     tiles = Board.generate(board_spec)
 
     quote do
@@ -39,21 +33,6 @@ defmodule Utils.GameBoards do
 
       @impl true
       def play(tile, move), do: Board.play(tile, move, @board_spec)
-    end
-  end
-
-  defp get(opts, :walls) do
-    walls = Keyword.get(opts, :walls, [])
-    MapSet.new(walls)
-  end
-
-  defp get(opts, size) do
-    value = Keyword.fetch!(opts, size)
-
-    if is_integer(value) and value > 0 do
-      value
-    else
-      raise BadSize, [{size, Macro.to_string(value)}]
     end
   end
 end
