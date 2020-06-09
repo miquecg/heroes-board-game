@@ -17,18 +17,11 @@ defmodule Game.Board do
   """
   @type wall :: tile
 
-  @typedoc """
-  A board is defined by:
-
-  - `cols`: number of columns
-  - `rows`: number of rows
-  - `walls`: `MapSet` of `t:wall/0`
-  """
-  @type t :: %__MODULE__{
-          cols: pos_integer(),
-          rows: pos_integer(),
-          walls: MapSet.t(wall)
-        }
+  @opaque t :: %__MODULE__{
+            cols: pos_integer(),
+            rows: pos_integer(),
+            walls: MapSet.t(wall)
+          }
 
   @enforce_keys [:cols, :rows, :walls]
 
