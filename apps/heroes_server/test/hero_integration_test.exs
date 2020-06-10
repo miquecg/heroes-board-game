@@ -24,7 +24,7 @@ defmodule Game.HeroIntegrationTest do
     enemy_out_of_reach = Map.get(context, {3, 0})
 
     assert {:ok, :launched} = Hero.control(hero, :attack)
-    :timer.sleep(10)
+    :timer.sleep(50)
 
     assert {:error, :noop} = Hero.control(enemy_within_reach, :right)
     assert {:ok, {3, 1}} = Hero.control(enemy_out_of_reach, :up)
