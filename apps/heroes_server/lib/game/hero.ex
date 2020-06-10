@@ -8,7 +8,7 @@ defmodule Game.Hero do
 
   require Logger
 
-  alias Game.{Board, BoardRange}
+  alias Game.BoardRange
   alias GameError.BadCommand
 
   @moves [:up, :down, :left, :right]
@@ -19,8 +19,8 @@ defmodule Game.Hero do
 
   @typep state :: %__MODULE__.State{
            board: module(),
-           tile: Board.tile(),
-           attack_range: BoardRange.t(),
+           tile: Game.tile(),
+           attack_range: Game.board_range(),
            alive: boolean()
          }
 
@@ -45,7 +45,7 @@ defmodule Game.Hero do
   Send a command to control a hero.
 
   `pid` is the hero reference.
-  `cmd` is of type `t:Game.Board.moves/0`
+  `cmd` is of type `t:Game.moves/0`
   or atom `:attack`.
 
   Returns `{:ok, tile}`, `{:ok, :launched}`
@@ -58,7 +58,7 @@ defmodule Game.Hero do
   @spec control(GenServer.server(), term()) ::
           {:ok, tile | :launched}
           | {:error, error}
-        when tile: Board.tile(), error: :noop | %BadCommand{}
+        when tile: Game.tile(), error: :noop | %BadCommand{}
   def control(pid, cmd)
 
   def control(pid, cmd) when cmd in @moves, do: GenServer.call(pid, {:play, cmd})
@@ -143,7 +143,7 @@ defmodule Game.Hero do
     {:noreply, state}
   end
 
-  @spec stream_task(Board.tile(), list) :: :done
+  @spec stream_task(Game.tile(), list()) :: :done
   def stream_task(tile, enemies) do
     opts = [ordered: false]
 
