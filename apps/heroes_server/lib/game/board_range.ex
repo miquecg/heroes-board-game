@@ -4,7 +4,6 @@ defmodule Game.BoardRange do
   """
 
   alias __MODULE__
-  alias Game.Board
 
   @typedoc """
   - `h`: horizontal axis range
@@ -22,7 +21,7 @@ defmodule Game.BoardRange do
   @doc """
   Tell whether a tile is within a board range.
   """
-  @spec member?(t, Board.tile()) :: boolean()
+  @spec member?(t, Game.tile()) :: boolean()
   def member?(%BoardRange{h: x_range, v: y_range}, {x, y}) do
     x in x_range and y in y_range
   end

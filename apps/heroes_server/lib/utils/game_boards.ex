@@ -3,11 +3,11 @@ defmodule Utils.GameBoards do
   Provide functionality for boards with use macro.
   """
 
-  alias Game.{Board, BoardRange}
+  @callback tiles :: list(Game.tile())
+  @callback attack_range(Game.tile()) :: Game.board_range()
+  @callback play(Game.tile(), Game.moves()) :: Game.tile()
 
-  @callback tiles :: list(Board.tile())
-  @callback attack_range(Board.tile()) :: BoardRange.t()
-  @callback play(Board.tile(), Board.moves()) :: Board.tile()
+  alias Game.Board
 
   @doc false
   defmacro __using__(opts) do
