@@ -11,7 +11,32 @@ on:
       - master
 
 jobs:
+  deps:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        elixir: [1.10.3]
+        erlang: [22.3.4]
+        os: [alpine-3.11.3]
+    container:
+      image: hexpm/elixir-amd64:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        id: cache
+        with:
+          path: deps
+          key: deps-${{ hashFiles('mix.lock') }}
+          restore-keys: |
+            deps-
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          mix local.rebar --force
+          mix local.hex --force
+          mix deps.get
   build:
+    needs: deps
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -22,22 +47,14 @@ jobs:
       image: hexpm/elixir-amd64:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
-      - name: Cache deps
-        uses: actions/cache@v1
+      - name: Restore deps from cache
+        uses: actions/cache@v2
         with:
           path: deps
           key: deps-${{ hashFiles('mix.lock') }}
-          restore-keys: |
-            deps-
-      - name: Install dependencies
-        run: |
-          mix local.rebar --force
-          mix local.hex --force
-          mix deps.get
       - name: Compile project
         run: mix compile --warnings-as-errors
-      - name: Cache priv/plts
-        uses: actions/cache@v1
+      - uses: actions/cache@v2
         with:
           path: priv/plts
           key: plts-${{ matrix.erlang }}-${{ matrix.elixir }}-${{ hashFiles('mix.lock') }}
@@ -49,8 +66,8 @@ jobs:
         run: mix credo -a
       - name: Check code formatting
         run: mix format --check-formatted
-
   test:
+    needs: deps
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -61,7 +78,10 @@ jobs:
       image: hexpm/elixir-amd64:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
+      - name: Restore deps from cache
+        uses: actions/cache@v2
+        with:
+          path: deps
+          key: deps-${{ hashFiles('mix.lock') }}
       - name: Run tests
-        run: |
-          mix local.hex --force
-          mix test
+        run: mix test
