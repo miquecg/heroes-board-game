@@ -26,16 +26,16 @@ jobs:
         id: cache
         with:
           path: |
-            $HOME/.mix
+            ~/.mix
             deps
-          key: mix-${{ matrix.elixir }}-deps-${{ hashFiles('mix.lock') }}
+          key: mix2-${{ matrix.elixir }}-deps-${{ hashFiles('mix.lock') }}
           restore-keys: |
-            mix-${{ matrix.elixir }}-deps-
-            mix-
+            mix2-${{ matrix.elixir }}-deps-
+            mix2-
       - name: Install hex, rebar and get deps
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          rm -rf $HOME/.mix/*
+          rm -rf ~/.mix/*
           mix local.hex --force
           mix local.rebar --force
           mix deps.get
@@ -55,9 +55,9 @@ jobs:
         uses: actions/cache@v2
         with:
           path: |
-            $HOME/.mix
+            ~/.mix
             deps
-          key: mix-${{ matrix.elixir }}-deps-${{ hashFiles('mix.lock') }}
+          key: mix2-${{ matrix.elixir }}-deps-${{ hashFiles('mix.lock') }}
       - name: Compile project
         run: mix compile --warnings-as-errors
       - uses: actions/cache@v2
@@ -88,8 +88,8 @@ jobs:
         uses: actions/cache@v2
         with:
           path: |
-            $HOME/.mix
+            ~/.mix
             deps
-          key: mix-${{ matrix.elixir }}-deps-${{ hashFiles('mix.lock') }}
+          key: mix2-${{ matrix.elixir }}-deps-${{ hashFiles('mix.lock') }}
       - name: Run tests
         run: mix test
