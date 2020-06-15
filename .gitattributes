@@ -1,0 +1,16 @@
+* text=auto
+
+*.css text
+*.eex text
+*.ex  text
+*.exs text
+*.js  text
+*.md  text
+*.txt text
+*.yml text
+
+*.ico binary
+
+# Disable auto-merge
+# https://git-scm.com/docs/gitattributes#_performing_a_three_way_merge
+*.lock -merge
