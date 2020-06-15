@@ -17,7 +17,7 @@ jobs:
       matrix:
         elixir: [1.10.3]
         erlang: [22.3.4]
-        os: [alpine-3.11.3]
+        os: [debian-buster-20200224]
     container:
       image: hexpm/elixir-amd64:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-${{ matrix.os }}
     steps:
