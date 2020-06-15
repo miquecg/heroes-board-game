@@ -10,7 +10,7 @@ defmodule GameBoards.Test2x2w1 do
   +---+---+
   """
 
-  use Utils.GameBoards,
+  use GameUtils.Board,
     cols: 2,
     rows: 2,
     walls: [{0, 0}]
@@ -28,7 +28,7 @@ defmodule GameBoards.Test3x2 do
   +---+---+---+
   """
 
-  use Utils.GameBoards,
+  use GameUtils.Board,
     cols: 3,
     rows: 2
 end
@@ -47,7 +47,7 @@ defmodule GameBoards.Test4x3w5 do
   +---+---+---+---+
   """
 
-  use Utils.GameBoards,
+  use GameUtils.Board,
     cols: 4,
     rows: 3,
     walls: [{0, 0}, {0, 2}, {2, 0}, {2, 2}, {3, 0}]
@@ -59,7 +59,7 @@ defmodule GameBoards.Test4x4 do
   Walls: 0
   """
 
-  use Utils.GameBoards,
+  use GameUtils.Board,
     cols: 4,
     rows: 4
 end
@@ -80,7 +80,7 @@ defmodule GameBoards.Test4x4w1 do
   +---+---+---+---+
   """
 
-  use Utils.GameBoards,
+  use GameUtils.Board,
     cols: 4,
     rows: 4,
     walls: [{3, 2}]
@@ -102,7 +102,7 @@ defmodule GameBoards.Test4x4w2 do
   +---+---+---+---+
   """
 
-  use Utils.GameBoards,
+  use GameUtils.Board,
     cols: 4,
     rows: 4,
     walls: [{1, 2}, {3, 2}]

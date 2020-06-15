@@ -11,7 +11,7 @@ on:
       - master
 
 jobs:
-  build:
+  deps:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -22,22 +22,45 @@ jobs:
       image: hexpm/elixir-amd64:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
-      - name: Cache deps
-        uses: actions/cache@v1
+      - uses: actions/cache@v2
+        id: cache
         with:
-          path: deps
-          key: deps-${{ hashFiles('mix.lock') }}
+          path: |
+            ~/.mix
+            deps
+          key: mix2-${{ matrix.elixir }}-deps-${{ hashFiles('mix.lock') }}
           restore-keys: |
-            deps-
-      - name: Install dependencies
+            mix2-${{ matrix.elixir }}-deps-
+            mix2-
+      - name: Install hex, rebar and get deps
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          mix local.rebar --force
+          rm -rf ~/.mix/*
           mix local.hex --force
+          mix local.rebar --force
           mix deps.get
+  build:
+    needs: deps
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        elixir: [1.10.3]
+        erlang: [22.3.4]
+        os: [debian-buster-20200224]
+    container:
+      image: hexpm/elixir-amd64:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Restore mix and deps from cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.mix
+            deps
+          key: mix2-${{ matrix.elixir }}-deps-${{ hashFiles('mix.lock') }}
       - name: Compile project
         run: mix compile --warnings-as-errors
-      - name: Cache priv/plts
-        uses: actions/cache@v1
+      - uses: actions/cache@v2
         with:
           path: priv/plts
           key: plts-${{ matrix.erlang }}-${{ matrix.elixir }}-${{ hashFiles('mix.lock') }}
@@ -49,8 +72,8 @@ jobs:
         run: mix credo -a
       - name: Check code formatting
         run: mix format --check-formatted
-
   test:
+    needs: deps
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -61,7 +84,12 @@ jobs:
       image: hexpm/elixir-amd64:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
+      - name: Restore mix and deps from cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.mix
+            deps
+          key: mix2-${{ matrix.elixir }}-deps-${{ hashFiles('mix.lock') }}
       - name: Run tests
-        run: |
-          mix local.hex --force
-          mix test
+        run: mix test
