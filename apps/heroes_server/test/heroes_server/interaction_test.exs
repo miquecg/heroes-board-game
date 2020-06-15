@@ -1,4 +1,4 @@
-defmodule Game.HeroIntegrationTest do
+defmodule HeroesServer.InteractionTest do
   use ExUnit.Case
 
   @moduletag :capture_log

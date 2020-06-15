@@ -1,4 +1,4 @@
-defmodule HeroesServerTest do
+defmodule HeroesServer.PlayerJoinTest do
   use ExUnit.Case, async: true
 
   @start_tile {0, 1}
