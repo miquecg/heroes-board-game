@@ -1,6 +1,6 @@
-defmodule Utils.GameBoards do
+defmodule GameUtils.Board do
   @moduledoc """
-  Provide functionality for boards with use macro.
+  Provide functionality for creating boards with use macro.
   """
 
   @callback tiles :: list(Game.tile())
@@ -15,7 +15,7 @@ defmodule Utils.GameBoards do
     tiles = Board.generate(board_spec)
 
     quote do
-      @behaviour Utils.GameBoards
+      @behaviour GameUtils.Board
 
       alias Game.Board
 
