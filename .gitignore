@@ -1,10 +1,10 @@
 # Top level directories
 /.elixir_ls/
 /_build/
+/deps/
 /priv/plts/*.plt
 /priv/plts/*.plt.hash
 
-deps/
-
-erl_crash.dump
 *.ez
+erl_crash.dump
+prod.secret.exs
