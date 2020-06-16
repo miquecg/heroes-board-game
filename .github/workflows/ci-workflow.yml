@@ -11,7 +11,7 @@ on:
       - master
 
 jobs:
-  deps:
+  build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -20,60 +20,45 @@ jobs:
         os: [debian-buster-20200224]
     container:
       image: hexpm/elixir-amd64:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-${{ matrix.os }}
+    outputs:
+      cache_timestamp: ${{ steps.date.outputs.timestamp }}
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/cache@v2
-        id: cache
+      - name: Get current timestamp
+        id: date
+        run: echo "::set-output name=timestamp::$(date +'%s%3N')"
+      - name: Restore build cache
+        uses: actions/cache@v2
         with:
           path: |
             ~/.mix
+            _build
             deps
-          key: mix2-${{ matrix.elixir }}-deps-${{ hashFiles('mix.lock') }}
+          key: build-v0-${{ hashFiles('mix.lock') }}-${{ steps.date.outputs.timestamp }}
           restore-keys: |
-            mix2-${{ matrix.elixir }}-deps-
-            mix2-
-      - name: Install hex, rebar and get deps
-        if: steps.cache.outputs.cache-hit != 'true'
+            build-v0-${{ hashFiles('mix.lock') }}-
+            build-v0-
+      - name: Get dependencies
         run: |
           rm -rf ~/.mix/*
           mix local.hex --force
           mix local.rebar --force
           mix deps.get
-  build:
-    needs: deps
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        elixir: [1.10.3]
-        erlang: [22.3.4]
-        os: [debian-buster-20200224]
-    container:
-      image: hexpm/elixir-amd64:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v2
-      - name: Restore mix and deps from cache
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.mix
-            deps
-          key: mix2-${{ matrix.elixir }}-deps-${{ hashFiles('mix.lock') }}
       - name: Compile project
-        run: mix compile --warnings-as-errors
-      - uses: actions/cache@v2
+        run: |
+          mix compile --warnings-as-errors
+          MIX_ENV=test mix compile
+      - name: Restore dialyzer cache
+        uses: actions/cache@v2
         with:
           path: priv/plts
-          key: plts-${{ matrix.erlang }}-${{ matrix.elixir }}-${{ hashFiles('mix.lock') }}
+          key: plts-v0-${{ matrix.erlang }}-${{ matrix.elixir }}-${{ hashFiles('mix.lock') }}
           restore-keys: |
-            plts-${{ matrix.erlang }}-${{ matrix.elixir }}-
-      - name: Run dialyzer
-        run: mix dialyzer --format short
-      - name: Run Credo
-        run: mix credo -a
-      - name: Check code formatting
-        run: mix format --check-formatted
-  test:
-    needs: deps
+            plts-v0-${{ matrix.erlang }}-${{ matrix.elixir }}-
+      - name: Build PLTs
+        run: mix dialyzer --plt
+  check:
+    needs: build
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -84,12 +69,44 @@ jobs:
       image: hexpm/elixir-amd64:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
-      - name: Restore mix and deps from cache
+      - name: Restore build cache
         uses: actions/cache@v2
         with:
           path: |
             ~/.mix
+            _build
             deps
-          key: mix2-${{ matrix.elixir }}-deps-${{ hashFiles('mix.lock') }}
+          key: build-v0-${{ hashFiles('mix.lock') }}-${{ needs.build.outputs.cache_timestamp }}
+      - name: Check code formatting
+        run: mix format --check-formatted
+      - name: Run Credo
+        run: mix credo -a
+      - name: Restore dialyzer cache
+        uses: actions/cache@v2
+        with:
+          path: priv/plts
+          key: plts-v0-${{ matrix.erlang }}-${{ matrix.elixir }}-${{ hashFiles('mix.lock') }}
+      - name: Run dialyzer
+        run: mix dialyzer --format short
+  test:
+    needs: [build, check]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        elixir: [1.10.3]
+        erlang: [22.3.4]
+        os: [debian-buster-20200224]
+    container:
+      image: hexpm/elixir-amd64:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Restore build cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.mix
+            _build
+            deps
+          key: build-v0-${{ hashFiles('mix.lock') }}-${{ needs.build.outputs.cache_timestamp }}
       - name: Run tests
         run: mix test
