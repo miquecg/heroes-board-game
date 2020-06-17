@@ -15,4 +15,9 @@ defmodule HeroesWeb.BrowserCase do
       @endpoint HeroesWeb.Endpoint
     end
   end
+
+  setup _tags do
+    {:ok, _} = Application.ensure_all_started(:wallaby)
+    :ok
+  end
 end
