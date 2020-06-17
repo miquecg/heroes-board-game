@@ -1,5 +1,6 @@
 defmodule HeroesWeb.DummyWebTest do
   use HeroesWeb.BrowserCase, async: true
+  @moduletag :browser
 
   import Wallaby.Query, only: [css: 1, css: 2]
 
