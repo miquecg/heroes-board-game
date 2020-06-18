@@ -4,16 +4,20 @@ defmodule HeroesServerTest do
 
   alias Game.{Hero, HeroSupervisor}
 
-  @start_tile {0, 1}
+  @app :heroes_server
 
   setup do
-    Application.stop(:heroes_server)
-    :ok = Application.start(:heroes_server)
+    Application.stop(@app)
+    :ok = Application.start(@app)
   end
 
   test "HeroesServer.join/0 puts a new Hero on a tile" do
     assert count() == 0
-    assert {_, @start_tile} = HeroesServer.join()
+
+    Application.put_env(@app, :board, GameBoards.Test2x2w1)
+    start_tile = {0, 1}
+
+    assert {_, ^start_tile} = HeroesServer.join()
     assert count() == 1
   end
 
