@@ -1,4 +1,4 @@
-defmodule HeroesWeb.DummyWebTest do
+defmodule HeroesWeb.AcceptanceTest do
   use HeroesWeb.BrowserCase, async: true
   @moduletag :browser
 
