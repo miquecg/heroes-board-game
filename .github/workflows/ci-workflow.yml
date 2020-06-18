@@ -57,7 +57,7 @@ jobs:
             plts-v0-${{ matrix.erlang }}-${{ matrix.elixir }}-
       - name: Build PLTs
         run: mix dialyzer --plt
-  check:
+  code-analysis:
     needs: build
     runs-on: ubuntu-latest
     strategy:
@@ -89,7 +89,7 @@ jobs:
       - name: Run dialyzer
         run: mix dialyzer --format short
   test:
-    needs: [build, check]
+    needs: [build, code-analysis]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -111,7 +111,7 @@ jobs:
       - name: Run tests
         run: mix test
   test-e2e:
-    needs: [build, check]
+    needs: [build, code-analysis]
     runs-on: ubuntu-latest
     strategy:
       matrix:
