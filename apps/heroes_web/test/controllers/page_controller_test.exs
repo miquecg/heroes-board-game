@@ -1,5 +1,5 @@
 defmodule HeroesWeb.PageControllerTest do
-  use HeroesWeb.ConnCase
+  use HeroesWeb.ConnCase, async: true
 
   test "GET /", %{conn: conn} do
     conn = get(conn, "/")

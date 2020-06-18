@@ -1,6 +1,5 @@
 defmodule HeroesServer.InteractionTest do
   use ExUnit.Case
-
   @moduletag :capture_log
 
   alias Game.{Hero, HeroSupervisor}
