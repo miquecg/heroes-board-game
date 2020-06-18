@@ -110,3 +110,29 @@ jobs:
           key: build-v0-${{ hashFiles('mix.lock') }}-${{ needs.build.outputs.cache_timestamp }}
       - name: Run tests
         run: mix test
+  test-e2e:
+    needs: [build, check]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        elixir: [1.10.3]
+        erlang: [22.3.4.1]
+        os: [debian-buster-20200511]
+    container:
+      image: hexpm/elixir-amd64:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-${{ matrix.os }}
+    steps:
+      - name: Install webdriver
+        run: |
+          apt update
+          apt --yes install chromium-driver
+      - uses: actions/checkout@v2
+      - name: Restore build cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.mix
+            _build
+            deps
+          key: build-v0-${{ hashFiles('mix.lock') }}-${{ needs.build.outputs.cache_timestamp }}
+      - name: Run tests
+        run: mix test --only browser:true
