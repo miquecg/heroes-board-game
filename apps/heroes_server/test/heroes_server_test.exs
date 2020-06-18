@@ -25,18 +25,20 @@ defmodule HeroesServerTest do
       end
     end
 
-    @tag tiles: [{1, 1}, {2, 2}, {3, 0}]
-    test "can attack all enemies at once", context do
-      hero = Map.get(context, {1, 1})
-      enemy_within_reach = Map.get(context, {2, 2})
-      enemy_out_of_reach = Map.get(context, {3, 0})
-
+    @tag tiles: [{1, 0}, {1, 1}, {2, 2}, {3, 0}]
+    test "can attack all enemies at once", %{{1, 1} => hero} = context do
       assert {:ok, :launched} = Hero.control(hero, :attack)
       :timer.sleep(50)
-
-      assert {:error, :noop} = Hero.control(enemy_within_reach, :right)
-      assert {:ok, {3, 1}} = Hero.control(enemy_out_of_reach, :up)
       assert {:ok, {0, 1}} = Hero.control(hero, :left)
+
+      dead_enemy = Map.get(context, {1, 0})
+      assert {:error, :noop} = Hero.control(dead_enemy, :up)
+
+      dead_enemy = Map.get(context, {2, 2})
+      assert {:error, :noop} = Hero.control(dead_enemy, :left)
+
+      live_enemy = Map.get(context, {3, 0})
+      assert {:ok, {3, 1}} = Hero.control(live_enemy, :up)
     end
   end
 
