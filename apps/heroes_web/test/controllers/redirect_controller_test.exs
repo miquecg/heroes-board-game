@@ -1,12 +1,14 @@
 defmodule HeroesWeb.RedirectControllerTest do
   use HeroesWeb.ConnCase, async: true
 
-  test "Web root redirects to /game", %{conn: conn} do
+  @game Routes.game_path(@endpoint, :index)
+
+  test "Web root redirects to game", %{conn: conn} do
     conn = get(conn, "/")
-    assert redirected_to(conn, 302) == Routes.game_path(conn, :index)
+    assert redirected_to(conn) == @game
   end
 
-  test "404 error on routes other than /game", %{conn: conn} do
+  test "Non redirected route raises 404 error", %{conn: conn} do
     assert_error_sent 404, fn ->
       get(conn, "/not-found")
     end
