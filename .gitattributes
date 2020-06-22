@@ -11,6 +11,7 @@
 
 *.ico binary
 
-# Disable auto-merge
+# Disable auto-merge and diffs for lock files
 # https://git-scm.com/docs/gitattributes#_performing_a_three_way_merge
-*.lock -merge
+*.lock            -diff -merge
+package-lock.json -diff -merge

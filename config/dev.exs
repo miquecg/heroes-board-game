@@ -4,7 +4,16 @@ config :heroes_web, HeroesWeb.Endpoint,
   http: [port: 4000],
   debug_errors: true,
   code_reloader: true,
-  check_origin: false
+  check_origin: false,
+  watchers: [
+    node: [
+      "node_modules/webpack/bin/webpack.js",
+      "--mode",
+      "development",
+      "--watch-stdin",
+      cd: Path.expand("../apps/heroes_web/assets", __DIR__)
+    ]
+  ]
 
 config :heroes_web, HeroesWeb.Endpoint,
   live_reload: [
