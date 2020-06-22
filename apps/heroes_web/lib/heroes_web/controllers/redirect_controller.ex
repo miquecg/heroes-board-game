@@ -4,7 +4,7 @@ defmodule HeroesWeb.RedirectController do
   alias Phoenix.Router.NoRouteError
 
   def perform(conn, %{"path" => []}) do
-    game_path = Routes.game_path(HeroesWeb.Endpoint, :index)
+    game_path = Routes.game_path(conn, :index)
 
     conn
     |> redirect(to: game_path)
