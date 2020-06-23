@@ -1,3 +1,60 @@
 <section>
   <h1>Heroes Board Game</h1>
+  <div id="grid" style="--colNum: 6;">
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell wall"></div>
+    <div class="cell"></div>
+    <!-- Row end -->
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell wall"></div>
+    <div class="cell"></div>
+    <!-- Row end -->
+    <div class="cell wall"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <!-- Row end -->
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell wall"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <!-- Row end -->
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <!-- Row end -->
+    <div class="cell"></div>
+    <div class="cell wall"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <!-- Row end -->
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell wall"></div>
+    <div class="cell wall"></div>
+    <!-- Row end -->
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+  </div>
 </section>
