@@ -1,4 +1,4 @@
-defmodule HeroesWeb.PageController do
+defmodule HeroesWeb.GameController do
   use HeroesWeb, :controller
 
   def index(conn, _params) do

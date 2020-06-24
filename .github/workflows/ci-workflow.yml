@@ -57,7 +57,7 @@ jobs:
             plts-v0-${{ matrix.erlang }}-${{ matrix.elixir }}-
       - name: Build PLTs
         run: mix dialyzer --plt
-  check:
+  code-analysis:
     needs: build
     runs-on: ubuntu-latest
     strategy:
@@ -89,7 +89,7 @@ jobs:
       - name: Run dialyzer
         run: mix dialyzer --format short
   test:
-    needs: [build, check]
+    needs: [build, code-analysis]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -111,7 +111,7 @@ jobs:
       - name: Run tests
         run: mix test
   test-e2e:
-    needs: [build, check]
+    needs: [build, code-analysis]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -125,6 +125,10 @@ jobs:
         run: |
           apt update
           apt --yes install chromium-driver
+      - name: Setup Node.js
+        uses: actions/setup-node@v2-beta
+        with:
+          node-version: '14.x'
       - uses: actions/checkout@v2
       - name: Restore build cache
         uses: actions/cache@v2
@@ -134,5 +138,17 @@ jobs:
             _build
             deps
           key: build-v0-${{ hashFiles('mix.lock') }}-${{ needs.build.outputs.cache_timestamp }}
+      - name: Restore npm cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: npm-v0-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            npm-v0-
+      - name: Bundle static assets
+        run: |
+          cd apps/heroes_web/assets
+          npm install --unsafe-perm
+          node node_modules/webpack/bin/webpack.js --mode development
       - name: Run tests
         run: mix test --only browser:true

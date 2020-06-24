@@ -11,6 +11,7 @@ defmodule HeroesWeb.Router do
   scope "/", HeroesWeb do
     pipe_through :browser
 
-    get "/", PageController, :index
+    get "/game", GameController, :index
+    get "/*path", RedirectController, :perform
   end
 end

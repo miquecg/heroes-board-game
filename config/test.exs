@@ -1,8 +1,6 @@
 import Config
 
-config :heroes_server,
-  board: GameBoards.Test2x2w1,
-  start_tile: :first
+config :heroes_server, start_tile: :first
 
 config :heroes_web, HeroesWeb.Endpoint,
   http: [port: 4002],
