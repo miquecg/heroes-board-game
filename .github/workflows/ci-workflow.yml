@@ -138,6 +138,13 @@ jobs:
             _build
             deps
           key: build-v0-${{ hashFiles('mix.lock') }}-${{ needs.build.outputs.cache_timestamp }}
+      - name: Restore npm cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: npm-v0-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            npm-v0-
       - name: Bundle static assets
         run: |
           cd apps/heroes_web/assets
