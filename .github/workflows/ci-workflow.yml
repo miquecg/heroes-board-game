@@ -125,6 +125,10 @@ jobs:
         run: |
           apt update
           apt --yes install chromium-driver
+      - name: Setup Node.js
+        uses: actions/setup-node@v2-beta
+        with:
+          node-version: '14.x'
       - uses: actions/checkout@v2
       - name: Restore build cache
         uses: actions/cache@v2
@@ -134,5 +138,10 @@ jobs:
             _build
             deps
           key: build-v0-${{ hashFiles('mix.lock') }}-${{ needs.build.outputs.cache_timestamp }}
+      - name: Bundle static assets
+        run: |
+          cd apps/heroes_web/assets
+          npm install --unsafe-perm
+          node node_modules/webpack/bin/webpack.js --mode development
       - name: Run tests
         run: mix test --only browser:true
