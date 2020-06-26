@@ -17,13 +17,16 @@ defmodule Game.Board do
   """
   @type wall :: tile
 
-  @opaque t :: %__MODULE__{
-            x_max: non_neg_integer(),
-            y_max: non_neg_integer(),
-            walls: MapSet.t(wall)
-          }
+  @typedoc """
+  A board specification.
+  """
+  @type t :: %__MODULE__{
+          h_range: Range.t(0, non_neg_integer()),
+          v_range: Range.t(0, non_neg_integer()),
+          walls: MapSet.t(wall)
+        }
 
-  @enforce_keys [:x_max, :y_max, :walls]
+  @enforce_keys [:h_range, :v_range, :walls]
 
   defstruct @enforce_keys
 
@@ -40,10 +43,14 @@ defmodule Game.Board do
   """
   @spec new(keyword()) :: t
   def new(opts) do
+    cols = fetch!(opts, :cols)
+    rows = fetch!(opts, :rows)
+    walls = Keyword.get(opts, :walls, [])
+
     %Board{
-      x_max: fetch!(opts, :cols) - 1,
-      y_max: fetch!(opts, :rows) - 1,
-      walls: get(opts, :walls)
+      h_range: 0..(cols - 1),
+      v_range: 0..(rows - 1),
+      walls: MapSet.new(walls)
     }
   end
 
@@ -58,29 +65,23 @@ defmodule Game.Board do
     end
   end
 
-  @spec get(keyword(), :walls) :: MapSet.t(wall)
-  defp get(opts, :walls) do
-    walls = Keyword.get(opts, :walls, [])
-    MapSet.new(walls)
-  end
-
   @doc """
   Generate all tiles in a board.
   """
   @spec generate(t) :: list(tile)
-  def generate(%Board{x_max: x_max, y_max: y_max, walls: walls}) do
-    for x <- 0..x_max, y <- 0..y_max, {x, y} not in walls, do: {x, y}
+  def generate(%Board{h_range: h_range, v_range: v_range, walls: walls}) do
+    for x <- h_range, y <- v_range, {x, y} not in walls, do: {x, y}
   end
 
   @doc """
   Calculate an attack range given a tile.
   """
   @spec attack_range(tile, t) :: Game.board_range()
-  def attack_range({x, y}, %Board{} = board) do
-    x_min = max(x - 1, 0)
-    x_max = min(x + 1, board.x_max)
-    y_min = max(y - 1, 0)
-    y_max = min(y + 1, board.y_max)
+  def attack_range({x, y}, %Board{h_range: h_min..h_max, v_range: v_min..v_max}) do
+    x_min = max(x - 1, h_min)
+    x_max = min(x + 1, h_max)
+    y_min = max(y - 1, v_min)
+    y_max = min(y + 1, v_max)
 
     %BoardRange{h: x_min..x_max, v: y_min..y_max}
   end
@@ -112,14 +113,14 @@ defmodule Game.Board do
 
   @spec validate(%{from: tile, to: {integer(), integer()}}, t) :: tile
   defp validate(%{from: current, to: {x, y} = next}, %Board{
-         x_max: x_max,
-         y_max: y_max,
+         h_range: h_min..h_max,
+         v_range: v_min..v_max,
          walls: walls
        })
        when is_integer(x) and is_integer(y) do
     cond do
-      x < 0 or x > x_max -> current
-      y < 0 or y > y_max -> current
+      x < h_min or x > h_max -> current
+      y < v_min or y > v_max -> current
       next in walls -> current
       true -> next
     end
