@@ -7,8 +7,6 @@ defmodule HeroesWeb.AcceptanceTest do
   @game game_path(@endpoint, :index)
 
   feature "When a browser opens the game endpoint the board grid is loaded", %{session: session} do
-    Application.put_env(:heroes_server, :board, GameBoards.Oblivion)
-
     session
     |> visit(@game)
     |> assert_has(css("#grid .cell", count: 48))
