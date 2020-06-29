@@ -1,7 +1,5 @@
 import Config
 
-config :heroes_server, start_tile: :first
-
 config :heroes_web, HeroesWeb.Endpoint,
   http: [port: 4002],
   server: true
