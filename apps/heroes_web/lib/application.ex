@@ -5,18 +5,23 @@ defmodule HeroesWeb.Application do
 
   @app :heroes_web
 
+  @impl true
   def start(_type, _args) do
+    mod = get_board()
+    player_start = Application.fetch_env!(@app, :player_start)
+
     children = [
       {Phoenix.PubSub, name: HeroesWeb.PubSub},
-      {HeroesServer, board: board(), start_tile: start_tile()},
-      HeroesWeb.Endpoint
+      {HeroesServer, board_mod: mod, player_start: player_start},
+      {HeroesWeb.Endpoint, board: mod.spec()}
     ]
 
     opts = [strategy: :one_for_one, name: HeroesWeb.Supervisor]
     Supervisor.start_link(children, opts)
   end
 
-  defp board do
+  @spec get_board() :: module()
+  defp get_board do
     board = System.get_env("BOARD", "oblivion")
 
     board
@@ -25,8 +30,7 @@ defmodule HeroesWeb.Application do
     |> String.to_existing_atom()
   end
 
-  defp start_tile, do: Application.fetch_env!(@app, :start_tile)
-
+  @impl true
   def config_change(changed, _new, removed) do
     HeroesWeb.Endpoint.config_change(changed, removed)
     :ok

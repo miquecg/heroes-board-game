@@ -6,14 +6,14 @@ defmodule HeroesServer do
   use GenServer
 
   @typep state :: %__MODULE__.State{
-           board: module(),
+           board_mod: module(),
            dice: function()
          }
 
   defmodule State do
     @moduledoc false
 
-    @enforce_keys [:board, :dice]
+    @enforce_keys [:board_mod, :dice]
 
     defstruct @enforce_keys
   end
@@ -24,7 +24,7 @@ defmodule HeroesServer do
   Start the server entrypoint.
 
   Requires to be configured with
-  `:board` and `:start_tile`.
+  `:board_mod` and `:player_start`.
   """
   def start_link(opts), do: GenServer.start_link(__MODULE__, opts, name: __MODULE__)
 
@@ -39,25 +39,25 @@ defmodule HeroesServer do
   @impl true
   @spec init(keyword()) :: {:ok, state}
   def init(opts) do
-    board = Keyword.fetch!(opts, :board)
+    mod = Keyword.fetch!(opts, :board_mod)
 
     dice =
-      case Keyword.fetch!(opts, :start_tile) do
+      case Keyword.fetch!(opts, :player_start) do
         :randomized -> &Enum.random/1
-        :first -> &Kernel.hd/1
+        :first_tile -> &Kernel.hd/1
       end
 
-    {:ok, %State{board: board, dice: dice}}
+    {:ok, %State{board_mod: mod, dice: dice}}
   end
 
   @impl true
-  def handle_call(:join, _from, %State{board: board, dice: dice} = state) do
-    tiles = board.tiles()
-    start = dice.(tiles)
+  def handle_call(:join, _from, %State{board_mod: board_mod, dice: dice} = state) do
+    tiles = board_mod.tiles()
+    start_pos = dice.(tiles)
 
-    opts = [board: board, tile: start]
+    opts = [board: board_mod, tile: start_pos]
     {:ok, pid} = DynamicSupervisor.start_child(Game.HeroSupervisor, {Game.Hero, opts})
 
-    {:reply, {:ok, {pid, start}}, state}
+    {:reply, {:ok, {pid, start_pos}}, state}
   end
 end
