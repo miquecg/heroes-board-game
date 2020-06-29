@@ -1,60 +1,8 @@
 <section>
   <h1>Heroes Board Game</h1>
-  <div id="grid" style="--colNum: 6;">
-    <div class="cell"></div>
-    <div class="cell"></div>
-    <div class="cell"></div>
-    <div class="cell"></div>
-    <div class="cell wall"></div>
-    <div class="cell"></div>
-    <!-- Row end -->
-    <div class="cell"></div>
-    <div class="cell"></div>
-    <div class="cell"></div>
-    <div class="cell"></div>
-    <div class="cell wall"></div>
-    <div class="cell"></div>
-    <!-- Row end -->
-    <div class="cell wall"></div>
-    <div class="cell"></div>
-    <div class="cell"></div>
-    <div class="cell"></div>
-    <div class="cell"></div>
-    <div class="cell"></div>
-    <!-- Row end -->
-    <div class="cell"></div>
-    <div class="cell"></div>
-    <div class="cell"></div>
-    <div class="cell wall"></div>
-    <div class="cell"></div>
-    <div class="cell"></div>
-    <!-- Row end -->
-    <div class="cell"></div>
-    <div class="cell"></div>
-    <div class="cell"></div>
-    <div class="cell"></div>
-    <div class="cell"></div>
-    <div class="cell"></div>
-    <!-- Row end -->
-    <div class="cell"></div>
-    <div class="cell wall"></div>
-    <div class="cell"></div>
-    <div class="cell"></div>
-    <div class="cell"></div>
-    <div class="cell"></div>
-    <!-- Row end -->
-    <div class="cell"></div>
-    <div class="cell"></div>
-    <div class="cell"></div>
-    <div class="cell"></div>
-    <div class="cell wall"></div>
-    <div class="cell wall"></div>
-    <!-- Row end -->
-    <div class="cell"></div>
-    <div class="cell"></div>
-    <div class="cell"></div>
-    <div class="cell"></div>
-    <div class="cell"></div>
-    <div class="cell"></div>
+  <div id="grid" style="--rowNum: <%= rows(@board) %>;">
+    <%= for x <- @board.h_range, y <- reverse(@board.v_range) do %>
+      <%= render("grid_box.html", position: {x, y}, walls: @board.walls) %>
+    <% end %>
   </div>
 </section>

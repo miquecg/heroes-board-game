@@ -3,6 +3,7 @@ defmodule GameUtils.Board do
   Provide functionality for creating boards with use macro.
   """
 
+  @callback spec :: Game.board()
   @callback tiles :: list(Game.tile())
   @callback attack_range(Game.tile()) :: Game.board_range()
   @callback play(Game.tile(), Game.moves()) :: Game.tile()
@@ -20,6 +21,9 @@ defmodule GameUtils.Board do
       alias Game.Board
 
       @board_spec unquote(Macro.escape(board_spec))
+
+      @impl true
+      def spec, do: @board_spec
 
       @impl true
       def tiles, do: unquote(tiles)

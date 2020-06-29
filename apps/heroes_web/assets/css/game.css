@@ -12,8 +12,9 @@ h1 {
 
 #grid {
   display: grid;
-  grid-template-columns: repeat(var(--colNum), 90px);
-  grid-auto-rows: 80px;
+  grid-template-rows: repeat(var(--rowNum), 80px);
+  grid-auto-columns: 90px;
+  grid-auto-flow: column;
   gap: 3px;
   border: 8px solid #7acfc0;
   border-radius: 8px;

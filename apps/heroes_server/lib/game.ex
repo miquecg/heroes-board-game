@@ -9,10 +9,7 @@ defmodule Game do
 
   @type moves :: Game.Board.moves()
 
-  @typedoc """
-  A board specification.
-  """
-  @opaque board :: Game.Board.t()
+  @type board :: Game.Board.t()
 
   @type board_range :: Game.BoardRange.t()
 end
