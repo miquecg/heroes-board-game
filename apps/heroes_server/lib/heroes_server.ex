@@ -25,8 +25,13 @@ defmodule HeroesServer do
 
   Requires to be configured with
   `:board_mod` and `:player_start`.
+
+  Optionally can receive a :name.
   """
-  def start_link(opts), do: GenServer.start_link(__MODULE__, opts, name: __MODULE__)
+  def start_link(opts) do
+    {name, opts} = Keyword.pop(opts, :name, __MODULE__)
+    GenServer.start_link(__MODULE__, opts, name: name)
+  end
 
   @doc """
   Join a player to the server creating a new hero.
@@ -58,6 +63,6 @@ defmodule HeroesServer do
     opts = [board: board_mod, tile: start_pos]
     {:ok, pid} = DynamicSupervisor.start_child(Game.HeroSupervisor, {Game.Hero, opts})
 
-    {:reply, {:ok, {pid, start_pos}}, state}
+    {:reply, {pid, start_pos}, state}
   end
 end
