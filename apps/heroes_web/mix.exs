@@ -19,12 +19,14 @@ defmodule HeroesWeb.MixProject do
 
   def application do
     [
-      mod: {HeroesWeb.Application, []}
+      mod: {HeroesWeb.Application, []},
+      env: [player_start: :randomized]
     ]
   end
 
   defp deps do
     [
+      {:heroes_server, in_umbrella: true},
       {:phoenix, "~> 1.5.3"},
       {:phoenix_html, "~> 2.11"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},

@@ -1,7 +1,5 @@
 import Config
 
-config :heroes_server, board: GameBoards.Oblivion
-
 config :heroes_web, HeroesWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "tO1ViyBWg5sM5X9YiBSvkc8re8VEf3bWkJclT2J4zrNtGjispgX145VZzP3nvoRU",
