@@ -1,6 +1,6 @@
 import Config
 
-config :heroes_web, HeroesWeb.Endpoint,
+config :heroes_web, Web.Endpoint,
   http: [port: 4000],
   debug_errors: true,
   code_reloader: true,
@@ -15,12 +15,12 @@ config :heroes_web, HeroesWeb.Endpoint,
     ]
   ]
 
-config :heroes_web, HeroesWeb.Endpoint,
+config :heroes_web, Web.Endpoint,
   live_reload: [
     patterns: [
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
-      ~r"lib/heroes_web/(live|views)/.*(ex)$",
-      ~r"lib/heroes_web/templates/.*(eex)$"
+      ~r"lib/web/(live|views)/.*(ex)$",
+      ~r"lib/web/templates/.*(eex)$"
     ]
   ]
 

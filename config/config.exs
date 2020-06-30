@@ -1,9 +1,9 @@
 import Config
 
-config :heroes_web, HeroesWeb.Endpoint,
+config :heroes_web, Web.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "tO1ViyBWg5sM5X9YiBSvkc8re8VEf3bWkJclT2J4zrNtGjispgX145VZzP3nvoRU",
-  render_errors: [view: HeroesWeb.ErrorView, accepts: ~w(html), layout: false],
+  render_errors: [view: Web.ErrorView, accepts: ~w(html), layout: false],
   pubsub_server: HeroesWeb.PubSub
 
 config :logger,

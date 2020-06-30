@@ -1,4 +1,4 @@
-defmodule HeroesWeb.RedirectControllerTest do
+defmodule Web.RedirectControllerTest do
   use HeroesWeb.ConnCase, async: true
 
   @game Routes.game_path(@endpoint, :index)

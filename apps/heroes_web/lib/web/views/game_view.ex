@@ -1,4 +1,4 @@
-defmodule HeroesWeb.GameView do
+defmodule Web.GameView do
   use HeroesWeb, :view
 
   alias Game.Board

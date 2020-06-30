@@ -19,18 +19,18 @@ defmodule HeroesWeb do
 
   def controller do
     quote do
-      use Phoenix.Controller, namespace: HeroesWeb
+      use Phoenix.Controller, namespace: Web
 
       import Plug.Conn
-      alias HeroesWeb.Router.Helpers, as: Routes
+      alias Web.Router.Helpers, as: Routes
     end
   end
 
   def view do
     quote do
       use Phoenix.View,
-        root: "lib/heroes_web/templates",
-        namespace: HeroesWeb
+        root: "lib/web/templates",
+        namespace: Web
 
       # Include shared imports and aliases for views
       unquote(view_helpers())
@@ -52,8 +52,8 @@ defmodule HeroesWeb do
 
       import Phoenix.View
 
-      import HeroesWeb.ErrorHelpers
-      alias HeroesWeb.Router.Helpers, as: Routes
+      import Web.ErrorHelpers
+      alias Web.Router.Helpers, as: Routes
     end
   end
 

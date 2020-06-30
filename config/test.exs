@@ -1,6 +1,6 @@
 import Config
 
-config :heroes_web, HeroesWeb.Endpoint,
+config :heroes_web, Web.Endpoint,
   http: [port: 4002],
   server: true
 

@@ -13,7 +13,7 @@ defmodule HeroesWeb.Application do
     children = [
       {Phoenix.PubSub, name: HeroesWeb.PubSub},
       {HeroesServer, board_mod: mod, player_start: player_start},
-      {HeroesWeb.Endpoint, board: mod.spec()}
+      {Web.Endpoint, board: mod.spec()}
     ]
 
     opts = [strategy: :one_for_one, name: HeroesWeb.Supervisor]
@@ -32,7 +32,7 @@ defmodule HeroesWeb.Application do
 
   @impl true
   def config_change(changed, _new, removed) do
-    HeroesWeb.Endpoint.config_change(changed, removed)
+    Web.Endpoint.config_change(changed, removed)
     :ok
   end
 end
