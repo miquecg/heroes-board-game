@@ -20,7 +20,6 @@ defmodule Game.Hero do
   @typep state :: %__MODULE__.State{
            board: module(),
            tile: Game.tile(),
-           attack_range: Game.board_range(),
            alive: boolean()
          }
 
@@ -29,7 +28,7 @@ defmodule Game.Hero do
 
     @enforce_keys [:board, :tile]
 
-    defstruct [:attack_range, alive: true] ++ @enforce_keys
+    defstruct [alive: true] ++ @enforce_keys
   end
 
   ## Client
@@ -85,7 +84,7 @@ defmodule Game.Hero do
     board = Keyword.fetch!(opts, :board)
     tile = Keyword.fetch!(opts, :tile)
 
-    {:ok, %State{board: board, tile: tile, attack_range: board.attack_range(tile)}}
+    {:ok, %State{board: board, tile: tile}}
   end
 
   @impl true
@@ -97,9 +96,8 @@ defmodule Game.Hero do
   @impl true
   def handle_call({:play, move}, _from, %State{tile: tile, board: board} = state) do
     result = board.play(tile, move)
-    new_range = board.attack_range(result)
 
-    {:reply, {:ok, result}, %{state | tile: result, attack_range: new_range}}
+    {:reply, {:ok, result}, %{state | tile: result}}
   end
 
   @impl true
@@ -121,7 +119,9 @@ defmodule Game.Hero do
   end
 
   @impl true
-  def handle_call({:attack, enemy}, _from, %State{attack_range: attack_range} = state) do
+  def handle_call({:attack, enemy}, _from, %State{board: board, tile: tile} = state) do
+    attack_range = board.attack_range(tile)
+
     {living_status, state} =
       case BoardRange.member?(attack_range, enemy) do
         true -> {@dead_status, %{state | alive: false}}
