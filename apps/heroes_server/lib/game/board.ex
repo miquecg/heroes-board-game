@@ -76,8 +76,8 @@ defmodule Game.Board do
   @doc """
   Calculate an attack range given a tile.
   """
-  @spec attack_range(tile, t) :: Game.board_range()
-  def attack_range({x, y}, %Board{h_range: h_min..h_max, v_range: v_min..v_max}) do
+  @spec attack_range(t, tile) :: Game.board_range()
+  def attack_range(%Board{h_range: h_min..h_max, v_range: v_min..v_max}, {x, y}) do
     x_min = max(x - 1, h_min)
     x_max = min(x + 1, h_max)
     y_min = max(y - 1, v_min)
@@ -91,8 +91,8 @@ defmodule Game.Board do
 
   `tile` is the starting point.
   """
-  @spec play(tile, moves, t) :: tile
-  def play(tile, move, board) do
+  @spec play(t, tile, moves) :: tile
+  def play(board, tile, move) do
     tile
     |> compute(move)
     |> validate(board)

@@ -29,10 +29,10 @@ defmodule GameUtils.Board do
       def tiles, do: unquote(tiles)
 
       @impl true
-      def attack_range(tile), do: Board.attack_range(tile, @board_spec)
+      def attack_range(tile), do: Board.attack_range(@board_spec, tile)
 
       @impl true
-      def play(tile, move), do: Board.play(tile, move, @board_spec)
+      def play(tile, move), do: Board.play(@board_spec, tile, move)
     end
   end
 end
