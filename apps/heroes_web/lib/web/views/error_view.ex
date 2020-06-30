@@ -1,4 +1,4 @@
-defmodule HeroesWeb.ErrorView do
+defmodule Web.ErrorView do
   use HeroesWeb, :view
 
   def template_not_found(template, _assigns) do

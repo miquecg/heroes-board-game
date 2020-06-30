@@ -1,7 +1,7 @@
-defmodule HeroesWeb.GameController do
+defmodule Web.GameController do
   use HeroesWeb, :controller
 
-  alias HeroesWeb.Endpoint
+  alias Web.Endpoint
 
   def index(conn, _params) do
     render(conn, "index.html", board: Endpoint.config(:board))

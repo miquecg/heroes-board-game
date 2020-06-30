@@ -1,4 +1,4 @@
-defmodule HeroesWeb.Endpoint do
+defmodule Web.Endpoint do
   use Phoenix.Endpoint, otp_app: :heroes_web
 
   @session_options [
@@ -20,5 +20,5 @@ defmodule HeroesWeb.Endpoint do
   end
 
   plug Plug.Session, @session_options
-  plug HeroesWeb.Router
+  plug Web.Router
 end

@@ -10,9 +10,9 @@ defmodule HeroesWeb.BrowserCase do
     quote do
       use Wallaby.Feature
 
-      import HeroesWeb.Router.Helpers
+      import Web.Router.Helpers
 
-      @endpoint HeroesWeb.Endpoint
+      @endpoint Web.Endpoint
     end
   end
 

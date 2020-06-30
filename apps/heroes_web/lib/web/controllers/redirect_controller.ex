@@ -1,4 +1,4 @@
-defmodule HeroesWeb.RedirectController do
+defmodule Web.RedirectController do
   use HeroesWeb, :controller
 
   alias Phoenix.Router.NoRouteError
@@ -12,6 +12,6 @@ defmodule HeroesWeb.RedirectController do
   end
 
   def perform(conn, _) do
-    raise NoRouteError, conn: conn, router: HeroesWeb.Router
+    raise NoRouteError, conn: conn, router: Web.Router
   end
 end

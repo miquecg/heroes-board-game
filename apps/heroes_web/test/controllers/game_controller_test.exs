@@ -1,4 +1,4 @@
-defmodule HeroesWeb.GameControllerTest do
+defmodule Web.GameControllerTest do
   use HeroesWeb.ConnCase, async: true
 
   @game Routes.game_path(@endpoint, :index)

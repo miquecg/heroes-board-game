@@ -1,4 +1,4 @@
-defmodule HeroesWeb.Router do
+defmodule Web.Router do
   use HeroesWeb, :router
 
   pipeline :browser do
@@ -8,7 +8,7 @@ defmodule HeroesWeb.Router do
     plug :put_secure_browser_headers
   end
 
-  scope "/", HeroesWeb do
+  scope "/", Web do
     pipe_through :browser
 
     get "/game", GameController, :index

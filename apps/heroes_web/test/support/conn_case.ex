@@ -12,9 +12,9 @@ defmodule HeroesWeb.ConnCase do
       import Phoenix.ConnTest
       import HeroesWeb.ConnCase
 
-      alias HeroesWeb.Router.Helpers, as: Routes
+      alias Web.Router.Helpers, as: Routes
 
-      @endpoint HeroesWeb.Endpoint
+      @endpoint Web.Endpoint
     end
   end
 
