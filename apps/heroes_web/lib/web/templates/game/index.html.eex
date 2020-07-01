@@ -5,4 +5,5 @@
       <%= render("grid_box.html", position: {x, y}, walls: @board.walls) %>
     <% end %>
   </div>
+  <%= render("start_button.html") %>
 </section>
