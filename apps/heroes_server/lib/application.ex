@@ -9,6 +9,6 @@ defmodule HeroesServer.Application do
       {DynamicSupervisor, strategy: :one_for_one, name: Game.HeroSupervisor}
     ]
 
-    Supervisor.start_link(children, strategy: :one_for_one)
+    Supervisor.start_link(children, strategy: :one_for_one, name: Game.Supervisor)
   end
 end
