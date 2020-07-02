@@ -15,5 +15,5 @@ defmodule Web.Router do
     post "/game", GameController, :start
   end
 
-  get "/*path", Web.RedirectController, :perform
+  get "/*path", Web.WildcardController, :route
 end

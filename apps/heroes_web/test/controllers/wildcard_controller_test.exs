@@ -1,4 +1,4 @@
-defmodule Web.RedirectControllerTest do
+defmodule Web.WildcardControllerTest do
   use HeroesWeb.ConnCase, async: true
 
   @game Routes.game_path(@endpoint, :index)
@@ -8,7 +8,7 @@ defmodule Web.RedirectControllerTest do
     assert redirected_to(conn) == @game
   end
 
-  test "Non redirected route raises 404 error", %{conn: conn} do
+  test "Unknown route raises 404 error", %{conn: conn} do
     assert_error_sent 404, fn ->
       get(conn, "/not-found")
     end
