@@ -19,6 +19,8 @@ defmodule Web.Endpoint do
     plug Phoenix.CodeReloader
   end
 
+  plug Plug.Parsers, parsers: [:urlencoded]
+
   plug Plug.Session, @session_options
   plug Web.Router
 end

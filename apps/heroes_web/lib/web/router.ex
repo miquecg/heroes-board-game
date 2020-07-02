@@ -12,6 +12,8 @@ defmodule Web.Router do
     pipe_through :browser
 
     get "/game", GameController, :index
-    get "/*path", RedirectController, :perform
+    post "/game", GameController, :start
   end
+
+  get "/*path", Web.RedirectController, :perform
 end
