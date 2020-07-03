@@ -12,14 +12,13 @@ defmodule HeroesServerTest do
   end
 
   test "Player joins and the server puts a new Hero on a tile" do
-    assert count() == 0
-
     opts = [board_mod: GameBoards.Test2x2w1, player_start: :first_tile]
     server = start_supervised!({HeroesServer, [name: :test_server] ++ opts})
 
-    start_pos = {0, 1}
+    assert count() == 0
 
-    assert {_pid, ^start_pos} = GenServer.call(server, :join)
+    {_player_id, {0, 1}} = GenServer.call(server, :join)
+
     assert count() == 1
   end
 

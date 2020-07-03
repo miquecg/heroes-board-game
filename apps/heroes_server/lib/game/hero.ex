@@ -4,7 +4,7 @@ defmodule Game.Hero do
   All player actions during the game happen on this GenServer.
   """
 
-  use GenServer, restart: :temporary
+  use GenServer
 
   require Logger
 
@@ -37,8 +37,15 @@ defmodule Game.Hero do
   Spawn a hero.
 
   Requires options `:board` and `:tile`.
+
+  Can be registered under a `:name`.
   """
-  def start_link(opts), do: GenServer.start_link(__MODULE__, opts)
+  def start_link(opts) do
+    case Keyword.pop(opts, :name) do
+      {nil, opts} -> GenServer.start_link(__MODULE__, opts)
+      {name, opts} -> GenServer.start_link(__MODULE__, opts, name: name)
+    end
+  end
 
   @doc """
   Send a command to control a hero.

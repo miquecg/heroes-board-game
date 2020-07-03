@@ -139,10 +139,6 @@ defmodule Game.HeroTest do
     end
   end
 
-  test "Heroes are temporary workers" do
-    assert Supervisor.child_spec(Hero, []).restart == :temporary
-  end
-
   defp create_hero(context) do
     board = Map.get(context, :board, @board_4x4)
     tile = Map.get(context, :tile, {1, 1})
