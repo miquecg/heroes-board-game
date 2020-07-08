@@ -26,8 +26,9 @@ defmodule HeroesServer do
   Requires to be configured with
   `:board_mod` and `:player_start`.
 
-  Optionally can receive a :name.
+  Optionally can receive a `:name`.
   """
+  @spec start_link(keyword()) :: GenServer.on_start()
   def start_link(opts) do
     {name, opts} = Keyword.pop(opts, :name, __MODULE__)
     GenServer.start_link(__MODULE__, opts, name: name)
@@ -36,7 +37,7 @@ defmodule HeroesServer do
   @doc """
   Join a player to the server creating a new hero.
   """
-  @spec join() :: {pid(), Game.tile()}
+  @spec join() :: {player_id :: binary(), Game.tile()}
   def join, do: GenServer.call(__MODULE__, :join)
 
   ## Server (callbacks)
@@ -59,10 +60,22 @@ defmodule HeroesServer do
   def handle_call(:join, _from, %State{board_mod: board_mod, dice: dice} = state) do
     tiles = board_mod.tiles()
     start_pos = dice.(tiles)
+    player_id = generate_id()
 
-    opts = [board: board_mod, tile: start_pos]
-    {:ok, pid} = DynamicSupervisor.start_child(Game.HeroSupervisor, {Game.Hero, opts})
+    opts = [
+      name: {:via, Registry, {HeroesServer.Registry, player_id}},
+      board: board_mod,
+      tile: start_pos
+    ]
 
-    {:reply, {pid, start_pos}, state}
+    {:ok, _pid} = DynamicSupervisor.start_child(Game.HeroSupervisor, {Game.Hero, opts})
+
+    {:reply, {player_id, start_pos}, state}
+  end
+
+  @spec generate_id :: binary()
+  defp generate_id do
+    random_bytes = :crypto.strong_rand_bytes(16)
+    Base.hex_encode32(random_bytes, padding: false)
   end
 end

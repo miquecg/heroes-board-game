@@ -1,0 +1,4 @@
+<% {column, row} = cartesian_to_grid(@coords) %>
+<% grid_column = ["grid-column:", column, ";"] %>
+<% grid_row = ["grid-row: span 1 / ", row, ";"] %>
+<%= content_tag(:div, "", class: "hero", style: [grid_column, grid_row]) %>

@@ -5,10 +5,11 @@ defmodule HeroesServer.Application do
 
   def start(_type, _args) do
     children = [
-      {Task.Supervisor, name: Game.TaskSupervisor},
-      {DynamicSupervisor, strategy: :one_for_one, name: Game.HeroSupervisor}
+      {Registry, keys: :unique, name: HeroesServer.Registry},
+      Game.Supervisor
     ]
 
-    Supervisor.start_link(children, strategy: :one_for_one, name: Game.Supervisor)
+    opts = [strategy: :rest_for_one, name: HeroesServer.Supervisor]
+    Supervisor.start_link(children, opts)
   end
 end

@@ -1,9 +1,9 @@
-defmodule Web.RedirectController do
+defmodule Web.WildcardController do
   use HeroesWeb, :controller
 
   alias Phoenix.Router.NoRouteError
 
-  def perform(conn, %{"path" => []}) do
+  def route(conn, %{"path" => []}) do
     game_path = Routes.game_path(conn, :index)
 
     conn
@@ -11,7 +11,7 @@ defmodule Web.RedirectController do
     |> halt()
   end
 
-  def perform(conn, _) do
+  def route(conn, %{"path" => _}) do
     raise NoRouteError, conn: conn, router: Web.Router
   end
 end
