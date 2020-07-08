@@ -2,7 +2,7 @@
   <h1>Heroes Board Game</h1>
   <div id="grid" style="--rowNum: <%= rows(@board) %>;">
     <%= for x <- @board.h_range, y <- reverse(@board.v_range) do %>
-      <%= render("grid_box.html", position: {x, y}, walls: @board.walls) %>
+      <%= render("grid_box.html", cell: {x, y}, walls: @board.walls) %>
     <% end %>
     <%= if @player do %>
       <%= render("hero.html", coords: @player.tile) %>
