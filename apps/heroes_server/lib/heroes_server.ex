@@ -26,8 +26,9 @@ defmodule HeroesServer do
   Requires to be configured with
   `:board_mod` and `:player_start`.
 
-  Optionally can receive a :name.
+  Optionally can receive a `:name`.
   """
+  @spec start_link(keyword()) :: GenServer.on_start()
   def start_link(opts) do
     {name, opts} = Keyword.pop(opts, :name, __MODULE__)
     GenServer.start_link(__MODULE__, opts, name: name)

@@ -40,6 +40,7 @@ defmodule Game.Hero do
 
   Can be registered under a `:name`.
   """
+  @spec start_link(keyword()) :: GenServer.on_start()
   def start_link(opts) do
     case Keyword.pop(opts, :name) do
       {nil, opts} -> GenServer.start_link(__MODULE__, opts)
