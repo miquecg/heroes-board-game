@@ -9,9 +9,12 @@ defmodule Web.GameController do
 
   def start(conn, _params) do
     delete_csrf_token()
+
+    {id, tile} = HeroesServer.join()
     game_path = Routes.game_path(conn, :index)
 
     conn
+    |> put_session("player", %{id: id, tile: tile})
     |> put_status(303)
     |> redirect(to: game_path)
     |> halt()
