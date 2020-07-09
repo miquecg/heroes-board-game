@@ -14,4 +14,9 @@ defmodule Web.GameViewTest do
     board = Board.new(rows: 6, cols: 4, walls: [{0, 0}, {1, 2}])
     assert rows(board) == 6
   end
+
+  test "Reversing ranges" do
+    assert 100..1 = reverse(1..100)
+    assert 1..1 = reverse(1..1)
+  end
 end
