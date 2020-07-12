@@ -2,7 +2,7 @@ defmodule HeroesServerTest do
   use ExUnit.Case
   @moduletag :capture_log
 
-  alias Game.{Hero, HeroSupervisor}
+  alias Game.{Hero, HeroSupervisor, Player}
 
   @app :heroes_server
 
@@ -15,11 +15,11 @@ defmodule HeroesServerTest do
     opts = [board_mod: GameBoards.Test2x2w1, player_start: :first_tile]
     server = start_supervised!({HeroesServer, [name: :test_server] ++ opts})
 
-    assert count() == 0
+    assert [] = HeroesServer.players()
 
-    {_player_id, {0, 1}} = GenServer.call(server, :join)
+    id = GenServer.call(server, :join)
 
-    assert count() == 1
+    assert [%Player{id: ^id, coords: {0, 1}}] = HeroesServer.players()
   end
 
   describe "A player controlling a Hero" do
@@ -45,11 +45,6 @@ defmodule HeroesServerTest do
       live_enemy = Map.get(context, {3, 0})
       assert {:ok, {3, 1}} = Hero.control(live_enemy, :up)
     end
-  end
-
-  defp count do
-    %{active: heroes} = DynamicSupervisor.count_children(HeroSupervisor)
-    heroes
   end
 
   defp create_hero(board, tile) do
