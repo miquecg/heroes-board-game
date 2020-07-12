@@ -10,9 +10,13 @@ defmodule Web.GameView do
 
   def reverse(min..max), do: max..min
 
-  def cartesian_to_grid({x, y}) do
+  def grid_plot({x, y}) do
     [@cols_start + x, @rows_end - y]
-    |> Enum.map(&Integer.to_string/1)
-    |> List.to_tuple()
+    |> Stream.map(&Integer.to_string/1)
+    |> Stream.zip([:column, :row])
+    |> Enum.map(&css_property/1)
   end
+
+  defp css_property({value, :column}), do: ["grid-column:", value, ";"]
+  defp css_property({value, :row}), do: ["grid-row:", "span 1 / ", value, ";"]
 end
