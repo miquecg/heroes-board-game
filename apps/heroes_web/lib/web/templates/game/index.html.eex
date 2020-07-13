@@ -4,10 +4,11 @@
     <%= for x <- @board.h_range, y <- reverse(@board.v_range) do %>
       <%= render("grid_box.html", cell: {x, y}, walls: @board.walls) %>
     <% end %>
-    <%= if @player do %>
-      <%= render("hero.html", coords: @player.tile) %>
-    <% else %>
-      <%= render("start_button.html") %>
+    <%# --- Players --- %>
+    <%= for player <- @players do %>
+      <%= render("hero.html", player: player) %>
     <% end %>
+    <%# --- Start button --- %>
+    <%= if @players == [], do: render("start_button.html") %>
   </div>
 </section>

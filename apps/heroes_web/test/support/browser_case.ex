@@ -6,6 +6,8 @@ defmodule HeroesWeb.BrowserCase do
 
   use ExUnit.CaseTemplate
 
+  @game_server :heroes_server
+
   using do
     quote do
       use Wallaby.Feature
@@ -17,6 +19,9 @@ defmodule HeroesWeb.BrowserCase do
   end
 
   setup _tags do
+    Application.stop(@game_server)
+    :ok = Application.start(@game_server)
+
     {:ok, _} = Application.ensure_all_started(:wallaby)
     :ok
   end

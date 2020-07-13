@@ -20,11 +20,31 @@ defmodule Web.GameViewTest do
     assert 1..1 = reverse(1..1)
   end
 
-  test "Conversion of cartesian coordinates to grid cells in the HTML layout" do
-    assert cartesian_to_grid({0, 0}) == {"1", "-1"}
-    assert cartesian_to_grid({3, 0}) == {"4", "-1"}
-    assert cartesian_to_grid({0, 3}) == {"1", "-4"}
-    assert cartesian_to_grid({3, 3}) == {"4", "-4"}
-    assert cartesian_to_grid({5, 7}) == {"6", "-8"}
+  test "Plot into the grid from player coordinates" do
+    {0, 0}
+    |> grid_plot()
+    |> (&assert(grid_values(&1) == ["1", "-1"])).()
+
+    {3, 0}
+    |> grid_plot()
+    |> (&assert(grid_values(&1) == ["4", "-1"])).()
+
+    {0, 3}
+    |> grid_plot()
+    |> (&assert(grid_values(&1) == ["1", "-4"])).()
+
+    {3, 3}
+    |> grid_plot()
+    |> (&assert(grid_values(&1) == ["4", "-4"])).()
+
+    {5, 7}
+    |> grid_plot()
+    |> (&assert(grid_values(&1) == ["6", "-8"])).()
+  end
+
+  defp grid_values(css) do
+    css
+    |> List.flatten()
+    |> Enum.filter(fn string -> Integer.parse(string) != :error end)
   end
 end

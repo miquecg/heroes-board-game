@@ -3,7 +3,18 @@ defmodule HeroesServer do
   The entrypoint to play the game.
   """
 
+  @dialyzer {:nowarn_function, players: 0}
+
   use GenServer
+
+  @typedoc """
+  Unique identifier for every active
+  player in the server.
+
+  26 characters binary string encoded
+  in base 32 hex.
+  """
+  @type player_id :: <<_::208>>
 
   @typep state :: %__MODULE__.State{
            board_mod: module(),
@@ -37,8 +48,27 @@ defmodule HeroesServer do
   @doc """
   Join a player to the server creating a new hero.
   """
-  @spec join() :: {player_id :: binary(), Game.tile()}
+  @spec join() :: player_id
   def join, do: GenServer.call(__MODULE__, :join)
+
+  @doc """
+  Return all players in current game state.
+  """
+  @spec players() :: list(Game.player())
+  def players do
+    match_spec = [
+      {
+        # match key (id) and value (tile)
+        {:"$1", :_, :"$3"},
+        # filter none
+        [],
+        # return Player structs
+        [%Game.Player{id: :"$1", coords: :"$3"}]
+      }
+    ]
+
+    Registry.select(HeroesServer.Registry, match_spec)
+  end
 
   ## Server (callbacks)
 
@@ -63,17 +93,17 @@ defmodule HeroesServer do
     player_id = generate_id()
 
     opts = [
-      name: {:via, Registry, {HeroesServer.Registry, player_id}},
+      name: {:via, Registry, {HeroesServer.Registry, player_id, start_pos}},
       board: board_mod,
       tile: start_pos
     ]
 
     {:ok, _pid} = DynamicSupervisor.start_child(Game.HeroSupervisor, {Game.Hero, opts})
 
-    {:reply, {player_id, start_pos}, state}
+    {:reply, player_id, state}
   end
 
-  @spec generate_id :: binary()
+  @spec generate_id :: player_id
   defp generate_id do
     random_bytes = :crypto.strong_rand_bytes(16)
     Base.hex_encode32(random_bytes, padding: false)

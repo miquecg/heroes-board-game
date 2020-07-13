@@ -12,4 +12,6 @@ defmodule Game do
   @type board :: Game.Board.t()
 
   @type board_range :: Game.BoardRange.t()
+
+  @type player :: Game.Player.t()
 end
