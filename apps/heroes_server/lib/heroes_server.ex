@@ -3,6 +3,8 @@ defmodule HeroesServer do
   The entrypoint to play the game.
   """
 
+  @dialyzer {:nowarn_function, players: 0}
+
   use GenServer
 
   @typedoc """
