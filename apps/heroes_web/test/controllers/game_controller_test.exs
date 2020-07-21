@@ -13,11 +13,17 @@ defmodule Web.GameControllerTest do
     assert redirected_to(conn, 303) == @game
   end
 
-  test "game endpoint is CSRF protected", %{conn: conn} do
-    assert_error_sent 403, fn ->
+  test "POST request fails without a CSRF token", %{conn: conn} do
+    conn =
       conn
+      |> create_session()
+      |> recycle()
       |> put_private(:plug_skip_csrf_protection, false)
-      |> post(@game)
+
+    assert_error_sent 403, fn ->
+      post(conn, @game)
     end
   end
+
+  defp create_session(conn), do: get(conn, @game)
 end
