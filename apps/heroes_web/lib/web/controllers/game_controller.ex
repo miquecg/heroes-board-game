@@ -3,7 +3,7 @@ defmodule Web.GameController do
 
   alias Web.Endpoint
 
-  plug :game_state when action in [:index]
+  plug :get_players when action in [:index]
 
   def index(conn, _params) do
     render(conn, "index.html", board: Endpoint.config(:board))
@@ -22,10 +22,11 @@ defmodule Web.GameController do
     |> halt()
   end
 
-  defp game_state(conn, _opts) do
-    case get_session(conn, "player_id") do
-      nil -> assign(conn, :players, [])
-      _id -> assign(conn, :players, HeroesServer.players())
+  defp get_players(conn, _opts) do
+    if get_session(conn, "player_id") do
+      assign(conn, :players, HeroesServer.players())
+    else
+      conn
     end
   end
 end

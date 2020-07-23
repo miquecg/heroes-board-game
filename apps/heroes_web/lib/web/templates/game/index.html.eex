@@ -1,14 +1,19 @@
 <section>
   <h1>Heroes Board Game</h1>
   <div id="grid" style="--rowNum: <%= rows(@board) %>;">
+    <%# --- render board --- %>
     <%= for x <- @board.h_range, y <- reverse(@board.v_range) do %>
       <%= render("grid_box.html", cell: {x, y}, walls: @board.walls) %>
     <% end %>
-    <%# --- Players --- %>
-    <%= for player <- @players do %>
-      <%= render("hero.html", player: player) %>
+    <%= if assigns[:players] do %>
+      <%# --- render players --- %>
+      <%= for player <- @players do %>
+        <%= render("hero.html", player: player) %>
+      <% end %>
+      <script defer type="text/javascript" src="<%= Routes.static_path(@conn, "/js/app.js") %>"></script>
+    <% else %>
+      <%# --- render button to start game --- %>
+      <%= render("start_button.html") %>
     <% end %>
-    <%# --- Start button --- %>
-    <%= if @players == [], do: render("start_button.html") %>
   </div>
 </section>
