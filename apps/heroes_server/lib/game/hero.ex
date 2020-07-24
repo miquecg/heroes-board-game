@@ -147,7 +147,7 @@ defmodule Game.Hero do
 
   @impl true
   def handle_info({:DOWN, _down_ref, :process, _pid, reason}, %State{} = state) do
-    Logger.warn("Attack failed with reason: #{inspect(reason)}", tag: :task_down)
+    Logger.warn("Task failed with reason #{reason}", tag: "attack")
     {:noreply, state}
   end
 
