@@ -109,7 +109,7 @@ defmodule Game.Hero do
   end
 
   @impl true
-  def handle_call({:broadcast, []}, _from, %State{} = state) do
+  def handle_call({:broadcast, []}, _from, state) do
     {:reply, {:ok, :launched}, state}
   end
 
@@ -140,13 +140,13 @@ defmodule Game.Hero do
   end
 
   @impl true
-  def handle_info({task_ref, :done}, %State{} = state) do
+  def handle_info({task_ref, :done}, state) do
     Process.demonitor(task_ref, [:flush])
     {:noreply, state}
   end
 
   @impl true
-  def handle_info({:DOWN, _down_ref, :process, _pid, reason}, %State{} = state) do
+  def handle_info({:DOWN, _down_ref, :process, _pid, reason}, state) do
     Logger.warn("Task failed with reason #{reason}", tag: "attack")
     {:noreply, state}
   end
