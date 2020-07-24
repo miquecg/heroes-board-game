@@ -3,7 +3,8 @@ defmodule Web.GameController do
 
   alias Web.Endpoint
 
-  plug :get_players when action in [:index]
+  plug :authenticate when action in [:index]
+  plug :put_game_token when action in [:index]
 
   def index(conn, _params) do
     render(conn, "index.html", board: Endpoint.config(:board))
@@ -22,9 +23,21 @@ defmodule Web.GameController do
     |> halt()
   end
 
-  defp get_players(conn, _opts) do
-    if get_session(conn, "player_id") do
-      assign(conn, :players, HeroesServer.players())
+  defp authenticate(conn, _opts) do
+    if id = get_session(conn, "player_id") do
+      conn
+      |> assign(:signed_in?, true)
+      |> assign(:player_id, id)
+      |> assign(:players, HeroesServer.players())
+    else
+      assign(conn, :signed_in?, false)
+    end
+  end
+
+  defp put_game_token(conn, _opts) do
+    if id = conn.assigns[:player_id] do
+      token = Phoenix.Token.sign(conn, "player socket", id)
+      assign(conn, :game_token, token)
     else
       conn
     end
