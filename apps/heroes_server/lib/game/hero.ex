@@ -84,6 +84,12 @@ defmodule Game.Hero do
 
   def control(_, _), do: {:error, %BadCommand{}}
 
+  @doc """
+  Get current hero position.
+  """
+  @spec position(GenServer.server()) :: Game.tile()
+  def position(server), do: GenServer.call(server, :position)
+
   ## Server (callbacks)
 
   @impl true
@@ -114,8 +120,8 @@ defmodule Game.Hero do
   end
 
   @impl true
-  def handle_call({:broadcast, enemies}, _from, %State{tile: tile} = state) do
-    args = [tile, enemies]
+  def handle_call({:broadcast, enemies}, _from, state) do
+    args = [state.tile, enemies]
     Task.Supervisor.async_nolink(Game.TaskSupervisor, __MODULE__, :stream_task, args)
     {:reply, {:ok, :launched}, state}
   end
@@ -138,6 +144,9 @@ defmodule Game.Hero do
 
     {:reply, living_status, state}
   end
+
+  @impl true
+  def handle_call(:position, _from, state), do: {:reply, state.tile, state}
 
   @impl true
   def handle_info({task_ref, :done}, state) do

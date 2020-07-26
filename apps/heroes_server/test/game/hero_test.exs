@@ -139,6 +139,21 @@ defmodule Game.HeroTest do
     end
   end
 
+  describe "Current hero position" do
+    setup :create_hero
+
+    test "can be retrieved", %{hero: pid} do
+      {:ok, {1, 2}} = Hero.control(pid, :up)
+
+      assert {1, 2} = Hero.position(pid)
+
+      {:ok, {0, 2}} = Hero.control(pid, :left)
+      {:ok, {0, 1}} = Hero.control(pid, :down)
+
+      assert {0, 1} = Hero.position(pid)
+    end
+  end
+
   defp create_hero(context) do
     board = Map.get(context, :board, @board_4x4)
     tile = Map.get(context, :tile, {1, 1})
