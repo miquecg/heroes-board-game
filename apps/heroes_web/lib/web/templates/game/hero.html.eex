@@ -1,1 +1,0 @@
-<%= content_tag(:div, "", class: "hero", style: grid_plot(@player.coords)) %>

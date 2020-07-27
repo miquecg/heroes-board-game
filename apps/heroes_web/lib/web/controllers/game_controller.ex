@@ -28,7 +28,6 @@ defmodule Web.GameController do
       conn
       |> assign(:signed_in?, true)
       |> assign(:player_id, id)
-      |> assign(:players, HeroesServer.players())
     else
       assign(conn, :signed_in?, false)
     end

@@ -6,14 +6,10 @@
       <%= render("grid_box.html", cell: {x, y}, walls: @board.walls) %>
     <% end %>
     <%= if @signed_in? do %>
-      <%# --- heroes --- %>
-      <%= for player <- @players do %>
-        <%= render("hero.html", player: player) %>
-      <% end %>
+      <%# --- game client --- %>
       <script>window.gameToken="<%= assigns[:game_token] %>";</script>
       <script defer type="text/javascript" src="<%= Routes.static_path(@conn, "/js/app.js") %>"></script>
     <% else %>
-      <%# --- button to start game --- %>
       <%= render("start_button.html") %>
     <% end %>
   </div>
