@@ -2,7 +2,7 @@ defmodule HeroesServerTest do
   use ExUnit.Case
   @moduletag :capture_log
 
-  alias Game.{Hero, HeroSupervisor, Player}
+  alias Game.{Hero, HeroSupervisor}
 
   @app :heroes_server
 
@@ -11,18 +11,20 @@ defmodule HeroesServerTest do
     :ok = Application.start(@app)
   end
 
-  test "Player joins and the server puts a new Hero on a tile" do
+  test "When a player joins the server a hero is created and registered" do
     opts = [board_mod: GameBoards.Test2x2w1, player_start: :first_tile]
     server = start_supervised!({HeroesServer, [name: :test_server] ++ opts})
 
-    assert [] = HeroesServer.players()
+    assert count_heroes() == 0
 
     id = GenServer.call(server, :join)
+    server = {:via, Registry, {HeroesServer.Registry, id}}
 
-    assert [%Player{id: ^id, coords: {0, 1}}] = HeroesServer.players()
+    assert count_heroes() == 1
+    assert {0, 1} = Hero.position(server)
   end
 
-  describe "A player controlling a Hero" do
+  describe "A player controlling a hero" do
     setup context do
       for tile <- context.tiles, into: %{} do
         hero = create_hero(GameBoards.Test4x4, tile)
@@ -46,6 +48,8 @@ defmodule HeroesServerTest do
       assert {:ok, {3, 1}} = Hero.control(live_enemy, :up)
     end
   end
+
+  defp count_heroes, do: Registry.count(HeroesServer.Registry)
 
   defp create_hero(board, tile) do
     child = {Hero, [board: board, tile: tile]}
