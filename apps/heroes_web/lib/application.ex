@@ -12,6 +12,7 @@ defmodule HeroesWeb.Application do
 
     children = [
       {Phoenix.PubSub, name: HeroesWeb.PubSub},
+      Web.Presence,
       {HeroesServer, board_mod: mod, player_start: player_start},
       {Web.Endpoint, board: mod.spec()}
     ]
