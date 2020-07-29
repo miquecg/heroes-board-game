@@ -5,6 +5,7 @@
     <%= for x <- @board.h_range, y <- reverse(@board.v_range) do %>
       <%= render("grid_box.html", cell: {x, y}, walls: @board.walls) %>
     <% end %>
+    <div class="hero-cells"></div>
     <%= unless @signed_in?, do: render("start_button.html") %>
   </div>
   <%# --- game client --- %>
