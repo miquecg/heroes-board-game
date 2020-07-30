@@ -10,4 +10,5 @@ config :logger,
 
 config :wallaby,
   base_url: "http://localhost:4002",
-  driver: Wallaby.Chrome
+  driver: Wallaby.Chrome,
+  js_logger: nil
