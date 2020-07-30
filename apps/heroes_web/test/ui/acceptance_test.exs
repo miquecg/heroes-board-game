@@ -30,9 +30,9 @@ defmodule Web.AcceptanceTest do
   } do
     user
     |> visit(@game)
-    |> refute_has(hero_on_the_grid())
+    |> refute_has(active_heroes())
     |> click(button("Start"))
-    |> assert_has(hero_on_the_grid(count: 1))
+    |> assert_has(active_heroes(count: 1))
   end
 
   @tag :join
@@ -40,15 +40,15 @@ defmodule Web.AcceptanceTest do
   feature "JavaScript client updates board as players join and leave the game", %{
     sessions: [player1, player2]
   } do
-    assert_has(player1, hero_on_the_grid(count: 2))
-    assert_has(player2, hero_on_the_grid(count: 2))
+    assert_has(player1, active_heroes(count: 2))
+    assert_has(player2, active_heroes(count: 2))
 
     :ok = Wallaby.end_session(player2)
-    assert_has(player1, hero_on_the_grid(count: 1))
+    assert_has(player1, active_heroes(count: 1))
   end
 
   defp sessions(%{session: user}), do: [user]
   defp sessions(context), do: context.sessions
 
-  defp hero_on_the_grid(opts \\ []), do: css("#grid .hero", opts)
+  defp active_heroes(opts \\ []), do: css("#grid .hero", opts)
 end
