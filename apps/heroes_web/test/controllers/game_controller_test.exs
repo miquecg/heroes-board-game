@@ -11,6 +11,10 @@ defmodule Web.GameControllerTest do
   test "POST to start the game is followed by a redirect", %{conn: conn} do
     conn = post(conn, @game)
     assert redirected_to(conn, 303) == @game
+
+    conn = get(recycle(conn), @game)
+    token_regex = ~r/gameToken="[\w-\.]+";/
+    assert html_response(conn, 200) =~ token_regex
   end
 
   test "POST request fails without a CSRF token", %{conn: conn} do
