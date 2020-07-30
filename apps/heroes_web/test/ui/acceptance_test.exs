@@ -4,7 +4,7 @@ defmodule Web.AcceptanceTest do
 
   import Wallaby.Query, only: [button: 1, css: 2]
 
-  @game game_path(@endpoint, :index)
+  @game Routes.game_path(@endpoint, :index)
 
   feature "User visits the game URL and the board grid is loaded", %{session: session} do
     session
