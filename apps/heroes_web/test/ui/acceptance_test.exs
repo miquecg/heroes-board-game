@@ -6,17 +6,17 @@ defmodule Web.AcceptanceTest do
 
   @game Routes.game_path(@endpoint, :index)
 
-  feature "User visits the game URL and the board grid is loaded", %{session: session} do
-    session
+  feature "User visits the game URL and the board grid is loaded", %{session: user} do
+    user
     |> visit(@game)
     |> assert_has(css("#grid .cell", count: 48))
     |> assert_has(css(".cell.wall", count: 7))
   end
 
   feature "User clicks the start button and their hero appears in the board grid", %{
-    session: session
+    session: user
   } do
-    session
+    user
     |> visit(@game)
     |> refute_has(hero_on_the_grid())
     |> click(button("Start"))
