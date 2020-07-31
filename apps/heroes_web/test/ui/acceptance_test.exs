@@ -23,6 +23,7 @@ defmodule Web.AcceptanceTest do
     |> visit(@game)
     |> assert_has(css("#grid .cell", count: 48))
     |> assert_has(css(".cell.wall", count: 7))
+    |> assert_has(button("Start"))
   end
 
   feature "User clicks the start button and their hero appears in the board grid", %{
