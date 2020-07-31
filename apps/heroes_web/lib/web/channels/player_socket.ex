@@ -11,7 +11,7 @@ defmodule Web.PlayerSocket do
 
   @impl true
   @one_day_seconds 86_400
-  def connect(%{"token" => token}, socket, _connect_info) do
+  def connect(%{"token" => token}, socket) do
     case Phoenix.Token.verify(socket, "player socket", token, max_age: @one_day_seconds) do
       {:ok, id} ->
         {:ok, assign(socket, :player_id, id)}
