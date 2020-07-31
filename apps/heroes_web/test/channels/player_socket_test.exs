@@ -1,6 +1,5 @@
 defmodule Web.PlayerSocketTest do
   use HeroesWeb.ChannelCase, async: true
-  @moduletag :capture_log
 
   alias Web.PlayerSocket, as: Socket
 

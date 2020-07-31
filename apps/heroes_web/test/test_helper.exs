@@ -1,2 +1,2 @@
-ExUnit.configure(exclude: :browser)
+ExUnit.configure(exclude: :browser, capture_log: true)
 ExUnit.start()
