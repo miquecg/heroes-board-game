@@ -46,6 +46,12 @@ defmodule HeroesWeb do
     end
   end
 
+  def channel do
+    quote do
+      use Phoenix.Channel
+    end
+  end
+
   defp view_helpers do
     quote do
       use Phoenix.HTML

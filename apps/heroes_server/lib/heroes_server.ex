@@ -3,8 +3,6 @@ defmodule HeroesServer do
   The entrypoint to play the game.
   """
 
-  @dialyzer {:nowarn_function, players: 0}
-
   use GenServer
 
   @typedoc """
@@ -51,25 +49,6 @@ defmodule HeroesServer do
   @spec join() :: player_id
   def join, do: GenServer.call(__MODULE__, :join)
 
-  @doc """
-  Return all players in current game state.
-  """
-  @spec players() :: list(Game.player())
-  def players do
-    match_spec = [
-      {
-        # match key (id) and value (tile)
-        {:"$1", :_, :"$3"},
-        # filter none
-        [],
-        # return Player structs
-        [%Game.Player{id: :"$1", coords: :"$3"}]
-      }
-    ]
-
-    Registry.select(HeroesServer.Registry, match_spec)
-  end
-
   ## Server (callbacks)
 
   @impl true
@@ -93,7 +72,7 @@ defmodule HeroesServer do
     player_id = generate_id()
 
     opts = [
-      name: {:via, Registry, {HeroesServer.Registry, player_id, start_pos}},
+      name: {:via, Registry, {HeroesServer.Registry, player_id}},
       board: board_mod,
       tile: start_pos
     ]

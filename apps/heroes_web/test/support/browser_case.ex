@@ -12,13 +12,13 @@ defmodule HeroesWeb.BrowserCase do
     quote do
       use Wallaby.Feature
 
-      import Web.Router.Helpers
+      alias Web.Router.Helpers, as: Routes
 
       @endpoint Web.Endpoint
     end
   end
 
-  setup _tags do
+  setup do
     Application.stop(@game_server)
     :ok = Application.start(@game_server)
 

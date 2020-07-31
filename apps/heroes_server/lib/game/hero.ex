@@ -51,12 +51,11 @@ defmodule Game.Hero do
   @doc """
   Send a command to control a hero.
 
-  `pid` is the hero reference.
-  `cmd` is of type `t:Game.moves/0`
-  or atom `:attack`.
+  `server` is the hero reference.
+  `cmd` is of type `t:Game.moves/0` or atom `:attack`.
 
-  Returns `{:ok, tile}`, `{:ok, :launched}`
-  or `{:error, :noop}` when hero is dead and
+  Returns `{:ok, tile}`, `{:ok, :launched}` or
+  `{:error, :noop}` when hero is dead and
   cannot execute any command.
 
   For invalid commands returns exception
@@ -66,23 +65,29 @@ defmodule Game.Hero do
           {:ok, tile | :launched}
           | {:error, error}
         when tile: Game.tile(), error: :noop | %BadCommand{}
-  def control(pid, cmd)
+  def control(server, cmd)
 
-  def control(pid, cmd) when cmd in @moves, do: GenServer.call(pid, {:play, cmd})
+  def control(server, cmd) when cmd in @moves, do: GenServer.call(server, {:play, cmd})
 
-  def control(pid, :attack) do
+  def control(server, :attack) do
     children = Supervisor.which_children(Game.HeroSupervisor)
 
     enemies =
       Enum.flat_map(children, fn
-        {_, ^pid, :worker, [__MODULE__]} -> []
+        {_, ^server, :worker, [__MODULE__]} -> []
         {_, hero, :worker, [__MODULE__]} -> [hero]
       end)
 
-    GenServer.call(pid, {:broadcast, enemies})
+    GenServer.call(server, {:broadcast, enemies})
   end
 
   def control(_, _), do: {:error, %BadCommand{}}
+
+  @doc """
+  Get current hero position.
+  """
+  @spec position(GenServer.server()) :: Game.tile()
+  def position(server), do: GenServer.call(server, :position)
 
   ## Server (callbacks)
 
@@ -109,13 +114,13 @@ defmodule Game.Hero do
   end
 
   @impl true
-  def handle_call({:broadcast, []}, _from, %State{} = state) do
+  def handle_call({:broadcast, []}, _from, state) do
     {:reply, {:ok, :launched}, state}
   end
 
   @impl true
-  def handle_call({:broadcast, enemies}, _from, %State{tile: tile} = state) do
-    args = [tile, enemies]
+  def handle_call({:broadcast, enemies}, _from, state) do
+    args = [state.tile, enemies]
     Task.Supervisor.async_nolink(Game.TaskSupervisor, __MODULE__, :stream_task, args)
     {:reply, {:ok, :launched}, state}
   end
@@ -140,14 +145,17 @@ defmodule Game.Hero do
   end
 
   @impl true
-  def handle_info({task_ref, :done}, %State{} = state) do
+  def handle_call(:position, _from, state), do: {:reply, state.tile, state}
+
+  @impl true
+  def handle_info({task_ref, :done}, state) do
     Process.demonitor(task_ref, [:flush])
     {:noreply, state}
   end
 
   @impl true
-  def handle_info({:DOWN, _down_ref, :process, _pid, reason}, %State{} = state) do
-    Logger.warn("Attack failed with reason: #{inspect(reason)}", tag: :task_down)
+  def handle_info({:DOWN, _down_ref, :process, _pid, reason}, state) do
+    Logger.warn("Task failed with reason #{reason}", tag: "attack")
     {:noreply, state}
   end
 

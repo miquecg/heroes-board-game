@@ -4,40 +4,52 @@ defmodule Web.AcceptanceTest do
 
   import Wallaby.Query, only: [button: 1, css: 2]
 
-  @game game_path(@endpoint, :index)
+  @game Routes.game_path(@endpoint, :index)
 
-  feature "User visits the game URL and the board grid is loaded", %{session: session} do
-    session
+  setup context do
+    if context[:join] do
+      Enum.each(sessions(context), fn user ->
+        user
+        |> visit(@game)
+        |> click(button("Start"))
+      end)
+    end
+
+    :ok
+  end
+
+  feature "User visits the game URL and the board grid is loaded", %{session: user} do
+    user
     |> visit(@game)
     |> assert_has(css("#grid .cell", count: 48))
     |> assert_has(css(".cell.wall", count: 7))
+    |> assert_has(button("Start"))
   end
 
   feature "User clicks the start button and their hero appears in the board grid", %{
-    session: session
+    session: user
   } do
-    session
+    user
     |> visit(@game)
-    |> refute_has(hero_on_the_grid())
+    |> refute_has(active_heroes())
     |> click(button("Start"))
-    |> assert_has(hero_on_the_grid(count: 1))
+    |> assert_has(active_heroes(count: 1))
   end
 
+  @tag :join
   @sessions 2
-  feature "Other players' heroes appear in the board grid when loaded", %{
-    sessions: [user1, user2]
+  feature "JavaScript client updates board as players join and leave the game", %{
+    sessions: [player1, player2]
   } do
-    user1
-    |> visit(@game)
-    |> click(button("Start"))
+    assert_has(player1, active_heroes(count: 2))
+    assert_has(player2, active_heroes(count: 2))
 
-    user2
-    |> visit(@game)
-    |> click(button("Start"))
-
-    user2
-    |> assert_has(hero_on_the_grid(count: 2))
+    :ok = Wallaby.end_session(player2)
+    assert_has(player1, active_heroes(count: 1))
   end
 
-  defp hero_on_the_grid(opts \\ []), do: css("#grid .hero", opts)
+  defp sessions(%{session: user}), do: [user]
+  defp sessions(context), do: context.sessions
+
+  defp active_heroes(opts \\ []), do: css("#grid .hero", opts)
 end
