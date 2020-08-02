@@ -16,8 +16,8 @@ jobs:
     strategy:
       matrix:
         elixir: [1.10.4]
-        erlang: [22.3.4.3]
-        os: [debian-buster-20200511]
+        erlang: [22.3.4.4]
+        os: [debian-buster-20200607]
     container:
       image: hexpm/elixir-amd64:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-${{ matrix.os }}
     outputs:
@@ -63,8 +63,8 @@ jobs:
     strategy:
       matrix:
         elixir: [1.10.4]
-        erlang: [22.3.4.3]
-        os: [debian-buster-20200511]
+        erlang: [22.3.4.4]
+        os: [debian-buster-20200607]
     container:
       image: hexpm/elixir-amd64:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-${{ matrix.os }}
     steps:
@@ -94,8 +94,8 @@ jobs:
     strategy:
       matrix:
         elixir: [1.10.4]
-        erlang: [22.3.4.3]
-        os: [debian-buster-20200511]
+        erlang: [22.3.4.4]
+        os: [debian-buster-20200607]
     container:
       image: hexpm/elixir-amd64:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-${{ matrix.os }}
     steps:
@@ -116,8 +116,8 @@ jobs:
     strategy:
       matrix:
         elixir: [1.10.4]
-        erlang: [22.3.4.3]
-        os: [debian-buster-20200511]
+        erlang: [22.3.4.4]
+        os: [debian-buster-20200607]
     container:
       image: hexpm/elixir-amd64:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-${{ matrix.os }}
     steps:
