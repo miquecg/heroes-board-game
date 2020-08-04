@@ -27,11 +27,15 @@ defmodule Web.GameChannelTest do
     assert_broadcast "presence_diff", %{joins: %{^id => _metas}, leaves: %{}}
   end
 
-  test "Player cannot join the channel with an expired id", context do
+  test "Channel join crashes with an expired player_id", context do
     Application.stop(@game)
     :ok = Application.start(@game)
 
     assert {:error, %{reason: "join crashed"}} = join_game(context.assigns)
+  end
+
+  test "Player cannot join channel using different sockets", context do
+    assert {:error, %{reason: "unauthorized"}} = join_game(context.assigns)
   end
 
   defp join_game(assigns) do
