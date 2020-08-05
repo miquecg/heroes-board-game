@@ -1,10 +1,8 @@
 defmodule Web.GameChannelTest do
-  use HeroesWeb.ChannelCase
+  use HeroesWeb.ChannelCase, async: true
 
   alias Web.GameChannel
   alias Web.PlayerSocket, as: Socket
-
-  @game :heroes_server
 
   setup do
     id = HeroesServer.join()
@@ -27,11 +25,13 @@ defmodule Web.GameChannelTest do
     assert_broadcast "presence_diff", %{joins: %{^id => _metas}, leaves: %{}}
   end
 
-  test "Player cannot join the channel with an expired id", context do
-    Application.stop(@game)
-    :ok = Application.start(@game)
+  test "Channel join crashes with an invalid player_id" do
+    assigns = %{player_id: "invalid"}
+    assert {:error, %{reason: "join crashed"}} = join_game(assigns)
+  end
 
-    assert {:error, %{reason: "join crashed"}} = join_game(context.assigns)
+  test "Player cannot join channel using different sockets", context do
+    assert {:error, %{reason: "unauthorized"}} = join_game(context.assigns)
   end
 
   defp join_game(assigns) do

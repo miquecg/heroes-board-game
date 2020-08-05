@@ -10,8 +10,12 @@ defmodule Web.GameChannel do
 
   @impl true
   def join("game:lobby", _message, socket) do
-    send(self(), {:after_join, player_position(socket)})
-    {:ok, socket}
+    if authorized?(socket) do
+      send(self(), {:after_join, player_position(socket)})
+      {:ok, socket}
+    else
+      {:error, %{reason: "unauthorized"}}
+    end
   end
 
   @impl true
@@ -20,6 +24,14 @@ defmodule Web.GameChannel do
     {:ok, _} = Presence.track(socket, socket.assigns.player_id, %{x: x, y: y})
 
     {:noreply, socket}
+  end
+
+  @spec authorized?(Socket.t()) :: boolean()
+  defp authorized?(socket) do
+    case Presence.get_by_key("game:lobby", socket.assigns.player_id) do
+      [] -> true
+      %{metas: _} -> false
+    end
   end
 
   @spec player_position(Socket.t()) :: Game.tile()
