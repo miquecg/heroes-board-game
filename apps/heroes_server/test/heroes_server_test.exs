@@ -16,11 +16,11 @@ defmodule HeroesServerTest do
 
     assert count_heroes() == 0
 
-    id = GenServer.call(server, :join)
-    server = {:via, Registry, {HeroesServer.Registry, id}}
+    player_id = GenServer.call(server, :join)
+    hero = HeroesServer.hero_name(player_id)
 
     assert count_heroes() == 1
-    assert {0, 1} = Hero.position(server)
+    assert {0, 1} = Hero.position(hero)
   end
 
   describe "A player controlling a hero" do

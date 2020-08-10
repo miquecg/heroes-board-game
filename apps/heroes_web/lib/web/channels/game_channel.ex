@@ -5,6 +5,8 @@ defmodule Web.GameChannel do
 
   use HeroesWeb, :channel
 
+  import HeroesServer, only: [hero_name: 1]
+
   alias Phoenix.Socket
   alias Web.Presence
 
@@ -36,7 +38,8 @@ defmodule Web.GameChannel do
 
   @spec player_position(Socket.t()) :: Game.tile()
   defp player_position(socket) do
-    server = {:via, Registry, {HeroesServer.Registry, socket.assigns.player_id}}
-    Game.Hero.position(server)
+    socket.assigns.player_id
+    |> hero_name()
+    |> Game.Hero.position()
   end
 end
