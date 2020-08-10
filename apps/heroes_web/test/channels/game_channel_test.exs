@@ -10,7 +10,7 @@ defmodule Web.GameChannelTest do
   end
 
   setup context do
-    {:ok, _, socket} = join_game(context.assigns)
+    {:ok, _, socket} = join_channel(context.assigns)
 
     %{socket: socket}
   end
@@ -27,14 +27,14 @@ defmodule Web.GameChannelTest do
 
   test "Channel join crashes with an invalid player_id" do
     assigns = %{player_id: "invalid"}
-    assert {:error, %{reason: "join crashed"}} = join_game(assigns)
+    assert {:error, %{reason: "join crashed"}} = join_channel(assigns)
   end
 
   test "Player cannot join channel using different sockets", context do
-    assert {:error, %{reason: "unauthorized"}} = join_game(context.assigns)
+    assert {:error, %{reason: "unauthorized"}} = join_channel(context.assigns)
   end
 
-  defp join_game(assigns) do
+  defp join_channel(assigns) do
     Socket
     |> socket(nil, assigns)
     |> subscribe_and_join(GameChannel, "game:lobby")
