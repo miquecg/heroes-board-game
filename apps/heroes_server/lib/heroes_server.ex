@@ -50,7 +50,7 @@ defmodule HeroesServer do
   def join, do: GenServer.call(__MODULE__, :join)
 
   @doc """
-  Registered name for player's hero
+  Registered name of player's hero.
   """
   @spec hero_name(player_id) :: {:via, module(), term()}
   def hero_name(player_id), do: {:via, Registry, {HeroesServer.Registry, player_id}}
