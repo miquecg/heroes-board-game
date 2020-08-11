@@ -15,11 +15,11 @@ defmodule Web.GameChannelTest do
     %{socket: socket}
   end
 
-  test "Channel pushes event presence_state to the client when joining" do
+  test "Channel pushes presence state to the client when joining" do
     assert_push "presence_state", %{}
   end
 
-  test "Channel broadcasts event presence_diff to clients when joins happen", context do
+  test "Channel broadcasts joins when they happen", context do
     %{player_id: id} = context.assigns
 
     assert_broadcast "presence_diff", %{joins: %{^id => _metas}, leaves: %{}}
