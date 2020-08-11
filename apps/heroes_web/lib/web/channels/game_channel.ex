@@ -22,8 +22,14 @@ defmodule Web.GameChannel do
   def handle_info({:after_join, {x, y}}, socket) do
     push(socket, "presence_state", Presence.list(socket))
     {:ok, _} = Presence.track(socket, socket.assigns.player_id, %{x: x, y: y})
+    monitor_hero(socket)
 
     {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({:DOWN, _ref, :process, _pid, _reason}, socket) do
+    {:stop, :hero_down, socket}
   end
 
   @spec authorized?(Socket.t()) :: boolean()
@@ -36,7 +42,19 @@ defmodule Web.GameChannel do
 
   @spec player_position(Socket.t()) :: Game.tile()
   defp player_position(socket) do
-    server = {:via, Registry, {HeroesServer.Registry, socket.assigns.player_id}}
-    Game.Hero.position(server)
+    hero = hero_name(socket)
+    Game.Hero.position(hero)
   end
+
+  @spec monitor_hero(Socket.t()) :: reference()
+  defp monitor_hero(socket) do
+    hero = hero_name(socket)
+
+    hero
+    |> GenServer.whereis()
+    |> Process.monitor()
+  end
+
+  @spec hero_name(Socket.t()) :: GenServer.name()
+  defp hero_name(socket), do: HeroesServer.hero_name(socket.assigns.player_id)
 end
