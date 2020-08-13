@@ -5,13 +5,14 @@ defmodule Web.GameChannel do
 
   use HeroesWeb, :channel
 
+  alias Game.Hero
   alias Phoenix.Socket
   alias Web.Presence
 
   @impl true
   def join("game:lobby", _message, socket) do
     if authorized?(socket) do
-      send(self(), {:after_join, player_position(socket)})
+      send(self(), {:after_join, Hero.position(socket.assigns.hero)})
       {:ok, socket}
     else
       {:error, %{reason: "unauthorized"}}
@@ -40,21 +41,10 @@ defmodule Web.GameChannel do
     end
   end
 
-  @spec player_position(Socket.t()) :: Game.Board.tile()
-  defp player_position(socket) do
-    hero = hero_name(socket)
-    Game.Hero.position(hero)
-  end
-
   @spec monitor_hero(Socket.t()) :: reference()
   defp monitor_hero(socket) do
-    hero = hero_name(socket)
-
-    hero
+    socket.assigns.hero
     |> GenServer.whereis()
     |> Process.monitor()
   end
-
-  @spec hero_name(Socket.t()) :: GenServer.name()
-  defp hero_name(socket), do: HeroesServer.hero_name(socket.assigns.player_id)
 end

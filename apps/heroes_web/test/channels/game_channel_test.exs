@@ -1,12 +1,14 @@
 defmodule Web.GameChannelTest do
   use HeroesWeb.ChannelCase
 
+  import HeroesServer, only: [hero_name: 1]
+
   alias Web.GameChannel
   alias Web.PlayerSocket, as: Socket
 
   setup do
-    id = HeroesServer.join()
-    [assigns: %{player_id: id}]
+    id = join_server()
+    [assigns: %{player_id: id, hero: hero_name(id)}]
   end
 
   setup context do
@@ -45,6 +47,8 @@ defmodule Web.GameChannelTest do
     assert {:error, %{reason: "unauthorized"}} = join_channel(context.assigns)
   end
 
+  defp join_server, do: HeroesServer.join()
+
   defp join_channel(assigns) do
     Socket
     |> socket(nil, assigns)
@@ -65,7 +69,7 @@ defmodule Web.GameChannelTest do
 
   defp kill_hero(player_id) do
     player_id
-    |> HeroesServer.hero_name()
+    |> hero_name()
     |> GenServer.whereis()
     |> Process.exit(:kill)
   end
