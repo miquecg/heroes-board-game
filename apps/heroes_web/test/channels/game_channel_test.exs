@@ -1,76 +1,46 @@
 defmodule Web.GameChannelTest do
-  use HeroesWeb.ChannelCase
+  use HeroesWeb.ChannelCase, async: true
 
-  import HeroesServer, only: [hero_name: 1]
+  describe "Player position is tracked on game:board topic." do
+    setup context do
+      [socket: subscribe_and_join!(context.socket, @topics.board)]
+    end
 
-  alias Web.GameChannel
-  alias Web.PlayerSocket, as: Socket
+    test "When joining presence_state is pushed and presence_diff broadcasted",
+         %{player_id: id} do
+      assert_push "presence_state", %{}
 
-  setup do
-    id = join_server()
-    [assigns: %{player_id: id, hero: hero_name(id)}]
-  end
+      assert_broadcast "presence_diff", %{joins: %{^id => %{metas: metas}}, leaves: %{}}
+      assert [%{phx_ref: _, x: 5, y: 3}] = metas
+    end
 
-  setup context do
-    {:ok, _, socket} = join_channel(context.assigns)
+    test "When leaving presence_diff is broadcasted", %{socket: socket, player_id: id} do
+      Process.unlink(socket.channel_pid)
 
-    %{socket: socket}
-  end
+      ref = leave(socket)
+      assert_reply ref, :ok
 
-  test "Channel pushes presence state to the client when joining" do
-    assert_push "presence_state", %{}
-  end
+      assert_broadcast "presence_diff", %{joins: %{}, leaves: %{^id => _metas}}
+    end
 
-  test "Channel broadcasts joins when they happen", context do
-    %{player_id: id} = context.assigns
+    test "When closing socket presence_diff is broadcasted", %{socket: socket, player_id: id} do
+      Process.unlink(socket.channel_pid)
 
-    assert_broadcast "presence_diff", %{joins: %{^id => _metas}, leaves: %{}}
-  end
+      :ok = close(socket)
 
-  test "Channel broadcasts leave when a hero is restarted", context do
-    flush_messages()
-
-    Process.flag(:trap_exit, true)
-    %{player_id: id} = context.assigns
-    kill_hero(id)
-
-    assert_broadcast "presence_diff", %{joins: %{}, leaves: %{^id => _metas}}
-    assert_receive {:EXIT, _pid, :hero_down}
-  end
-
-  test "Channel join crashes with an invalid player_id" do
-    assigns = %{player_id: "invalid"}
-    assert {:error, %{reason: "join crashed"}} = join_channel(assigns)
-  end
-
-  test "Player cannot join channel using different sockets", context do
-    assert {:error, %{reason: "unauthorized"}} = join_channel(context.assigns)
-  end
-
-  defp join_server, do: HeroesServer.join()
-
-  defp join_channel(assigns) do
-    Socket
-    |> socket(nil, assigns)
-    |> subscribe_and_join(GameChannel, "game:lobby")
-  end
-
-  def flush_messages(timeout \\ 100) do
-    receive do
-      %Phoenix.Socket.Message{} ->
-        flush_messages()
-
-      %Phoenix.Socket.Broadcast{} ->
-        flush_messages()
-    after
-      timeout -> nil
+      assert_broadcast "presence_diff", %{joins: %{}, leaves: %{^id => _metas}}
     end
   end
 
-  defp kill_hero(player_id) do
-    player_id
-    |> hero_name()
-    |> GenServer.whereis()
-    |> Process.exit(:kill)
+  test "A player cannot join if the hero is no longer active", context do
+    stop_supervised!(Game.Hero)
+
+    assert {:error, %{reason: "join crashed"}} = join(context.socket, @topics.board)
+  end
+
+  test "A tracked player cannot join simultaneously on different socket connections", context do
+    {:ok, _, _} = join(context.socket, @topics.board)
+
+    assert {:error, %{reason: "unauthorized"}} = join(context.socket, @topics.board)
   end
 end

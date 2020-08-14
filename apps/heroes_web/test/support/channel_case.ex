@@ -6,11 +6,38 @@ defmodule HeroesWeb.ChannelCase do
 
   use ExUnit.CaseTemplate
 
+  import Phoenix.ChannelTest
+
+  alias Web.PlayerSocket
+
+  @endpoint Web.Endpoint
+
   using do
     quote do
       import Phoenix.ChannelTest
 
-      @endpoint Web.Endpoint
+      @topics %{
+        board: "game:board"
+      }
     end
+  end
+
+  setup %{test: test_name} do
+    assigns = %{
+      player_id: Atom.to_string(test_name),
+      hero: test_name
+    }
+
+    opts = [
+      name: test_name,
+      board: nil,
+      tile: {5, 3}
+    ]
+
+    [
+      socket: socket(PlayerSocket, nil, assigns),
+      hero_pid: start_supervised!({Game.Hero, opts}),
+      player_id: assigns.player_id
+    ]
   end
 end
