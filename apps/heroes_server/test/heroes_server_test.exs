@@ -11,7 +11,7 @@ defmodule HeroesServerTest do
   end
 
   test "When a player joins the server a hero is created and registered" do
-    opts = [board_mod: GameBoards.Test2x2w1, player_start: :first_tile]
+    opts = [board: GameBoards.Test2x2w1, player_spawn: :first_tile]
     server = start_supervised!({HeroesServer, [name: :test_server] ++ opts})
 
     assert count_heroes() == 0

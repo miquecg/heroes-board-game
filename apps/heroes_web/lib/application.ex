@@ -7,14 +7,17 @@ defmodule HeroesWeb.Application do
 
   @impl true
   def start(_type, _args) do
-    mod = get_board()
-    player_start = Application.fetch_env!(@app, :player_start)
+    board = get_board()
+    server_opts = [
+      board: board,
+      player_spawn: Application.fetch_env!(@app, :player_spawn)
+    ]
 
     children = [
       {Phoenix.PubSub, name: HeroesWeb.PubSub},
       Web.Presence,
-      {HeroesServer, board_mod: mod, player_start: player_start},
-      {Web.Endpoint, board: mod.spec()}
+      {HeroesServer, server_opts},
+      {Web.Endpoint, board: board.spec()}
     ]
 
     opts = [strategy: :one_for_one, name: HeroesWeb.Supervisor]
