@@ -40,7 +40,7 @@ defmodule Web.GameChannel do
     end
   end
 
-  @spec player_position(Socket.t()) :: Game.tile()
+  @spec player_position(Socket.t()) :: Game.Board.tile()
   defp player_position(socket) do
     hero = hero_name(socket)
     Game.Hero.position(hero)

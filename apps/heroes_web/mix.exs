@@ -20,7 +20,7 @@ defmodule HeroesWeb.MixProject do
   def application do
     [
       mod: {HeroesWeb.Application, []},
-      env: [player_start: :randomized]
+      env: [player_spawn: :randomized]
     ]
   end
 
