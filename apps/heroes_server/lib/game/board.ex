@@ -17,15 +17,20 @@ defmodule Game.Board do
   @type wall :: tile
 
   @typedoc """
+  Board dimension.
+  """
+  @type axis :: Range.t(0, non_neg_integer())
+
+  @typedoc """
   A board specification.
   """
   @type t :: %__MODULE__{
-          h_range: Range.t(0, non_neg_integer()),
-          v_range: Range.t(0, non_neg_integer()),
+          x_axis: axis,
+          y_axis: axis,
           walls: MapSet.t(wall)
         }
 
-  @enforce_keys [:h_range, :v_range, :walls]
+  @enforce_keys [:x_axis, :y_axis, :walls]
 
   defstruct @enforce_keys
 
@@ -49,8 +54,8 @@ defmodule Game.Board do
     walls = Keyword.get(opts, :walls, [])
 
     %Board{
-      h_range: 0..(cols - 1),
-      v_range: 0..(rows - 1),
+      x_axis: 0..(cols - 1),
+      y_axis: 0..(rows - 1),
       walls: MapSet.new(walls)
     }
   end
@@ -70,8 +75,8 @@ defmodule Game.Board do
   Generate all tiles in a board.
   """
   @spec generate(t) :: list(tile)
-  def generate(%Board{h_range: h_range, v_range: v_range, walls: walls}) do
-    for x <- h_range, y <- v_range, {x, y} not in walls, do: {x, y}
+  def generate(%Board{x_axis: x_axis, y_axis: y_axis, walls: walls}) do
+    for x <- x_axis, y <- y_axis, {x, y} not in walls, do: {x, y}
   end
 
   @doc """
@@ -100,16 +105,11 @@ defmodule Game.Board do
   end
 
   @spec validate(%{from: tile, to: {integer(), integer()}}, t) :: tile
-  defp validate(%{from: current, to: {x, y} = next}, %Board{
-         h_range: h_min..h_max,
-         v_range: v_min..v_max,
-         walls: walls
-       })
-       when is_integer(x) and is_integer(y) do
+  defp validate(%{from: current, to: {x, y} = next}, %Board{} = board) do
     cond do
-      x < h_min or x > h_max -> current
-      y < v_min or y > v_max -> current
-      next in walls -> current
+      x not in board.x_axis -> current
+      y not in board.y_axis -> current
+      next in board.walls -> current
       true -> next
     end
   end
