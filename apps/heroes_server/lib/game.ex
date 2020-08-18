@@ -10,6 +10,4 @@ defmodule Game do
   @type moves :: Game.Board.moves()
 
   @type board :: Game.Board.t()
-
-  @type board_range :: Game.BoardRange.t()
 end

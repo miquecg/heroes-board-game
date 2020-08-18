@@ -112,6 +112,31 @@ defmodule Game.BoardTest do
     end
   end
 
+  @doc """
+  +---+---+---+---+
+  |   | X | ⠀ | X |
+  +---+---+---+---+
+  | ✓ | ✓ |   |   |
+  +---+---+---+---+
+  |   | ✓ | ✓ | X |
+  +---+---+---+---+
+  | ✓ |   |   |   |
+  +---+---+---+---+
+  """
+  test "Attack distance spans one tile on every direction" do
+    attack_distance? = &Board.attack_distance?({1, 1}, &1)
+
+    assert attack_distance?.({0, 0})
+    assert attack_distance?.({0, 2})
+    assert attack_distance?.({1, 1})
+    assert attack_distance?.({1, 2})
+    assert attack_distance?.({2, 1})
+
+    refute attack_distance?.({1, 3})
+    refute attack_distance?.({3, 1})
+    refute attack_distance?.({3, 3})
+  end
+
   defp assert_tiles(board, candidates) do
     tiles = Enum.sort(board.tiles())
     expected = Enum.sort(candidates)

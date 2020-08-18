@@ -4,7 +4,6 @@ defmodule Game.Board do
   """
 
   alias __MODULE__
-  alias Game.BoardRange
   alias GameError.BadSize
 
   @typedoc """
@@ -34,6 +33,8 @@ defmodule Game.Board do
   Allowed movements.
   """
   @type moves :: :up | :down | :left | :right
+
+  defguardp distance_radius_one(a, b) when abs(a - b) <= 1
 
   @doc """
   Create a board struct from given options.
@@ -71,19 +72,6 @@ defmodule Game.Board do
   @spec generate(t) :: list(tile)
   def generate(%Board{h_range: h_range, v_range: v_range, walls: walls}) do
     for x <- h_range, y <- v_range, {x, y} not in walls, do: {x, y}
-  end
-
-  @doc """
-  Calculate an attack range given a tile.
-  """
-  @spec attack_range(t, tile) :: Game.board_range()
-  def attack_range(%Board{h_range: h_min..h_max, v_range: v_min..v_max}, {x, y}) do
-    x_min = max(x - 1, h_min)
-    x_max = min(x + 1, h_max)
-    y_min = max(y - 1, v_min)
-    y_max = min(y + 1, v_max)
-
-    %BoardRange{h: x_min..x_max, v: y_min..y_max}
   end
 
   @doc """
@@ -125,4 +113,15 @@ defmodule Game.Board do
       true -> next
     end
   end
+
+  @doc """
+  Check wether two tiles are within
+  one tile radius distance from each other.
+  """
+  @spec attack_distance?(tile, tile) :: boolean()
+  def attack_distance?({x1, y1}, {x2, y2})
+      when distance_radius_one(x1, x2) and distance_radius_one(y1, y2),
+      do: true
+
+  def attack_distance?(_, _), do: false
 end

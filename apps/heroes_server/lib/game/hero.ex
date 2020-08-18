@@ -8,7 +8,7 @@ defmodule Game.Hero do
 
   require Logger
 
-  alias Game.BoardRange
+  alias Game.Board
   alias GameError.BadCommand
 
   @moves [:up, :down, :left, :right]
@@ -132,11 +132,9 @@ defmodule Game.Hero do
   end
 
   @impl true
-  def handle_call({:attack, enemy}, _from, %State{board: board, tile: tile} = state) do
-    attack_range = board.attack_range(tile)
-
+  def handle_call({:attack, enemy_tile}, _from, state) do
     {living_status, state} =
-      case BoardRange.member?(attack_range, enemy) do
+      case Board.attack_distance?(state.tile, enemy_tile) do
         true -> {@dead_status, %{state | alive: false}}
         false -> {@alive_status, state}
       end
