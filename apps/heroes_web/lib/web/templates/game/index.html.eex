@@ -1,9 +1,9 @@
 <section>
   <h1>Heroes Board Game</h1>
   <%# --- board --- %>
-  <div id="grid" style="--rowNum: <%= rows(@board) %>;">
-    <%= for x <- @board.h_range, y <- reverse(@board.v_range) do %>
-      <%= render("grid_box.html", cell: {x, y}, walls: @board.walls) %>
+  <div id="grid" style="--rowNum: <%= count_rows(@board) %>;">
+    <%= for x <- @board.x_axis(), y <- reverse(@board.y_axis()) do %>
+      <%= render("grid_box.html", cell: {x, y}, walls: @board.walls()) %>
     <% end %>
     <div class="hero-cells"></div>
     <%= unless @signed_in?, do: render("start_button.html") %>

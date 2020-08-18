@@ -8,6 +8,7 @@ defmodule HeroesWeb.Application do
   @impl true
   def start(_type, _args) do
     board = get_board()
+
     server_opts = [
       board: board,
       player_spawn: Application.fetch_env!(@app, :player_spawn)
@@ -17,7 +18,7 @@ defmodule HeroesWeb.Application do
       {Phoenix.PubSub, name: HeroesWeb.PubSub},
       Web.Presence,
       {HeroesServer, server_opts},
-      {Web.Endpoint, board: board.spec()}
+      {Web.Endpoint, board: board}
     ]
 
     opts = [strategy: :one_for_one, name: HeroesWeb.Supervisor]
