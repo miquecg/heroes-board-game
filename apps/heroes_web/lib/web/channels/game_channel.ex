@@ -9,8 +9,10 @@ defmodule Web.GameChannel do
   alias Phoenix.Socket
   alias Web.Presence
 
+  @topic "game:board"
+
   @impl true
-  def join("game:lobby", _message, socket) do
+  def join(@topic, _message, socket) do
     if authorized?(socket) do
       send(self(), {:after_join, Hero.position(socket.assigns.hero)})
       {:ok, socket}
@@ -35,7 +37,7 @@ defmodule Web.GameChannel do
 
   @spec authorized?(Socket.t()) :: boolean()
   defp authorized?(socket) do
-    case Presence.get_by_key("game:lobby", socket.assigns.player_id) do
+    case Presence.get_by_key(@topic, socket.assigns.player_id) do
       [] -> true
       %{metas: _} -> false
     end

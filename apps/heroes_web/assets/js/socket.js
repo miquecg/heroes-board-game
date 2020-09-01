@@ -12,7 +12,7 @@ class App {
     socket.onError( ev => console.log("socket ERROR", e) )
     socket.onClose( () => console.log("socket CLOSE") )
 
-    let channel = socket.channel("game:lobby", {})
+    let channel = socket.channel("game:board", {})
     channel.join()
            .receive("ok", () => { console.log("Joined successfully") })
            .receive("error", resp => {
