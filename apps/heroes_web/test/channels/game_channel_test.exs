@@ -6,7 +6,7 @@ defmodule Web.GameChannelTest do
       [socket: subscribe_and_join!(context.socket, @topics.board)]
     end
 
-    test "When joining presence_state is pushed and presence_diff broadcasted",
+    test "When joining channel presence_state is pushed and presence_diff broadcasted",
          %{player_id: id} do
       assert_push "presence_state", %{}
 
@@ -14,21 +14,62 @@ defmodule Web.GameChannelTest do
       assert [%{phx_ref: _, x: 5, y: 3}] = metas
     end
 
-    test "When leaving presence_diff is broadcasted", %{socket: socket, player_id: id} do
-      Process.unlink(socket.channel_pid)
-
-      ref = leave(socket)
-      assert_reply ref, :ok
+    test "When leaving channel presence_diff is broadcasted", %{player_id: id} = context do
+      leave_channel(context.socket)
 
       assert_broadcast "presence_diff", %{joins: %{}, leaves: %{^id => _metas}}
     end
 
-    test "When closing socket presence_diff is broadcasted", %{socket: socket, player_id: id} do
-      Process.unlink(socket.channel_pid)
-
-      :ok = close(socket)
+    test "When closing socket presence_diff is broadcasted", %{player_id: id} = context do
+      close_socket(context.socket)
 
       assert_broadcast "presence_diff", %{joins: %{}, leaves: %{^id => _metas}}
+    end
+  end
+
+  describe "Player online presence is tracked on game:lobby topic." do
+    setup context do
+      @endpoint.subscribe(@topics.lobby)
+      {:ok, _, socket} = join(context.socket, @topics.board)
+
+      [socket: socket]
+    end
+
+    test "When joining channel presence_diff is broadcasted", %{player_id: id} do
+      assert_receive %Phoenix.Socket.Broadcast{
+        event: "presence_diff",
+        payload: %{
+          joins: %{^id => _metas},
+          leaves: %{}
+        },
+        topic: "game:lobby"
+      }
+    end
+
+    test "When leaving channel presence_diff is broadcasted", %{player_id: id} = context do
+      leave_channel(context.socket)
+
+      assert_receive %Phoenix.Socket.Broadcast{
+        event: "presence_diff",
+        payload: %{
+          joins: %{},
+          leaves: %{^id => _metas}
+        },
+        topic: "game:lobby"
+      }
+    end
+
+    test "When closing socket presence_diff is broadcasted", %{player_id: id} = context do
+      close_socket(context.socket)
+
+      assert_receive %Phoenix.Socket.Broadcast{
+        event: "presence_diff",
+        payload: %{
+          joins: %{},
+          leaves: %{^id => _metas}
+        },
+        topic: "game:lobby"
+      }
     end
   end
 
@@ -42,5 +83,17 @@ defmodule Web.GameChannelTest do
     {:ok, _, _} = join(context.socket, @topics.board)
 
     assert {:error, %{reason: "unauthorized"}} = join(context.socket, @topics.board)
+  end
+
+  defp leave_channel(socket) do
+    Process.unlink(socket.channel_pid)
+
+    ref = leave(socket)
+    assert_reply ref, :ok
+  end
+
+  defp close_socket(socket) do
+    Process.unlink(socket.channel_pid)
+    :ok = close(socket)
   end
 end

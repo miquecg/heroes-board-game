@@ -16,8 +16,11 @@ defmodule HeroesWeb.ChannelCase do
     quote do
       import Phoenix.ChannelTest
 
+      @endpoint Web.Endpoint
+
       @topics %{
-        board: "game:board"
+        board: "game:board",
+        lobby: "game:lobby"
       }
     end
   end
