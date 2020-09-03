@@ -84,16 +84,4 @@ defmodule Web.GameChannelTest do
 
     assert {:error, %{reason: "unauthorized"}} = join(context.socket, @topics.board)
   end
-
-  defp leave_channel(socket) do
-    Process.unlink(socket.channel_pid)
-
-    ref = leave(socket)
-    assert_reply ref, :ok
-  end
-
-  defp close_socket(socket) do
-    Process.unlink(socket.channel_pid)
-    :ok = close(socket)
-  end
 end

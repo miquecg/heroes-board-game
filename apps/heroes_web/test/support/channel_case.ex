@@ -14,6 +14,7 @@ defmodule HeroesWeb.ChannelCase do
 
   using do
     quote do
+      import HeroesWeb.ChannelCase
       import Phoenix.ChannelTest
 
       @endpoint Web.Endpoint
@@ -42,5 +43,17 @@ defmodule HeroesWeb.ChannelCase do
       hero_pid: start_supervised!({Game.Hero, opts}),
       player_id: assigns.player_id
     ]
+  end
+
+  def leave_channel(socket) do
+    Process.unlink(socket.channel_pid)
+
+    ref = leave(socket)
+    assert_reply ref, :ok, %{}, 100
+  end
+
+  def close_socket(socket) do
+    Process.unlink(socket.channel_pid)
+    :ok = close(socket)
   end
 end
