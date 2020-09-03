@@ -1,5 +1,7 @@
 import Config
 
+config :heroes_web, reconnect_timeout: 100
+
 config :heroes_web, Web.Endpoint,
   http: [port: 4002],
   server: true

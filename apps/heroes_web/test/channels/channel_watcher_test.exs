@@ -14,12 +14,12 @@ defmodule Web.ChannelWatcherTest do
   test "Hero is removed time after leaving the channel", %{ref: ref} = context do
     leave_channel(context.socket)
 
-    assert_receive {:DOWN, ^ref, :process, _pid, :normal}
+    assert_receive {:DOWN, ^ref, :process, _pid, :normal}, 150
   end
 
   test "Hero is removed time after closing the socket", %{ref: ref} = context do
     close_socket(context.socket)
 
-    assert_receive {:DOWN, ^ref, :process, _pid, :normal}
+    assert_receive {:DOWN, ^ref, :process, _pid, :normal}, 150
   end
 end

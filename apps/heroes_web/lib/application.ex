@@ -4,20 +4,17 @@ defmodule HeroesWeb.Application do
   use Application
 
   @app :heroes_web
+  @one_minute_ms 60_000
 
   @impl true
   def start(_type, _args) do
     board = get_board()
 
-    server_opts = [
-      board: board,
-      player_spawn: Application.fetch_env!(@app, :player_spawn)
-    ]
-
     children = [
       {Phoenix.PubSub, name: HeroesWeb.PubSub},
       Web.Presence,
-      {HeroesServer, server_opts},
+      {Web.ChannelWatcher, watcher_opts()},
+      {HeroesServer, server_opts(board)},
       {Web.Endpoint, board: board}
     ]
 
@@ -33,6 +30,21 @@ defmodule HeroesWeb.Application do
     |> String.capitalize()
     |> (&("Elixir.GameBoards." <> &1)).()
     |> String.to_existing_atom()
+  end
+
+  @spec server_opts(module()) :: keyword()
+  defp server_opts(board) do
+    [
+      board: board,
+      player_spawn: Application.get_env(@app, :player_spawn, :randomized)
+    ]
+  end
+
+  @spec watcher_opts :: keyword()
+  defp watcher_opts do
+    [
+      timeout: Application.get_env(@app, :reconnect_timeout, @one_minute_ms)
+    ]
   end
 
   @impl true
