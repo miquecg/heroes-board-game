@@ -1,6 +1,8 @@
 defmodule Web.ChannelWatcherTest do
   use HeroesWeb.ChannelCase
 
+  setup :register_hero
+
   setup context do
     {:ok, _, socket} = join(context.socket, @topics.board)
 

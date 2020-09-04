@@ -1,9 +1,15 @@
 defmodule Web.GameChannelTest do
   use HeroesWeb.ChannelCase, async: true
 
+  setup :dummy_hero
+
   describe "Player position is tracked on game:board topic." do
     setup context do
       [socket: subscribe_and_join!(context.socket, @topics.board)]
+    end
+
+    setup %{socket: socket} do
+      [player_id: socket.assigns.player_id]
     end
 
     test "When joining channel presence_state is pushed and presence_diff broadcasted",
@@ -33,6 +39,10 @@ defmodule Web.GameChannelTest do
       {:ok, _, socket} = join(context.socket, @topics.board)
 
       [socket: socket]
+    end
+
+    setup %{socket: socket} do
+      [player_id: socket.assigns.player_id]
     end
 
     test "When joining channel presence_diff is broadcasted", %{player_id: id} do

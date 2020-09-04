@@ -8,7 +8,7 @@ defmodule HeroesWeb.ChannelCase do
 
   import Phoenix.ChannelTest
 
-  alias Web.PlayerSocket
+  alias Phoenix.Socket
 
   @endpoint Web.Endpoint
 
@@ -26,7 +26,11 @@ defmodule HeroesWeb.ChannelCase do
     end
   end
 
-  setup %{test: test_name} do
+  setup do
+    [socket: socket(Web.PlayerSocket)]
+  end
+
+  def dummy_hero(%{test: test_name} = context) do
     assigns = %{
       player_id: Atom.to_string(test_name),
       hero: test_name
@@ -39,9 +43,22 @@ defmodule HeroesWeb.ChannelCase do
     ]
 
     [
-      socket: socket(PlayerSocket, nil, assigns),
-      hero_pid: start_supervised!({Game.Hero, opts}),
-      player_id: assigns.player_id
+      socket: Socket.assign(context.socket, assigns),
+      hero_pid: start_supervised!({Game.Hero, opts})
+    ]
+  end
+
+  def register_hero(context) do
+    id = HeroesServer.join()
+
+    assigns = %{
+      player_id: id,
+      hero: HeroesServer.hero(id)
+    }
+
+    [
+      socket: Socket.assign(context.socket, assigns),
+      hero_pid: GenServer.whereis(assigns.hero)
     ]
   end
 
