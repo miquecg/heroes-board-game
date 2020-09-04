@@ -17,7 +17,7 @@ defmodule HeroesServerTest do
     assert count_heroes() == 0
 
     player_id = GenServer.call(server, :join)
-    hero = HeroesServer.hero_name(player_id)
+    hero = HeroesServer.hero(player_id)
 
     assert count_heroes() == 1
     assert {0, 1} = Hero.position(hero)

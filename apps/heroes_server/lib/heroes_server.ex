@@ -50,10 +50,10 @@ defmodule HeroesServer do
   def join, do: GenServer.call(__MODULE__, :join)
 
   @doc """
-  Registered name of player's hero.
+  Hero process name.
   """
-  @spec hero_name(player_id) :: {:via, module(), term()}
-  def hero_name(player_id), do: {:via, Registry, {HeroesServer.Registry, player_id}}
+  @spec hero(player_id) :: {:via, module(), term()}
+  def hero(player_id), do: {:via, Registry, {HeroesServer.Registry, player_id}}
 
   ## Server (callbacks)
 
@@ -77,7 +77,7 @@ defmodule HeroesServer do
     tiles = board.tiles()
 
     opts = [
-      name: hero_name(player_id),
+      name: hero(player_id),
       board: board,
       tile: dice.(tiles)
     ]
