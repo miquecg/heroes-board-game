@@ -8,8 +8,8 @@ defmodule Web.ChannelWatcher do
   alias Phoenix.PubSub
   alias Phoenix.Socket.Broadcast
 
-  @typep player :: HeroesServer.player_id()
   @typep time :: non_neg_integer()
+  @typep timers :: %{optional(HeroesServer.player_id()) => reference()}
 
   ## Client
 
@@ -24,29 +24,50 @@ defmodule Web.ChannelWatcher do
   ## Server (callbacks)
 
   @impl true
-  @spec init(keyword()) :: {:ok, time}
+  @spec init(keyword()) :: {:ok, map()}
   def init(opts) do
     PubSub.subscribe(HeroesWeb.PubSub, "game:lobby")
 
-    {:ok, Keyword.fetch!(opts, :reconnect_timeout)}
+    state = %{
+      time: Keyword.fetch!(opts, :reconnect_timeout),
+      refs: %{}
+    }
+
+    {:ok, state}
   end
 
   @impl true
-  def handle_info(%Broadcast{event: "presence_diff", payload: %{leaves: leaves}}, time) do
-    Enum.each(leaves, fn {player, _metas} -> start_timer(player, time) end)
+  def handle_info(%Broadcast{event: "presence_diff", payload: payload}, %{time: time} = state) do
+    refs =
+      state.refs
+      |> cancel_timers(payload.joins)
+      |> start_timers(payload.leaves, time)
 
-    {:noreply, time}
+    {:noreply, %{state | refs: refs}}
   end
 
   @impl true
   def handle_info({:timeout, player}, state) do
-    HeroesServer.remove(player)
+    {timer, refs} = Map.pop(state.refs, player)
 
-    {:noreply, state}
+    if timer do
+      HeroesServer.remove(player)
+    end
+
+    {:noreply, %{state | refs: refs}}
   end
 
-  @spec start_timer(player, time) :: reference()
-  defp start_timer(id, time) do
-    Process.send_after(self(), {:timeout, id}, time)
+  @spec cancel_timers(timers(), map()) :: timers()
+  defp cancel_timers(refs, joins) do
+    players = Map.keys(joins)
+    Map.drop(refs, players)
+  end
+
+  @spec start_timers(timers(), map(), time) :: timers()
+  defp start_timers(refs, leaves, time) do
+    for {player, _meta} <- leaves, into: refs do
+      ref = Process.send_after(self(), {:timeout, player}, time)
+      {player, ref}
+    end
   end
 end
