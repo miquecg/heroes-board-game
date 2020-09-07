@@ -44,16 +44,25 @@ defmodule HeroesServer do
   end
 
   @doc """
-  Join a player to the server creating a new hero.
+  Join a player to the game creating a new hero.
   """
   @spec join() :: player_id
   def join, do: GenServer.call(__MODULE__, :join)
 
   @doc """
-  Registered name of player's hero.
+  Hero process name.
   """
-  @spec hero_name(player_id) :: {:via, module(), term()}
-  def hero_name(player_id), do: {:via, Registry, {HeroesServer.Registry, player_id}}
+  @spec hero(player_id) :: {:via, module(), term()}
+  def hero(id), do: {:via, Registry, {HeroesServer.Registry, id}}
+
+  @doc """
+  Remove a player's hero from the game.
+  """
+  @spec remove(player_id) :: {:ok, pid()}
+  def remove(id) do
+    server = hero(id)
+    Task.start(GenServer, :stop, [server])
+  end
 
   ## Server (callbacks)
 
@@ -77,7 +86,7 @@ defmodule HeroesServer do
     tiles = board.tiles()
 
     opts = [
-      name: hero_name(player_id),
+      name: hero(player_id),
       board: board,
       tile: dice.(tiles)
     ]

@@ -7,6 +7,8 @@ defmodule Web.PlayerSocket do
 
   require Logger
 
+  import HeroesServer, only: [hero: 1]
+
   channel "game:*", Web.GameChannel
 
   @impl true
@@ -14,7 +16,7 @@ defmodule Web.PlayerSocket do
   def connect(%{"token" => token}, socket) do
     case Phoenix.Token.verify(socket, "player socket", token, max_age: @one_day_seconds) do
       {:ok, id} ->
-        {:ok, assign(socket, :player_id, id)}
+        {:ok, assign(socket, player_id: id, hero: hero(id))}
 
       {:error, reason} ->
         Logger.error("Error verifying token #{inspect(token)}", tag: "token_#{reason}")
