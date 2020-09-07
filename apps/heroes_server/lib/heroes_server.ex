@@ -44,7 +44,7 @@ defmodule HeroesServer do
   end
 
   @doc """
-  Join a player to the server creating a new hero.
+  Join a player to the game creating a new hero.
   """
   @spec join() :: player_id
   def join, do: GenServer.call(__MODULE__, :join)
@@ -53,7 +53,16 @@ defmodule HeroesServer do
   Hero process name.
   """
   @spec hero(player_id) :: {:via, module(), term()}
-  def hero(player_id), do: {:via, Registry, {HeroesServer.Registry, player_id}}
+  def hero(id), do: {:via, Registry, {HeroesServer.Registry, id}}
+
+  @doc """
+  Remove a player's hero from the game.
+  """
+  @spec remove(player_id) :: {:ok, pid()}
+  def remove(id) do
+    server = hero(id)
+    Task.start(GenServer, :stop, [server])
+  end
 
   ## Server (callbacks)
 
