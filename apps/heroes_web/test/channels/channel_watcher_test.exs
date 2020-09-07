@@ -25,4 +25,20 @@ defmodule Web.ChannelWatcherTest do
 
     assert_receive {:DOWN, ^ref, :process, _pid, :normal}, 600
   end
+
+  test "Hero is not removed when player reconnects before timeout", %{ref: ref} = context do
+    leave_channel(context.socket)
+    {:ok, _, _} = join(context.socket, @topics.board)
+
+    refute_receive {:DOWN, ^ref, :process, _pid, :normal}, 1000
+  end
+
+  test "Tracks joins/leaves correctly with more than one hero", %{ref: ref} = context do
+    second_socket = Keyword.get(dummy_hero(:two), :socket)
+
+    leave_channel(context.socket)
+    {:ok, _, _} = join(second_socket, @topics.board)
+
+    assert_receive {:DOWN, ^ref, :process, _pid, :normal}, 600
+  end
 end

@@ -30,20 +30,23 @@ defmodule HeroesWeb.ChannelCase do
     [socket: socket(Web.PlayerSocket)]
   end
 
-  def dummy_hero(%{test: test_name} = context) do
+  def dummy_hero(%{test: name, socket: socket}), do: dummy_hero(name, socket)
+  def dummy_hero(name) when is_atom(name), do: dummy_hero(name, socket(Web.PlayerSocket))
+
+  defp dummy_hero(name, socket) do
     assigns = %{
-      player_id: Atom.to_string(test_name),
-      hero: test_name
+      player_id: Atom.to_string(name),
+      hero: name
     }
 
     opts = [
-      name: test_name,
+      name: name,
       board: nil,
       tile: {5, 3}
     ]
 
     [
-      socket: Socket.assign(context.socket, assigns),
+      socket: Socket.assign(socket, assigns),
       hero_pid: start_supervised!({Game.Hero, opts})
     ]
   end
