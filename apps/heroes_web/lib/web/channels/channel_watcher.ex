@@ -3,7 +3,7 @@ defmodule Web.ChannelWatcher do
   Watches game channels activity to remove heroes when players quit the game.
   """
 
-  use GenServer
+  use GenServer, restart: :transient
 
   ## Client
 
@@ -13,7 +13,7 @@ defmodule Web.ChannelWatcher do
   Requires option `:timeout`.
   """
   @spec start_link(keyword()) :: GenServer.on_start()
-  def start_link(opts), do: GenServer.start_link(__MODULE__, opts)
+  def start_link(opts), do: GenServer.start_link(__MODULE__, opts, name: __MODULE__)
 
   ## Server (callbacks)
 
