@@ -43,7 +43,7 @@ defmodule HeroesWeb.Application do
   @spec watcher_opts :: keyword()
   defp watcher_opts do
     [
-      timeout: Application.get_env(@app, :reconnect_timeout, @one_minute_ms)
+      reconnect_timeout: Application.get_env(@app, :reconnect_timeout, @one_minute_ms)
     ]
   end
 

@@ -10,7 +10,7 @@ defmodule Web.ChannelWatcher do
   @doc """
   Start GenServer under supervision.
 
-  Requires option `:timeout`.
+  Requires option `:reconnect_timeout`.
   """
   @spec start_link(keyword()) :: GenServer.on_start()
   def start_link(opts), do: GenServer.start_link(__MODULE__, opts, name: __MODULE__)
@@ -19,5 +19,5 @@ defmodule Web.ChannelWatcher do
 
   @impl true
   @spec init(keyword()) :: {:ok, non_neg_integer()}
-  def init(opts), do: {:ok, Keyword.fetch!(opts, :timeout)}
+  def init(opts), do: {:ok, Keyword.fetch!(opts, :reconnect_timeout)}
 end
