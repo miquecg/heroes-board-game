@@ -1,9 +1,11 @@
 defmodule HeroesServer do
   @moduledoc """
-  The entrypoint to play the game.
+  The entrypoint to the game.
   """
 
   use GenServer
+
+  alias Game.{HeroServer, HeroSupervisor}
 
   @typedoc """
   Unique identifier for every active
@@ -91,7 +93,7 @@ defmodule HeroesServer do
       tile: dice.(tiles)
     ]
 
-    {:ok, _pid} = DynamicSupervisor.start_child(Game.HeroSupervisor, {Game.Hero, opts})
+    {:ok, _pid} = DynamicSupervisor.start_child(HeroSupervisor, {HeroServer, opts})
 
     {:reply, player_id, state}
   end
