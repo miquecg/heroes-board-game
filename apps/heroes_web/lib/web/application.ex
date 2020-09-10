@@ -1,4 +1,4 @@
-defmodule HeroesWeb.Application do
+defmodule Web.Application do
   @moduledoc false
 
   use Application
@@ -11,18 +11,18 @@ defmodule HeroesWeb.Application do
     board = get_board()
 
     children = [
-      {Phoenix.PubSub, name: HeroesWeb.PubSub},
+      {Phoenix.PubSub, name: Web.PubSub},
       Web.Presence,
       {Web.ChannelWatcher, watcher_opts()},
-      {HeroesServer, server_opts(board)},
+      {Game, game_opts(board)},
       {Web.Endpoint, board: board}
     ]
 
-    opts = [strategy: :one_for_one, name: HeroesWeb.Supervisor]
+    opts = [strategy: :one_for_one, name: Web.Supervisor]
     Supervisor.start_link(children, opts)
   end
 
-  @spec get_board() :: module()
+  @spec get_board :: module()
   defp get_board do
     board = System.get_env("BOARD", "oblivion")
 
@@ -32,8 +32,8 @@ defmodule HeroesWeb.Application do
     |> String.to_existing_atom()
   end
 
-  @spec server_opts(module()) :: keyword()
-  defp server_opts(board) do
+  @spec game_opts(module()) :: keyword()
+  defp game_opts(board) do
     [
       board: board,
       player_spawn: Application.get_env(@app, :player_spawn, :randomized)
