@@ -53,54 +53,62 @@ defmodule Game.HeroTest do
     end
   end
 
-  describe "A hero can be killed by an enemy attack within a radius of one tile:" do
+  describe "A hero can be killed within a radius of one tile: attack from" do
     setup :create_hero
 
-    @tag enemy: {0, 0}
-    test "attack from {0, 0}", %{hero: pid} = context do
-      assert :dead = GenServer.call(pid, {:attack, context.enemy})
+    setup context do
+      attack(context.hero, context.from)
+      :ok
     end
 
-    @tag enemy: {0, 2}
-    test "attack from {0, 2}", %{hero: pid} = context do
-      assert :dead = GenServer.call(pid, {:attack, context.enemy})
+    @tag from: {0, 0}
+    test "{0, 0}", context do
+      refute alive?(context.hero)
     end
 
-    @tag enemy: {1, 1}
-    test "attack from {1, 1}", %{hero: pid} = context do
-      assert :dead = GenServer.call(pid, {:attack, context.enemy})
+    @tag from: {0, 2}
+    test "{0, 2}", context do
+      refute alive?(context.hero)
     end
 
-    @tag enemy: {1, 3}
-    test "attack from {1, 3}", %{hero: pid} = context do
-      assert :alive = GenServer.call(pid, {:attack, context.enemy})
+    @tag from: {1, 1}
+    test "{1, 1}", context do
+      refute alive?(context.hero)
     end
 
-    @tag enemy: {2, 1}
-    test "attack from {2, 1}", %{hero: pid} = context do
-      assert :dead = GenServer.call(pid, {:attack, context.enemy})
+    @tag from: {1, 3}
+    test "{1, 3}", context do
+      assert alive?(context.hero)
     end
 
-    @tag enemy: {3, 1}
-    test "two attacks from {3, 1}, hero moving in between", %{hero: pid} = context do
-      assert :alive = GenServer.call(pid, {:attack, context.enemy})
-
-      {:ok, {2, 1}} = Hero.control(pid, :right)
-
-      assert :dead = GenServer.call(pid, {:attack, context.enemy})
+    @tag from: {2, 1}
+    test "{2, 1}", context do
+      refute alive?(context.hero)
     end
 
-    @tag enemy: {3, 3}
-    test "three attacks from {3, 3}, hero moving in between", %{hero: pid} = context do
-      assert :alive = GenServer.call(pid, {:attack, context.enemy})
+    @tag from: {3, 1}
+    test "{3, 1} to different targets", %{hero: hero, from: from} do
+      assert alive?(hero)
 
-      {:ok, {2, 1}} = Hero.control(pid, :right)
+      {:ok, {2, 1}} = Hero.control(hero, :right)
+      attack(hero, from)
 
-      assert :alive = GenServer.call(pid, {:attack, context.enemy})
+      refute alive?(hero)
+    end
 
-      {:ok, {2, 2}} = Hero.control(pid, :up)
+    @tag from: {3, 3}
+    test "{3, 3} to different targets", %{hero: hero, from: from} do
+      assert alive?(hero)
 
-      assert :dead = GenServer.call(pid, {:attack, context.enemy})
+      {:ok, {2, 1}} = Hero.control(hero, :right)
+      attack(hero, from)
+
+      assert alive?(hero)
+
+      {:ok, {2, 2}} = Hero.control(hero, :up)
+      attack(hero, from)
+
+      refute alive?(hero)
     end
   end
 
@@ -169,6 +177,13 @@ defmodule Game.HeroTest do
     end
 
     Enum.reduce(commands, :acc, fn cmd, _ -> unwrap.(cmd) end)
+  end
+
+  defp attack(hero, from), do: send(hero, {:fire, from})
+
+  defp alive?(hero) do
+    state = :sys.get_state(hero)
+    state.alive
   end
 end
 
