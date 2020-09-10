@@ -1,6 +1,6 @@
-defmodule HeroesServer do
+defmodule Game do
   @moduledoc """
-  The entrypoint to the game.
+  Players entrypoint to the game.
   """
 
   use GenServer
@@ -8,11 +8,9 @@ defmodule HeroesServer do
   alias Game.{HeroServer, HeroSupervisor}
 
   @typedoc """
-  Unique identifier for every active
-  player in the server.
+  Unique identifier for every active player.
 
-  26 characters binary string encoded
-  in base 32 hex.
+  Base 32 hex encoded string of 26 characters.
   """
   @type player_id :: <<_::208>>
 
@@ -48,14 +46,14 @@ defmodule HeroesServer do
   @doc """
   Join a player to the game creating a new hero.
   """
-  @spec join() :: player_id
+  @spec join :: player_id
   def join, do: GenServer.call(__MODULE__, :join)
 
   @doc """
   Hero process name.
   """
   @spec hero(player_id) :: {:via, module(), term()}
-  def hero(id), do: {:via, Registry, {HeroesServer.Registry, id}}
+  def hero(id), do: {:via, Registry, {Game.Registry, id}}
 
   @doc """
   Remove a player's hero from the game.
