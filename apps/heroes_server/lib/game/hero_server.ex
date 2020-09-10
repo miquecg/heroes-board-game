@@ -10,11 +10,6 @@ defmodule Game.HeroServer do
 
   alias Game.Board
 
-  @actions [:play, :broadcast]
-
-  @alive_status :alive
-  @dead_status :dead
-
   @typep state :: %__MODULE__.State{
            board: module(),
            tile: Board.tile(),
@@ -57,76 +52,35 @@ defmodule Game.HeroServer do
 
   @impl true
   # Update to Elixir 1.11 `map.field` syntax in guards
-  def handle_call({msg, _}, _from, %State{alive: false} = state) when msg in @actions do
+  def handle_call(_action, _from, %State{alive: false} = state) do
     {:reply, {:error, :noop}, state}
   end
 
   @impl true
   def handle_call({:play, move}, _from, %State{tile: tile, board: board} = state) do
     result = board.play(tile, move)
-
     {:reply, {:ok, result}, %{state | tile: result}}
   end
 
   @impl true
-  def handle_call({:broadcast, []}, _from, state) do
-    {:reply, {:ok, :launched}, state}
-  end
-
-  @impl true
-  def handle_call({:broadcast, enemies}, _from, state) do
-    args = [state.tile, enemies]
-    Task.Supervisor.async_nolink(Game.TaskSupervisor, __MODULE__, :stream_task, args)
-    {:reply, {:ok, :launched}, state}
-  end
-
-  @impl true
-  # Update to Elixir 1.11 `map.field` syntax in guards
-  def handle_call({:attack, _}, _from, %State{alive: false} = state) do
-    {:reply, @dead_status, state}
-  end
-
-  @impl true
-  def handle_call({:attack, enemy_tile}, _from, state) do
-    {living_status, state} =
-      case Board.attack_distance?(state.tile, enemy_tile) do
-        true -> {@dead_status, %{state | alive: false}}
-        false -> {@alive_status, state}
-      end
-
-    {:reply, living_status, state}
+  def handle_call({:attack, enemies}, _from, state) do
+    # :erlang.send/2 is asynchronous and safe
+    # https://erlang.org/doc/reference_manual/processes.html#message-sending
+    Enum.each(enemies, &send(&1, {:fire, state.tile}))
+    {:reply, {:ok, :released}, state}
   end
 
   @impl true
   def handle_call(:position, _from, state), do: {:reply, state.tile, state}
 
   @impl true
-  def handle_info({task_ref, :done}, state) do
-    Process.demonitor(task_ref, [:flush])
+  def handle_info({:fire, enemy_tile}, state) do
+    state =
+      case Board.attack_distance?(state.tile, enemy_tile) do
+        true -> %{state | alive: false}
+        false -> state
+      end
+
     {:noreply, state}
-  end
-
-  @impl true
-  def handle_info({:DOWN, _down_ref, :process, _pid, reason}, state) do
-    Logger.warn("Task failed with reason #{reason}", tag: "attack")
-    {:noreply, state}
-  end
-
-  @spec stream_task(Board.tile(), list()) :: :done
-  def stream_task(tile, enemies) do
-    opts = [ordered: false]
-
-    stream =
-      Task.Supervisor.async_stream_nolink(
-        Game.TaskSupervisor,
-        enemies,
-        GenServer,
-        :call,
-        [{:attack, tile}],
-        opts
-      )
-
-    Stream.run(stream)
-    :done
   end
 end
