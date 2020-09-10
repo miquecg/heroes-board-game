@@ -5,5 +5,5 @@ defmodule Web.Presence do
 
   use Phoenix.Presence,
     otp_app: :heroes_web,
-    pubsub_server: HeroesWeb.PubSub
+    pubsub_server: Web.PubSub
 end

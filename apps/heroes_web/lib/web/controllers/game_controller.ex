@@ -13,7 +13,7 @@ defmodule Web.GameController do
   def start(conn, _params) do
     delete_csrf_token()
 
-    id = HeroesServer.join()
+    id = Game.join()
     game_path = Routes.game_path(conn, :index)
 
     conn
