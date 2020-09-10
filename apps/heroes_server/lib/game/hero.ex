@@ -3,7 +3,7 @@ defmodule Game.Hero do
   Client API of `Game.HeroServer`.
   """
 
-  alias Game.{Board, HeroServer}
+  alias Game.{Board, HeroServer, HeroSupervisor}
   alias GameError.BadCommand
 
   @moves [:up, :down, :left, :right]
@@ -11,24 +11,30 @@ defmodule Game.Hero do
   @doc """
   Send a command to control a hero.
 
-  `server` is the hero reference and `cmd`
-  can be `t:Game.Board.moves/0` or atom `:attack`.
+  `server` is the hero reference and
+  `cmd` is the action to be executed.
 
-  Returns `{:ok, tile}`, `{:ok, :launched}` or
-  `{:error, :noop}` when hero is dead and
-  cannot execute any further actions.
+  Valid commands:
 
-  For invalid commands returns exception
-  `GameError.BadCommand` in the error tuple.
+  - `t:Game.Board.moves/0` returns `{:ok, tile}`
+  - `:attack` returns `{:ok, :released}`
+
+  Errors:
+
+  - `{:error, :noop}` when hero is dead and
+  cannot execute any further actions
+  - `{:error, GameError.BadCommand}` for
+  invalid commands
   """
-  @spec control(GenServer.server(), term()) :: {:ok, tile | :launched} | {:error, error}
-        when tile: Board.tile(), error: :noop | %BadCommand{}
+  @spec control(GenServer.server(), term()) :: {:ok, result} | {:error, error}
+        when result: Board.tile() | :released,
+             error: :noop | %BadCommand{}
   def control(server, cmd)
 
   def control(server, cmd) when cmd in @moves, do: GenServer.call(server, {:play, cmd})
 
   def control(server, :attack) do
-    children = Supervisor.which_children(Game.HeroSupervisor)
+    children = Supervisor.which_children(HeroSupervisor)
 
     enemies =
       Enum.flat_map(children, fn
@@ -36,7 +42,7 @@ defmodule Game.Hero do
         {_, hero, :worker, [HeroServer]} -> [hero]
       end)
 
-    GenServer.call(server, {:broadcast, enemies})
+    GenServer.call(server, {:attack, enemies})
   end
 
   def control(_, _), do: {:error, %BadCommand{}}
