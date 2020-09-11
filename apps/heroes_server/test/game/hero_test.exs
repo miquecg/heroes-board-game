@@ -182,29 +182,37 @@ defmodule Game.HeroTestSync do
 
   alias Game.{Hero, HeroServer, HeroSupervisor}
 
-  describe "A player controlling a hero" do
-    setup context do
-      for tile <- context.tiles, into: %{} do
-        hero = create_hero(GameBoards.Test4x4, tile)
-        {tile, hero}
-      end
-    end
+  setup %{board: board} = context do
+    enemies =
+      for tile <- context.enemies,
+      into: %{},
+      do: {tile, create_hero(board, tile)}
 
-    @tag tiles: [{1, 0}, {1, 1}, {2, 2}, {3, 0}]
-    test "can attack all enemies at once", %{{1, 1} => hero} = context do
-      assert {:ok, :launched} = Hero.control(hero, :attack)
-      :timer.sleep(50)
-      assert {:ok, {0, 1}} = Hero.control(hero, :left)
+    [enemies: enemies]
+  end
 
-      dead_enemy = Map.get(context, {1, 0})
-      assert {:error, :noop} = Hero.control(dead_enemy, :up)
+  setup context do
+    hero = create_hero(context.board, {1, 1})
+    {:ok, :released} = Hero.control(hero, :attack)
+    :timer.sleep(50)
 
-      dead_enemy = Map.get(context, {2, 2})
-      assert {:error, :noop} = Hero.control(dead_enemy, :left)
+    [hero: hero]
+  end
 
-      live_enemy = Map.get(context, {3, 0})
-      assert {:ok, {3, 1}} = Hero.control(live_enemy, :up)
-    end
+  @tag board: GameBoards.Test4x4
+  @tag enemies: [{1, 0}, {2, 2}, {3, 0}]
+  test "An attack is released and all heroes in range die except the attacker",
+       %{enemies: enemies} = context do
+    assert {:ok, {0, 1}} = Hero.control(context.hero, :left)
+
+    dead = Map.get(enemies, {1, 0})
+    assert {:error, :noop} = Hero.control(dead, :up)
+
+    dead = Map.get(enemies, {2, 2})
+    assert {:error, :noop} = Hero.control(dead, :left)
+
+    alive = Map.get(enemies, {3, 0})
+    assert {:ok, {3, 1}} = Hero.control(alive, :up)
   end
 
   defp create_hero(board, tile) do
