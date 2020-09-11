@@ -10,51 +10,51 @@ defmodule Game.HeroTest do
 
   setup :create_hero
 
-  describe "A hero can move in four directions one tile at a time:" do
-    test "go up", %{hero: pid} do
-      assert {:ok, {1, 2}} = Hero.control(pid, :up)
+  describe "Hero can move" do
+    test "up", context do
+      assert {:ok, {1, 2}} = Hero.control(context.hero, :up)
     end
 
-    test "go down", %{hero: pid} do
-      assert {:ok, {1, 0}} = Hero.control(pid, :down)
+    test "down", context do
+      assert {:ok, {1, 0}} = Hero.control(context.hero, :down)
     end
 
-    test "go right", %{hero: pid} do
-      assert {:ok, {2, 1}} = Hero.control(pid, :right)
+    test "right", context do
+      assert {:ok, {2, 1}} = Hero.control(context.hero, :right)
     end
 
-    test "go left", %{hero: pid} do
-      assert {:ok, {0, 1}} = Hero.control(pid, :left)
+    test "left", context do
+      assert {:ok, {0, 1}} = Hero.control(context.hero, :left)
     end
   end
 
-  describe "A hero can go anywhere on the board but not crossing walls:" do
+  describe "A series of movements on a map" do
     @describetag tile: {2, 1}
 
     setup do
       [
-        commands: [:down, :right, :up, :up, :left, :up, :left, :left, :down, :down]
+        route: [:down, :right, :up, :up, :left, :up, :left, :left, :down, :down]
       ]
     end
 
-    test "route without walls", %{hero: pid} = context do
-      assert {0, 1} = control(pid, context.commands)
+    test "without walls", %{hero: hero, route: commands} do
+      assert {0, 1} = control(hero, commands)
     end
 
     @tag board: @board_4x4_w1
-    test "same route with one wall", %{hero: pid} = context do
-      assert {0, 0} = control(pid, context.commands)
+    test "with one wall", %{hero: hero, route: commands} do
+      assert {0, 0} = control(hero, commands)
     end
 
     @tag board: @board_4x4_w2
-    test "same route with two walls", %{hero: pid} = context do
-      assert {2, 0} = control(pid, context.commands)
+    test "with two walls", %{hero: hero, route: commands} do
+      assert {2, 0} = control(hero, commands)
     end
   end
 
-  describe "A hero can be killed within a radius of one tile: attack from" do
-    setup context do
-      attack(context.hero, context.from)
+  describe "Hero in {1, 1} being attacked from" do
+    setup %{hero: hero, from: from} do
+      attack(hero, from)
       :ok
     end
 
@@ -82,31 +82,23 @@ defmodule Game.HeroTest do
     test "{2, 1}", context do
       refute alive?(context.hero)
     end
+  end
 
-    @tag from: {3, 1}
-    test "{3, 1} to different targets", %{hero: hero, from: from} do
-      assert alive?(hero)
+  @tag from: {3, 3}
+  test "Attacks to different targets from {3, 3}", %{hero: hero, from: from} do
+    attack(hero, from)
 
-      {:ok, {2, 1}} = Hero.control(hero, :right)
-      attack(hero, from)
+    assert alive?(hero)
 
-      refute alive?(hero)
-    end
+    {:ok, {2, 1}} = Hero.control(hero, :right)
+    attack(hero, from)
 
-    @tag from: {3, 3}
-    test "{3, 3} to different targets", %{hero: hero, from: from} do
-      assert alive?(hero)
+    assert alive?(hero)
 
-      {:ok, {2, 1}} = Hero.control(hero, :right)
-      attack(hero, from)
+    {:ok, {2, 2}} = Hero.control(hero, :up)
+    attack(hero, from)
 
-      assert alive?(hero)
-
-      {:ok, {2, 2}} = Hero.control(hero, :up)
-      attack(hero, from)
-
-      refute alive?(hero)
-    end
+    refute alive?(hero)
   end
 
   describe "A dead hero" do
@@ -131,17 +123,17 @@ defmodule Game.HeroTest do
     end
   end
 
-  describe "A hero returns error when commands are" do
-    test "invalid atoms", %{hero: pid} do
-      assert {:error, %BadCommand{}} = Hero.control(pid, :doowap)
+  describe "Hero client returns {:error, exception} for invalid input" do
+    test ":doowap", context do
+      assert {:error, %BadCommand{}} = Hero.control(context.hero, :doowap)
     end
 
-    test "converted to strings", %{hero: pid} do
-      assert {:error, %BadCommand{}} = Hero.control(pid, "up")
+    test ~s("up"), context do
+      assert {:error, %BadCommand{}} = Hero.control(context.hero, "up")
     end
 
-    test "{x, y} points", %{hero: pid} do
-      assert {:error, %BadCommand{}} = Hero.control(pid, {1, 2})
+    test "{1, 2}", context do
+      assert {:error, %BadCommand{}} = Hero.control(context.hero, {1, 2})
     end
   end
 
