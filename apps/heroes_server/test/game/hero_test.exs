@@ -8,9 +8,9 @@ defmodule Game.HeroTest do
   @board_4x4_w1 GameBoards.Test4x4w1
   @board_4x4_w2 GameBoards.Test4x4w2
 
-  describe "A hero can move in four directions one tile at a time:" do
-    setup :create_hero
+  setup :create_hero
 
+  describe "A hero can move in four directions one tile at a time:" do
     test "go up", %{hero: pid} do
       assert {:ok, {1, 2}} = Hero.control(pid, :up)
     end
@@ -29,14 +29,13 @@ defmodule Game.HeroTest do
   end
 
   describe "A hero can go anywhere on the board but not crossing walls:" do
+    @describetag tile: {2, 1}
+
     setup do
       [
-        tile: {2, 1},
         commands: [:down, :right, :up, :up, :left, :up, :left, :left, :down, :down]
       ]
     end
-
-    setup :create_hero
 
     test "route without walls", %{hero: pid} = context do
       assert {0, 1} = control(pid, context.commands)
@@ -54,8 +53,6 @@ defmodule Game.HeroTest do
   end
 
   describe "A hero can be killed within a radius of one tile: attack from" do
-    setup :create_hero
-
     setup context do
       attack(context.hero, context.from)
       :ok
@@ -113,8 +110,6 @@ defmodule Game.HeroTest do
   end
 
   describe "A dead hero" do
-    setup :create_hero
-
     setup context do
       attack(context.hero, {1, 2})
       :ok
@@ -137,8 +132,6 @@ defmodule Game.HeroTest do
   end
 
   describe "A hero returns error when commands are" do
-    setup :create_hero
-
     test "invalid atoms", %{hero: pid} do
       assert {:error, %BadCommand{}} = Hero.control(pid, :doowap)
     end
@@ -152,19 +145,15 @@ defmodule Game.HeroTest do
     end
   end
 
-  describe "Current hero position" do
-    setup :create_hero
+  test "Get current hero position", %{hero: hero} do
+    {:ok, {1, 2}} = Hero.control(hero, :up)
 
-    test "can be retrieved", %{hero: pid} do
-      {:ok, {1, 2}} = Hero.control(pid, :up)
+    assert {1, 2} = Hero.position(hero)
 
-      assert {1, 2} = Hero.position(pid)
+    {:ok, {0, 2}} = Hero.control(hero, :left)
+    {:ok, {0, 1}} = Hero.control(hero, :down)
 
-      {:ok, {0, 2}} = Hero.control(pid, :left)
-      {:ok, {0, 1}} = Hero.control(pid, :down)
-
-      assert {0, 1} = Hero.position(pid)
-    end
+    assert {0, 1} = Hero.position(hero)
   end
 
   defp create_hero(context) do
@@ -172,7 +161,7 @@ defmodule Game.HeroTest do
     tile = Map.get(context, :tile, {1, 1})
 
     opts = [board: board, tile: tile]
-    [hero: start_supervised!({HeroServer, opts})] ++ opts
+    [hero: start_supervised!({HeroServer, opts})]
   end
 
   defp control(pid, commands) do
