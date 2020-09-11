@@ -19,7 +19,7 @@ defmodule HeroesWeb.MixProject do
 
   def application do
     [
-      mod: {HeroesWeb.Application, []}
+      mod: {Web.Application, []}
     ]
   end
 

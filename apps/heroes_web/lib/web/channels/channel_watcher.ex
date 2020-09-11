@@ -9,7 +9,7 @@ defmodule Web.ChannelWatcher do
   alias Phoenix.Socket.Broadcast
 
   @typep time :: non_neg_integer()
-  @typep timers :: %{optional(HeroesServer.player_id()) => reference()}
+  @typep timers :: %{optional(Game.player_id()) => reference()}
 
   ## Client
 
@@ -26,7 +26,7 @@ defmodule Web.ChannelWatcher do
   @impl true
   @spec init(keyword()) :: {:ok, map()}
   def init(opts) do
-    PubSub.subscribe(HeroesWeb.PubSub, "game:lobby")
+    PubSub.subscribe(Web.PubSub, "game:lobby")
 
     state = %{
       time: Keyword.fetch!(opts, :reconnect_timeout),
@@ -51,7 +51,7 @@ defmodule Web.ChannelWatcher do
     {timer, refs} = Map.pop(state.refs, player)
 
     if timer do
-      HeroesServer.remove(player)
+      Game.remove(player)
     end
 
     {:noreply, %{state | refs: refs}}

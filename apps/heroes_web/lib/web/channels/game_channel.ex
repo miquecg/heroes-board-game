@@ -22,8 +22,10 @@ defmodule Web.GameChannel do
   @impl true
   def handle_info({:after_join, {x, y}}, socket) do
     push(socket, "presence_state", Presence.list(socket))
-    {:ok, _} = Presence.track(socket, socket.assigns.player_id, %{x: x, y: y})
-    {:ok, _} = Presence.track(self(), "game:lobby", socket.assigns.player_id, %{})
+
+    %{player_id: id} = socket.assigns
+    {:ok, _} = Presence.track(socket, id, %{x: x, y: y})
+    {:ok, _} = Presence.track(self(), "game:lobby", id, %{})
 
     {:noreply, socket}
   end

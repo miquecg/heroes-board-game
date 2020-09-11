@@ -22,6 +22,7 @@ defmodule HeroesWeb do
       use Phoenix.Controller, namespace: Web
 
       import Plug.Conn
+
       alias Web.Router.Helpers, as: Routes
     end
   end
@@ -41,8 +42,8 @@ defmodule HeroesWeb do
     quote do
       use Phoenix.Router
 
-      import Plug.Conn
       import Phoenix.Controller
+      import Plug.Conn
     end
   end
 
@@ -57,8 +58,8 @@ defmodule HeroesWeb do
       use Phoenix.HTML
 
       import Phoenix.View
-
       import Web.ErrorHelpers
+
       alias Web.Router.Helpers, as: Routes
     end
   end

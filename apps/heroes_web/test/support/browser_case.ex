@@ -1,7 +1,6 @@
 defmodule HeroesWeb.BrowserCase do
   @moduledoc """
-  This module defines the test case to be used by
-  tests that require a real web browser.
+  Setup and helpers for tests that use a browser.
   """
 
   use ExUnit.CaseTemplate
@@ -15,6 +14,7 @@ defmodule HeroesWeb.BrowserCase do
       alias Web.Router.Helpers, as: Routes
 
       @endpoint Web.Endpoint
+      @game Routes.game_path(@endpoint, :index)
     end
   end
 

@@ -44,8 +44,8 @@ defmodule Game.Board do
   @doc """
   Create a board struct from given options.
 
-  Requires a positive number of `cols`, `rows`
-  and optionally a list of `t:wall/0`.
+  Requires a positive number of `cols`,
+  `rows` and optionally a list of `t:wall/0`.
   """
   @spec new(keyword()) :: t
   def new(opts) do
@@ -85,7 +85,7 @@ defmodule Game.Board do
   `tile` is the starting point.
   """
   @spec play(t, tile, moves) :: tile
-  def play(board, tile, move) do
+  def play(%Board{} = board, tile, move) do
     tile
     |> compute(move)
     |> validate(board)
@@ -105,7 +105,7 @@ defmodule Game.Board do
   end
 
   @spec validate(%{from: tile, to: {integer(), integer()}}, t) :: tile
-  defp validate(%{from: current, to: {x, y} = next}, %Board{} = board) do
+  defp validate(%{from: current, to: {x, y} = next}, board) do
     cond do
       x not in board.x_axis -> current
       y not in board.y_axis -> current
@@ -115,8 +115,8 @@ defmodule Game.Board do
   end
 
   @doc """
-  Check wether two tiles are within
-  one tile radius distance from each other.
+  Check wether two tiles are within one tile
+  radius distance from each other.
   """
   @spec attack_distance?(tile, tile) :: boolean()
   def attack_distance?({x1, y1}, {x2, y2})

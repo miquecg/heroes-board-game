@@ -1,7 +1,6 @@
 defmodule HeroesWeb.ConnCase do
   @moduledoc """
-  This module defines the test case to be used by
-  tests that require setting up a connection.
+  Setup and helpers for tests that require a connection.
   """
 
   use ExUnit.CaseTemplate
@@ -14,6 +13,7 @@ defmodule HeroesWeb.ConnCase do
       alias Web.Router.Helpers, as: Routes
 
       @endpoint Web.Endpoint
+      @game Routes.game_path(@endpoint, :index)
     end
   end
 
