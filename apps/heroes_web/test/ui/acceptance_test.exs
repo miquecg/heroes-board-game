@@ -20,8 +20,7 @@ defmodule Web.AcceptanceTest do
   end
 
   feature "JavaScript client updates board when new players join and leave",
-          %{session: player_1}
-  do
+          %{session: player_1} do
     player_1
     |> click_start()
     |> assert_has(active_heroes(count: 1))

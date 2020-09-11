@@ -96,6 +96,7 @@ defmodule Web.GameChannelTest do
       board: nil,
       tile: {5, 3}
     ]
+
     start_supervised!({HeroServer, opts})
 
     assigns = %{

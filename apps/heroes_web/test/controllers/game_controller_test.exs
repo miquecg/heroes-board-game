@@ -22,7 +22,8 @@ defmodule Web.GameControllerTest do
     conn =
       context.conn
       |> get(@game)
-      |> recycle() # removes CSRF token
+      # recycling removes CSRF token
+      |> recycle()
       |> put_private(:plug_skip_csrf_protection, false)
 
     assert_error_sent 403, fn ->

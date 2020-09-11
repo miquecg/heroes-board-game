@@ -185,8 +185,8 @@ defmodule Game.HeroTestSync do
   setup %{board: board} = context do
     enemies =
       for tile <- context.enemies,
-      into: %{},
-      do: {tile, create_hero(board, tile)}
+          into: %{},
+          do: {tile, create_hero(board, tile)}
 
     [enemies: enemies]
   end
