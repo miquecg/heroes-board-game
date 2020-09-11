@@ -1,33 +1,32 @@
 defmodule Web.GameControllerTest do
   use HeroesWeb.ConnCase, async: true
 
-  @game Routes.game_path(@endpoint, :index)
-
-  test "GET game path", %{conn: conn} do
-    conn = get(conn, @game)
+  test "GET /game renders header", context do
+    conn = get(context.conn, @game)
     assert html_response(conn, 200) =~ "<h1>Heroes Board Game</h1>"
   end
 
-  test "POST game path to start", %{conn: conn} do
-    conn = post(conn, @game)
+  test "POST /game redirects to inject game token", context do
+    conn = post(context.conn, @game)
     assert redirected_to(conn, 303) == @game
 
-    conn = get(recycle(conn), @game)
-    token_regex = ~r/gameToken="[\w-\.]+";/
-    assert html_response(conn, 200) =~ token_regex
-  end
-
-  test "POST fails without a CSRF token", %{conn: conn} do
     conn =
       conn
-      |> create_session()
       |> recycle()
+      |> get(@game)
+
+    assert html_response(conn, 200) =~ ~r/gameToken="[\w-\.]+";/
+  end
+
+  test "POST /game fails without a CSRF token", context do
+    conn =
+      context.conn
+      |> get(@game)
+      |> recycle() # removes CSRF token
       |> put_private(:plug_skip_csrf_protection, false)
 
     assert_error_sent 403, fn ->
       post(conn, @game)
     end
   end
-
-  defp create_session(conn), do: get(conn, @game)
 end

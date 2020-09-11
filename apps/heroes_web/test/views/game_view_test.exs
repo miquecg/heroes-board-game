@@ -5,7 +5,7 @@ defmodule Web.GameViewTest do
 
   alias Game.Board
 
-  test "Count rows of the board" do
+  test "Count board rows" do
     board = Board.new(rows: 3, cols: 1)
     assert count_rows(board) == 3
 
