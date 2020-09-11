@@ -12,19 +12,19 @@ defmodule Game.HeroTest do
 
   describe "Hero can move" do
     test "up", context do
-      assert {:ok, {1, 2}} = Hero.control(context.hero, :up)
+      assert {1, 2} = control(context.hero, :up)
     end
 
     test "down", context do
-      assert {:ok, {1, 0}} = Hero.control(context.hero, :down)
+      assert {1, 0} = control(context.hero, :down)
     end
 
     test "right", context do
-      assert {:ok, {2, 1}} = Hero.control(context.hero, :right)
+      assert {2, 1} = control(context.hero, :right)
     end
 
     test "left", context do
-      assert {:ok, {0, 1}} = Hero.control(context.hero, :left)
+      assert {0, 1} = control(context.hero, :left)
     end
   end
 
@@ -90,12 +90,12 @@ defmodule Game.HeroTest do
 
     assert alive?(hero)
 
-    {:ok, {2, 1}} = Hero.control(hero, :right)
+    {2, 1} = control(hero, :right)
     attack(hero, from)
 
     assert alive?(hero)
 
-    {:ok, {2, 2}} = Hero.control(hero, :up)
+    {2, 2} = control(hero, :up)
     attack(hero, from)
 
     refute alive?(hero)
@@ -118,32 +118,32 @@ defmodule Game.HeroTest do
     test "cannot move or attack other heroes", %{hero: hero} do
       refute alive?(hero)
 
-      assert {:error, :noop} = Hero.control(hero, :right)
-      assert {:error, :noop} = Hero.control(hero, :attack)
+      assert :noop = control(hero, :right)
+      assert :noop = control(hero, :attack)
     end
   end
 
   describe "Hero client returns {:error, exception} for invalid input" do
     test ":doowap", context do
-      assert {:error, %BadCommand{}} = Hero.control(context.hero, :doowap)
+      assert %BadCommand{} = control(context.hero, :doowap)
     end
 
     test ~s("up"), context do
-      assert {:error, %BadCommand{}} = Hero.control(context.hero, "up")
+      assert %BadCommand{} = control(context.hero, "up")
     end
 
     test "{1, 2}", context do
-      assert {:error, %BadCommand{}} = Hero.control(context.hero, {1, 2})
+      assert %BadCommand{} = control(context.hero, {1, 2})
     end
   end
 
   test "Get current hero position", %{hero: hero} do
-    {:ok, {1, 2}} = Hero.control(hero, :up)
+    {1, 2} = control(hero, :up)
 
     assert {1, 2} = Hero.position(hero)
 
-    {:ok, {0, 2}} = Hero.control(hero, :left)
-    {:ok, {0, 1}} = Hero.control(hero, :down)
+    {0, 2} = control(hero, :left)
+    {0, 1} = control(hero, :down)
 
     assert {0, 1} = Hero.position(hero)
   end
@@ -156,13 +156,17 @@ defmodule Game.HeroTest do
     [hero: start_supervised!({HeroServer, opts})]
   end
 
-  defp control(pid, commands) do
+  defp control(hero, commands) do
     unwrap = fn cmd ->
-      {:ok, result} = Hero.control(pid, cmd)
-      result
+      case Hero.control(hero, cmd) do
+        {:ok, result} -> result
+        {:error, error} -> error
+      end
     end
 
-    Enum.reduce(commands, :acc, fn cmd, _ -> unwrap.(cmd) end)
+    commands
+    |> List.wrap()
+    |> Enum.reduce(:acc, fn cmd, _ -> unwrap.(cmd) end)
   end
 
   defp attack(hero, from), do: send(hero, {:fire, from})
