@@ -115,19 +115,24 @@ defmodule Game.HeroTest do
   describe "A dead hero" do
     setup :create_hero
 
-    test "remains dead", %{hero: pid} do
-      assert :alive = GenServer.call(pid, {:attack, {3, 1}})
-      assert :dead = GenServer.call(pid, {:attack, {1, 2}})
-
-      assert :dead = GenServer.call(pid, {:attack, {2, 0}})
+    setup context do
+      attack(context.hero, {1, 2})
+      :ok
     end
 
-    test "cannot perform any action", %{hero: pid} do
-      assert :alive = GenServer.call(pid, {:attack, {3, 1}})
-      assert :dead = GenServer.call(pid, {:attack, {1, 2}})
+    test "does not come back from the dead", %{hero: hero} do
+      refute alive?(hero)
 
-      assert {:error, :noop} = Hero.control(pid, :right)
-      assert {:error, :noop} = Hero.control(pid, :attack)
+      attack(hero, {3, 0})
+
+      refute alive?(hero)
+    end
+
+    test "cannot move or attack other heroes", %{hero: hero} do
+      refute alive?(hero)
+
+      assert {:error, :noop} = Hero.control(hero, :right)
+      assert {:error, :noop} = Hero.control(hero, :attack)
     end
   end
 
