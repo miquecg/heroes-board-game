@@ -1,3 +1,29 @@
+defmodule GameBehaviour do
+  @moduledoc false
+
+  @typedoc """
+  Unique identifier for every active player.
+
+  Base 32 hex encoded string of 26 characters.
+  """
+  @type player_id :: <<_::208>>
+
+  @doc """
+  Join a player to the game creating a new hero.
+  """
+  @callback join(board :: module(), dice :: fun()) :: player_id
+
+  @doc """
+  Remove a player's hero from the game.
+  """
+  @callback remove(player_id) :: :ok
+
+  @doc """
+  Get current hero position.
+  """
+  @callback position(player_id) :: Game.Board.tile()
+end
+
 defmodule Game do
   @moduledoc """
   Players entrypoint to the game.

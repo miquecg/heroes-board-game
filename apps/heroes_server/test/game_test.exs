@@ -10,18 +10,36 @@ defmodule GameTest do
     :ok = Application.start(@app)
   end
 
-  test "When a player joins the game a hero is created and registered" do
-    opts = [board: GameBoards.Test2x2w1, player_spawn: :first_tile]
-    game = start_supervised!({Game, [name: :test_game] ++ opts})
+  setup :join
 
-    assert count_heroes() == 0
+  test "Create and remove hero from the game", %{player_id: id} do
+    hero = whereis(id)
+    assert Process.alive?(hero)
 
-    player_id = GenServer.call(game, :join)
-    hero = Game.hero(player_id)
+    ref = monitor_hero(id)
+    :ok = Game.remove(id)
 
-    assert count_heroes() == 1
-    assert {0, 1} = Hero.position(hero)
+    assert_receive {:DOWN, ^ref, :process, _pid, :normal}
   end
 
-  defp count_heroes, do: Registry.count(Game.Registry)
+  test "Game.position/1 returns hero current tile", %{player_id: id} do
+    assert {0, 0} = Game.position(id)
+
+    Hero.control({:via, Registry, {Game.Registry, id}}, :up)
+
+    assert {0, 1} = Game.position(id)
+  end
+
+  defp monitor_hero(id) do
+    id
+    |> whereis()
+    |> Process.monitor()
+  end
+
+  defp whereis(id), do: GenServer.whereis({:via, Registry, {Game.Registry, id}})
+
+  defp join(_context) do
+    dice = fn _ -> {0, 0} end
+    [player_id: Game.join(GameBoards.Test4x4, dice)]
+  end
 end
