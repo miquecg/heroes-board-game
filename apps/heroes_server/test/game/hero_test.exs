@@ -148,6 +148,10 @@ defmodule Game.HeroTest do
     assert {0, 1} = Hero.position(hero)
   end
 
+  test "Restart strategy is :transient so heroes can be stopped" do
+    assert %{restart: :transient} = HeroServer.child_spec([])
+  end
+
   defp create_hero(context) do
     board = Map.get(context, :board, @board_4x4)
     tile = Map.get(context, :tile, {1, 1})

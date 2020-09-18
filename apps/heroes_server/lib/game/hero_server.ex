@@ -4,7 +4,7 @@ defmodule Game.HeroServer do
   All player actions during the game happen on this GenServer.
   """
 
-  use GenServer
+  use GenServer, restart: :transient
 
   require Logger
 
