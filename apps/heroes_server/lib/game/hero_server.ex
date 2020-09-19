@@ -1,12 +1,9 @@
 defmodule Game.HeroServer do
   @moduledoc """
   Holds hero status and current tile on the board.
-  All player actions during the game happen on this GenServer.
   """
 
   use GenServer, restart: :transient
-
-  require Logger
 
   alias Game.Board
 
