@@ -137,17 +137,6 @@ defmodule Game.HeroTest do
     end
   end
 
-  test "Get current hero position", %{hero: hero} do
-    {1, 2} = control(hero, :up)
-
-    assert {1, 2} = Hero.position(hero)
-
-    {0, 2} = control(hero, :left)
-    {0, 1} = control(hero, :down)
-
-    assert {0, 1} = Hero.position(hero)
-  end
-
   test "Restart strategy is :transient so heroes can be stopped" do
     assert %{restart: :transient} = HeroServer.child_spec([])
   end

@@ -71,9 +71,6 @@ defmodule Game.HeroServer do
   end
 
   @impl true
-  def handle_call(:position, _from, state), do: {:reply, state.tile, state}
-
-  @impl true
   def handle_info({:fire, enemy_tile}, state) do
     state =
       case Board.attack_distance?(state.tile, enemy_tile) do

@@ -46,10 +46,4 @@ defmodule Game.Hero do
   end
 
   def control(_, _), do: {:error, %BadCommand{}}
-
-  @doc """
-  Get current hero position.
-  """
-  @spec position(GenServer.server()) :: Board.tile()
-  def position(server), do: GenServer.call(server, :position)
 end
