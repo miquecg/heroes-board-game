@@ -117,12 +117,16 @@ defmodule Game do
   @spec attack_callback :: attack
   defp attack_callback do
     fn attacker, from ->
-      Registry.dispatch(Registry.Game, "board", &Enum.each(&1, fn
-        {^attacker, _} -> :ok
-        # :erlang.send/2 is asynchronous and safe
-        # https://erlang.org/doc/reference_manual/processes.html#message-sending
-        {pid, _} -> send(pid, {:fire, from})
-      end))
+      Registry.dispatch(
+        Registry.Game,
+        "board",
+        &Enum.each(&1, fn
+          {^attacker, _} -> :ok
+          # :erlang.send/2 is asynchronous and safe
+          # https://erlang.org/doc/reference_manual/processes.html#message-sending
+          {pid, _} -> send(pid, {:fire, from})
+        end)
+      )
     end
   end
 
