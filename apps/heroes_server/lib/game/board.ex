@@ -116,8 +116,8 @@ defmodule Game.Board do
   end
 
   @doc """
-  Check wether two tiles are within one tile
-  radius distance from each other.
+  Check wether two tiles are within
+  one tile radius from each other.
   """
   @spec attack_distance?(tile, tile) :: boolean()
   def attack_distance?({x1, y1}, {x2, y2})
