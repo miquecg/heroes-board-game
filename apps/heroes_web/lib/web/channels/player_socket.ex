@@ -15,7 +15,7 @@ defmodule Web.PlayerSocket do
   def connect(%{"token" => token}, socket) do
     case Phoenix.Token.verify(socket, "player socket", token, max_age: @one_day_seconds) do
       {:ok, id} ->
-        {:ok, assign(socket, player_id: id, hero: Game.hero(id))}
+        {:ok, assign(socket, player_id: id, game: Game)}
 
       {:error, reason} ->
         Logger.error("Error verifying token #{inspect(token)}", tag: "token_#{reason}")
