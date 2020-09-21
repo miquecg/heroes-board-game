@@ -50,7 +50,13 @@ defmodule Game do
   """
   @behaviour GameBehaviour
 
+  require Game.Board
+
   alias Game.{Board, HeroServer, HeroSupervisor}
+  alias GameError.BadCommand
+
+  @type update :: (Board.tile() -> :ok)
+  @type attack :: (pid(), Board.tile() -> :ok)
 
   @impl true
   def join(board, dice) do
@@ -58,7 +64,7 @@ defmodule Game do
     tile = choose_tile(board, dice)
 
     opts = [
-      name: {:via, Registry, {Game.Registry, player_id, tile}},
+      name: {:via, Registry, {Registry.Heroes, player_id, tile}},
       board: board,
       tile: tile
     ]
@@ -69,15 +75,20 @@ defmodule Game do
   end
 
   @impl true
-  def remove(id) do
-    server = {:via, Registry, {Game.Registry, id}}
-    {:ok, _pid} = Task.start(GenServer, :stop, [server])
-    :ok
-  end
+  def remove(id), do: call_hero(id, :stop)
+
+  @impl true
+  def play(id, cmd) when Board.is_move(cmd), do: call_hero(id, {cmd, update_callback(id)})
+
+  @impl true
+  def play(id, :attack), do: call_hero(id, {:attack, attack_callback()})
+
+  @impl true
+  def play(_, _), do: {:error, %BadCommand{}}
 
   @impl true
   def position(id) do
-    [{_pid, position}] = Registry.lookup(Game.Registry, id)
+    [{_pid, position}] = Registry.lookup(Registry.Heroes, id)
     position
   end
 
@@ -91,5 +102,41 @@ defmodule Game do
   defp choose_tile(board, dice) do
     tiles = board.tiles()
     dice.(tiles)
+  end
+
+  @spec update_callback(binary()) :: update
+  defp update_callback(id) do
+    fn tile ->
+      {^tile, _} = Registry.update_value(Registry.Heroes, id, fn _old -> tile end)
+      :ok
+    end
+  end
+
+  @spec attack_callback :: attack
+  defp attack_callback do
+    fn attacker, from ->
+      Registry.dispatch(Registry.Game, "board", &Enum.each(&1, fn
+        {^attacker, _} -> :ok
+        # :erlang.send/2 is asynchronous and safe
+        # https://erlang.org/doc/reference_manual/processes.html#message-sending
+        {pid, _} -> send(pid, {:fire, from})
+      end))
+    end
+  end
+
+  defp call_hero(id, request) when is_binary(id) do
+    call_hero({:via, Registry, {Registry.Heroes, id}}, request)
+  end
+
+  defp call_hero(hero, :stop) do
+    {:ok, _pid} = Task.start(GenServer, :stop, [hero])
+    :ok
+  end
+
+  defp call_hero(hero, request) do
+    case GenServer.call(hero, request) do
+      :noop -> {:error, :noop}
+      reply -> {:ok, reply}
+    end
   end
 end
