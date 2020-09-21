@@ -10,20 +10,20 @@ defmodule Game.HeroTest do
   setup :create_hero
 
   describe "Hero can move" do
-    test "up", context do
-      assert {1, 2} = control(context.hero, :up)
+    test "up", %{hero: hero} do
+      assert {1, 2} = control(hero, :up)
     end
 
-    test "down", context do
-      assert {1, 0} = control(context.hero, :down)
+    test "down", %{hero: hero} do
+      assert {1, 0} = control(hero, :down)
     end
 
-    test "right", context do
-      assert {2, 1} = control(context.hero, :right)
+    test "right", %{hero: hero} do
+      assert {2, 1} = control(hero, :right)
     end
 
-    test "left", context do
-      assert {0, 1} = control(context.hero, :left)
+    test "left", %{hero: hero} do
+      assert {0, 1} = control(hero, :left)
     end
   end
 
