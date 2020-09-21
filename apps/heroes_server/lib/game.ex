@@ -1,6 +1,9 @@
 defmodule GameBehaviour do
   @moduledoc false
 
+  alias Game.Board
+  alias GameError.BadCommand
+
   @typedoc """
   Unique identifier for every active player.
 
@@ -9,19 +12,36 @@ defmodule GameBehaviour do
   @type player_id :: <<_::208>>
 
   @doc """
-  Join a player to the game creating a new hero.
+  Join a new player to the game creating a hero.
   """
   @callback join(board :: module(), dice :: fun()) :: player_id
 
   @doc """
-  Remove a player's hero from the game.
+  Remove player's hero from the game.
   """
   @callback remove(player_id) :: :ok
 
   @doc """
+  Send command to player's hero.
+
+  Valid commands:
+
+  - `t:Game.Board.move/0`
+  - `:attack`
+
+  Error values:
+
+  - `:noop`: hero is dead and cannot execute any further actions
+  - `%GameError.BadCommand{}`
+  """
+  @callback play(player_id, cmd :: term()) :: {:ok, result} | {:error, error}
+            when result: Board.tile() | :released,
+                 error: :noop | %BadCommand{}
+
+  @doc """
   Get current hero position.
   """
-  @callback position(player_id) :: Game.Board.tile()
+  @callback position(player_id) :: Board.tile()
 end
 
 defmodule Game do
