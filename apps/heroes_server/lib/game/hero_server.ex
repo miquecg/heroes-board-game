@@ -7,6 +7,10 @@ defmodule Game.HeroServer do
 
   alias Game.Board
 
+  @type request :: {:attack, Game.attack()} | {Board.move(), Game.update()}
+  @type result :: Board.tile() | :released
+  @type noop :: :noop
+
   @typep state :: %__MODULE__.State{
            board: module(),
            tile: Board.tile(),
@@ -44,27 +48,31 @@ defmodule Game.HeroServer do
     board = Keyword.fetch!(opts, :board)
     tile = Keyword.fetch!(opts, :tile)
 
+    Registry.register(Registry.Game, "board", [])
+
     {:ok, %State{board: board, tile: tile}}
   end
+
+  @spec handle_call(request, GenServer.from(), state) :: {:reply, result | noop, state}
+  def handle_call(msg, from, state)
 
   @impl true
   # Update to Elixir 1.11 `map.field` syntax in guards
   def handle_call(_action, _from, %State{alive: false} = state) do
-    {:reply, {:error, :noop}, state}
+    {:reply, :noop, state}
   end
 
   @impl true
-  def handle_call({:play, move}, _from, %State{tile: tile, board: board} = state) do
+  def handle_call({:attack, launcher}, _from, state) do
+    launcher.(self(), state.tile)
+    {:reply, :released, state}
+  end
+
+  @impl true
+  def handle_call({move, updater}, _from, %State{tile: tile, board: board} = state) do
     result = board.play(tile, move)
-    {:reply, {:ok, result}, %{state | tile: result}}
-  end
-
-  @impl true
-  def handle_call({:attack, enemies}, _from, state) do
-    # :erlang.send/2 is asynchronous and safe
-    # https://erlang.org/doc/reference_manual/processes.html#message-sending
-    Enum.each(enemies, &send(&1, {:fire, state.tile}))
-    {:reply, {:ok, :released}, state}
+    updater.(result)
+    {:reply, result, %{state | tile: result}}
   end
 
   @impl true

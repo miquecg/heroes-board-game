@@ -126,25 +126,16 @@ defmodule Game.HeroTest do
     assert %{restart: :transient} = HeroServer.child_spec([])
   end
 
-  defp create_hero(context) do
-    board = Map.get(context, :board, @board_4x4)
-    tile = Map.get(context, :tile, {1, 1})
-
-    opts = [board: board, tile: tile]
-    [hero: start_supervised!({HeroServer, opts})]
-  end
-
   defp control(hero, commands) do
-    unwrap = fn cmd ->
-      case Hero.control(hero, cmd) do
-        {:ok, result} -> result
-        {:error, error} -> error
-      end
-    end
+    attack = fn _, _ -> :ok end
+    update = fn _ -> :ok end
 
     commands
     |> List.wrap()
-    |> Enum.reduce(:acc, fn cmd, _ -> unwrap.(cmd) end)
+    |> Enum.reduce(:acc, fn
+      :attack, _ -> GenServer.call(hero, {:attack, attack})
+      move, _ -> GenServer.call(hero, {move, update})
+    end)
   end
 
   defp attack(hero, from), do: send(hero, {:fire, from})
