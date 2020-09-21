@@ -1,7 +1,7 @@
 defmodule Game.HeroTest do
   use ExUnit.Case, async: true
 
-  alias Game.HeroServer
+  alias Game.Hero
 
   @board_4x4 GameBoards.Test4x4
   @board_4x4_w1 GameBoards.Test4x4w1
@@ -123,7 +123,7 @@ defmodule Game.HeroTest do
   end
 
   test "Restart strategy is :transient so heroes can be stopped" do
-    assert %{restart: :transient} = HeroServer.child_spec([])
+    assert %{restart: :transient} = Hero.child_spec([])
   end
 
   defp control(hero, commands) do
@@ -150,6 +150,6 @@ defmodule Game.HeroTest do
     tile = Map.get(context, :tile, {1, 1})
 
     opts = [board: board, tile: tile]
-    [hero: start_supervised!({HeroServer, opts})]
+    [hero: start_supervised!({Hero, opts})]
   end
 end

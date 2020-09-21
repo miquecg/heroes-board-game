@@ -52,7 +52,7 @@ defmodule Game do
 
   require Game.Board
 
-  alias Game.{Board, HeroServer, HeroSupervisor}
+  alias Game.{Board, Hero, HeroSupervisor}
   alias GameError.BadCommand
 
   @type update :: (Board.tile() -> :ok)
@@ -69,7 +69,7 @@ defmodule Game do
       tile: tile
     ]
 
-    {:ok, _pid} = DynamicSupervisor.start_child(HeroSupervisor, {HeroServer, opts})
+    {:ok, _pid} = DynamicSupervisor.start_child(HeroSupervisor, {Hero, opts})
 
     player_id
   end

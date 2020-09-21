@@ -1,4 +1,4 @@
-defmodule Game.HeroServer do
+defmodule Game.Hero do
   @moduledoc """
   Holds hero status and current tile on the board.
   """
