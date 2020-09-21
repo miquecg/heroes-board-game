@@ -1,7 +1,7 @@
 defmodule Game.HeroTest do
   use ExUnit.Case, async: true
 
-  alias Game.{Hero, HeroServer}
+  alias Game.HeroServer
 
   @board_4x4 GameBoards.Test4x4
   @board_4x4_w1 GameBoards.Test4x4w1
