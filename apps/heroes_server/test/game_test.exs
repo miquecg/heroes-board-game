@@ -49,6 +49,10 @@ defmodule GameTest do
     assert {2, 1} = Game.position(id)
   end
 
+  test "Game.position/1 can return an empty tuple" do
+    assert {} = Game.position("invalid_player_id")
+  end
+
   describe "Game.play/2 returns {:error, exception} for invalid command" do
     test ":doowap", %{player_id: id} do
       assert %BadCommand{} = play(id, :doowap)

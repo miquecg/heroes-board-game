@@ -41,7 +41,7 @@ defmodule GameBehaviour do
   @doc """
   Get current hero position.
   """
-  @callback position(player_id) :: Board.tile()
+  @callback position(player_id) :: Board.tile() | {}
 end
 
 defmodule Game do
@@ -88,8 +88,10 @@ defmodule Game do
 
   @impl true
   def position(id) do
-    [{_pid, position}] = Registry.lookup(Registry.Heroes, id)
-    position
+    case Registry.lookup(Registry.Heroes, id) do
+      [{_pid, position}] -> position
+      [] -> {}
+    end
   end
 
   @spec generate_id :: binary()
