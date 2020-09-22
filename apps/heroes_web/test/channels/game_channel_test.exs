@@ -76,20 +76,15 @@ defmodule Web.GameChannelTest do
     end
   end
 
-  @tag name: "removed_player"
-  test "Join crashes if hero is not found in the board", context do
-    assert {:error, %{reason: "join crashed"}} = join(context.socket, @topics.board)
-  end
-
   test "Unauthorized join on a second connection for same player", %{socket: socket} do
     {:ok, _, _} = join(socket, @topics.board)
 
     assert {:error, %{reason: "unauthorized"}} = join(socket, @topics.board)
   end
 
-  defp socket_mock(%{socket: socket} = context) do
+  defp socket_mock(%{socket: socket}) do
     assigns = %{
-      player_id: Map.get(context, :name, "test_player"),
+      player_id: GameMock.join(),
       game: GameMock
     }
 

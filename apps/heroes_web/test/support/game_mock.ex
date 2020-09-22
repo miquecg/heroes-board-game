@@ -2,18 +2,19 @@ defmodule GameMock do
   @moduledoc false
   @behaviour GameBehaviour
 
-  @impl true
-  def join(_, _), do: raise("GameMock")
+  @test_player "test_player_id"
+
+  def join, do: join(nil, nil)
 
   @impl true
-  def remove(_), do: raise("GameMock")
+  def join(nil, nil), do: @test_player
+
+  @impl true
+  def remove(@test_player), do: :ok
 
   @impl true
   def play(_, _), do: raise("GameMock")
 
   @impl true
-  def position("removed_player"), do: {}
-
-  @impl true
-  def position(_id), do: {5, 3}
+  def position(@test_player), do: {5, 3}
 end

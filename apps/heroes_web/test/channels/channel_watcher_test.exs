@@ -38,6 +38,13 @@ defmodule Web.ChannelWatcherTest do
     assert_receive {:DOWN, ^ref, :process, _pid, :normal}, 300
   end
 
+  test "Reconnect is not possible after removing hero", %{socket: socket, ref: ref} do
+    leave_channel(socket)
+
+    assert_receive {:DOWN, ^ref, :process, _pid, :normal}, 300
+    assert {:error, %{reason: "join crashed"}} = join(socket, @topics.board)
+  end
+
   defp player_socket do
     Web.PlayerSocket
     |> socket()
