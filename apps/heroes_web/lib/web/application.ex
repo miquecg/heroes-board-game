@@ -8,22 +8,22 @@ defmodule Web.Application do
 
   @impl true
   def start(_type, _args) do
-    board = get_board()
-
     children = [
       {Phoenix.PubSub, name: Web.PubSub},
       Web.Presence,
-      {Web.ChannelWatcher, watcher_opts()},
-      {Game, game_opts(board)},
-      {Web.Endpoint, board: board}
+      {Web.ChannelWatcher, reconnect_timeout: timeout_ms()},
+      {Web.Endpoint, board: board(), dice: dice()}
     ]
 
     opts = [strategy: :one_for_one, name: Web.Supervisor]
     Supervisor.start_link(children, opts)
   end
 
-  @spec get_board :: module()
-  defp get_board do
+  @spec timeout_ms :: non_neg_integer()
+  defp timeout_ms, do: Application.get_env(@app, :reconnect_timeout, @one_minute_ms)
+
+  @spec board :: module()
+  defp board do
     board = System.get_env("BOARD", "oblivion")
 
     board
@@ -32,19 +32,12 @@ defmodule Web.Application do
     |> String.to_existing_atom()
   end
 
-  @spec game_opts(module()) :: keyword()
-  defp game_opts(board) do
-    [
-      board: board,
-      player_spawn: Application.get_env(@app, :player_spawn, :randomized)
-    ]
-  end
-
-  @spec watcher_opts :: keyword()
-  defp watcher_opts do
-    [
-      reconnect_timeout: Application.get_env(@app, :reconnect_timeout, @one_minute_ms)
-    ]
+  @spec dice :: fun()
+  defp dice do
+    case Application.get_env(@app, :player_spawn, :randomized) do
+      :randomized -> &Enum.random/1
+      :first_tile -> &Enum.at(&1, 0)
+    end
   end
 
   @impl true
