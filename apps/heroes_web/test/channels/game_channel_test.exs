@@ -17,14 +17,14 @@ defmodule Web.GameChannelTest do
       assert [%{phx_ref: _, x: 5, y: 3}] = metas
     end
 
-    test "presence leaving channel", %{player_id: id} = context do
-      leave_channel(context.socket)
+    test "presence leaving channel", %{socket: socket, player_id: id} do
+      leave_channel(socket)
 
       assert_broadcast "presence_diff", %{joins: %{}, leaves: %{^id => _metas}}
     end
 
-    test "presence closing socket", %{player_id: id} = context do
-      close_socket(context.socket)
+    test "presence closing socket", %{socket: socket, player_id: id} do
+      close_socket(socket)
 
       assert_broadcast "presence_diff", %{joins: %{}, leaves: %{^id => _metas}}
     end
@@ -49,8 +49,8 @@ defmodule Web.GameChannelTest do
       }
     end
 
-    test "presence leaving channel", %{player_id: id} = context do
-      leave_channel(context.socket)
+    test "presence leaving channel", %{socket: socket, player_id: id} do
+      leave_channel(socket)
 
       assert_receive %Phoenix.Socket.Broadcast{
         event: "presence_diff",
@@ -62,8 +62,8 @@ defmodule Web.GameChannelTest do
       }
     end
 
-    test "presence closing socket", %{player_id: id} = context do
-      close_socket(context.socket)
+    test "presence closing socket", %{socket: socket, player_id: id} do
+      close_socket(socket)
 
       assert_receive %Phoenix.Socket.Broadcast{
         event: "presence_diff",
