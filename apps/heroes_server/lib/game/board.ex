@@ -37,8 +37,9 @@ defmodule Game.Board do
   @typedoc """
   Allowed movements.
   """
-  @type moves :: :up | :down | :left | :right
+  @type move :: :up | :down | :left | :right
 
+  defguard is_move(action) when action in [:up, :down, :left, :right]
   defguardp distance_radius_one(a, b) when abs(a - b) <= 1
 
   @doc """
@@ -84,14 +85,14 @@ defmodule Game.Board do
 
   `tile` is the starting point.
   """
-  @spec play(t, tile, moves) :: tile
+  @spec play(t, tile, move) :: tile
   def play(%Board{} = board, tile, move) do
     tile
     |> compute(move)
     |> validate(board)
   end
 
-  @spec compute(tile, moves) :: %{from: tile, to: {integer(), integer()}}
+  @spec compute(tile, move) :: %{from: tile, to: {integer(), integer()}}
   defp compute({x, y} = current, move) do
     next =
       case move do
@@ -115,8 +116,8 @@ defmodule Game.Board do
   end
 
   @doc """
-  Check wether two tiles are within one tile
-  radius distance from each other.
+  Check wether two tiles are within
+  one tile radius from each other.
   """
   @spec attack_distance?(tile, tile) :: boolean()
   def attack_distance?({x1, y1}, {x2, y2})

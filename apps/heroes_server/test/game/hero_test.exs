@@ -1,8 +1,7 @@
 defmodule Game.HeroTest do
   use ExUnit.Case, async: true
 
-  alias Game.{Hero, HeroServer}
-  alias GameError.BadCommand
+  alias Game.Hero
 
   @board_4x4 GameBoards.Test4x4
   @board_4x4_w1 GameBoards.Test4x4w1
@@ -11,20 +10,20 @@ defmodule Game.HeroTest do
   setup :create_hero
 
   describe "Hero can move" do
-    test "up", context do
-      assert {1, 2} = control(context.hero, :up)
+    test "up", %{hero: hero} do
+      assert {1, 2} = control(hero, :up)
     end
 
-    test "down", context do
-      assert {1, 0} = control(context.hero, :down)
+    test "down", %{hero: hero} do
+      assert {1, 0} = control(hero, :down)
     end
 
-    test "right", context do
-      assert {2, 1} = control(context.hero, :right)
+    test "right", %{hero: hero} do
+      assert {2, 1} = control(hero, :right)
     end
 
-    test "left", context do
-      assert {0, 1} = control(context.hero, :left)
+    test "left", %{hero: hero} do
+      assert {0, 1} = control(hero, :left)
     end
   end
 
@@ -123,50 +122,20 @@ defmodule Game.HeroTest do
     end
   end
 
-  describe "Hero client returns {:error, exception} for invalid input" do
-    test ":doowap", context do
-      assert %BadCommand{} = control(context.hero, :doowap)
-    end
-
-    test ~s("up"), context do
-      assert %BadCommand{} = control(context.hero, "up")
-    end
-
-    test "{1, 2}", context do
-      assert %BadCommand{} = control(context.hero, {1, 2})
-    end
-  end
-
-  test "Get current hero position", %{hero: hero} do
-    {1, 2} = control(hero, :up)
-
-    assert {1, 2} = Hero.position(hero)
-
-    {0, 2} = control(hero, :left)
-    {0, 1} = control(hero, :down)
-
-    assert {0, 1} = Hero.position(hero)
-  end
-
-  defp create_hero(context) do
-    board = Map.get(context, :board, @board_4x4)
-    tile = Map.get(context, :tile, {1, 1})
-
-    opts = [board: board, tile: tile]
-    [hero: start_supervised!({HeroServer, opts})]
+  test "Restart strategy is :transient so heroes can be stopped" do
+    assert %{restart: :transient} = Hero.child_spec([])
   end
 
   defp control(hero, commands) do
-    unwrap = fn cmd ->
-      case Hero.control(hero, cmd) do
-        {:ok, result} -> result
-        {:error, error} -> error
-      end
-    end
+    attack = fn _, _ -> :ok end
+    update = fn _ -> :ok end
 
     commands
     |> List.wrap()
-    |> Enum.reduce(:acc, fn cmd, _ -> unwrap.(cmd) end)
+    |> Enum.reduce(:acc, fn
+      :attack, _ -> GenServer.call(hero, {:attack, attack})
+      move, _ -> GenServer.call(hero, {move, update})
+    end)
   end
 
   defp attack(hero, from), do: send(hero, {:fire, from})
@@ -175,49 +144,12 @@ defmodule Game.HeroTest do
     state = :sys.get_state(hero)
     state.alive
   end
-end
 
-defmodule Game.HeroTestSync do
-  use ExUnit.Case
+  defp create_hero(context) do
+    board = Map.get(context, :board, @board_4x4)
+    tile = Map.get(context, :tile, {1, 1})
 
-  alias Game.{Hero, HeroServer, HeroSupervisor}
-
-  setup %{board: board} = context do
-    enemies =
-      for tile <- context.enemies,
-          into: %{},
-          do: {tile, create_hero(board, tile)}
-
-    [enemies: enemies]
-  end
-
-  setup context do
-    hero = create_hero(context.board, {1, 1})
-    {:ok, :released} = Hero.control(hero, :attack)
-    :timer.sleep(50)
-
-    [hero: hero]
-  end
-
-  @tag board: GameBoards.Test4x4
-  @tag enemies: [{1, 0}, {2, 2}, {3, 0}]
-  test "An attack is released and all heroes in range die except the attacker",
-       %{enemies: enemies} = context do
-    assert {:ok, {0, 1}} = Hero.control(context.hero, :left)
-
-    dead = Map.get(enemies, {1, 0})
-    assert {:error, :noop} = Hero.control(dead, :up)
-
-    dead = Map.get(enemies, {2, 2})
-    assert {:error, :noop} = Hero.control(dead, :left)
-
-    alive = Map.get(enemies, {3, 0})
-    assert {:ok, {3, 1}} = Hero.control(alive, :up)
-  end
-
-  defp create_hero(board, tile) do
-    child = {HeroServer, [board: board, tile: tile]}
-    {:ok, pid} = DynamicSupervisor.start_child(HeroSupervisor, child)
-    pid
+    opts = [board: board, tile: tile]
+    [hero: start_supervised!({Hero, opts})]
   end
 end

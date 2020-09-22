@@ -5,14 +5,14 @@ defmodule Web.GameChannel do
 
   use HeroesWeb, :channel
 
-  alias Game.Hero
   alias Phoenix.Socket
   alias Web.Presence
 
   @impl true
-  def join("game:board", _message, socket) do
+  def join("game:board", _message, %{assigns: %{player_id: id, game: game}} = socket) do
     if authorized?(socket) do
-      send(self(), {:after_join, Hero.position(socket.assigns.hero)})
+      {_, _} = position = game.position(id)
+      send(self(), {:after_join, position})
       {:ok, socket}
     else
       {:error, %{reason: "unauthorized"}}
@@ -20,10 +20,9 @@ defmodule Web.GameChannel do
   end
 
   @impl true
-  def handle_info({:after_join, {x, y}}, socket) do
+  def handle_info({:after_join, {x, y}}, %{assigns: %{player_id: id}} = socket) do
     push(socket, "presence_state", Presence.list(socket))
 
-    %{player_id: id} = socket.assigns
     {:ok, _} = Presence.track(socket, id, %{x: x, y: y})
     {:ok, _} = Presence.track(self(), "game:lobby", id, %{})
 

@@ -8,8 +8,10 @@ defmodule Web.ChannelWatcher do
   alias Phoenix.PubSub
   alias Phoenix.Socket.Broadcast
 
+  @typep player_id :: GameBehaviour.player_id()
+
   @typep time :: non_neg_integer()
-  @typep timers :: %{optional(Game.player_id()) => reference()}
+  @typep timers :: %{optional(player_id) => reference()}
 
   ## Client
 

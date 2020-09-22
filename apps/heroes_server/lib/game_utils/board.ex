@@ -9,7 +9,7 @@ defmodule GameUtils.Board do
   @callback y_axis :: Board.axis()
   @callback walls :: MapSet.t(Board.wall())
   @callback tiles :: list(Board.tile())
-  @callback play(Board.tile(), Board.moves()) :: Board.tile()
+  @callback play(Board.tile(), Board.move()) :: Board.tile()
 
   @doc false
   defmacro __using__(opts) do

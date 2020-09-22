@@ -1,55 +1,88 @@
 defmodule Game.Hero do
   @moduledoc """
-  Client API of `Game.HeroServer`.
+  Holds hero status and current tile on the board.
   """
 
-  alias Game.{Board, HeroServer, HeroSupervisor}
-  alias GameError.BadCommand
+  use GenServer, restart: :transient
 
-  @moves [:up, :down, :left, :right]
+  alias Game.Board
 
-  @doc """
-  Send a command to control a hero.
+  @type request :: {:attack, Game.attack()} | {Board.move(), Game.update()}
+  @type result :: Board.tile() | :released
+  @type noop :: :noop
 
-  `server` is the hero reference and
-  `cmd` is the action to be executed.
+  @typep state :: %__MODULE__.State{
+           board: module(),
+           tile: Board.tile(),
+           alive: boolean()
+         }
 
-  Valid commands:
+  defmodule State do
+    @moduledoc false
 
-  - `t:Game.Board.moves/0` returns `{:ok, tile}`
-  - `:attack` returns `{:ok, :released}`
+    @enforce_keys [:board, :tile]
 
-  Errors:
-
-  - `{:error, :noop}` when hero is dead and
-  cannot execute any further actions
-  - `{:error, GameError.BadCommand}` for
-  invalid commands
-  """
-  @spec control(GenServer.server(), term()) :: {:ok, result} | {:error, error}
-        when result: Board.tile() | :released,
-             error: :noop | %BadCommand{}
-  def control(server, cmd)
-
-  def control(server, cmd) when cmd in @moves, do: GenServer.call(server, {:play, cmd})
-
-  def control(server, :attack) do
-    children = Supervisor.which_children(HeroSupervisor)
-
-    enemies =
-      Enum.flat_map(children, fn
-        {_, ^server, :worker, [HeroServer]} -> []
-        {_, hero, :worker, [HeroServer]} -> [hero]
-      end)
-
-    GenServer.call(server, {:attack, enemies})
+    defstruct [alive: true] ++ @enforce_keys
   end
 
-  def control(_, _), do: {:error, %BadCommand{}}
-
   @doc """
-  Get current hero position.
+  Spawn a hero.
+
+  Requires options `:board` and `:tile`.
+
+  Can be registered under a `:name`.
   """
-  @spec position(GenServer.server()) :: Board.tile()
-  def position(server), do: GenServer.call(server, :position)
+  @spec start_link(keyword()) :: GenServer.on_start()
+  def start_link(opts) do
+    case Keyword.pop(opts, :name) do
+      {nil, opts} -> GenServer.start_link(__MODULE__, opts)
+      {name, opts} -> GenServer.start_link(__MODULE__, opts, name: name)
+    end
+  end
+
+  ## Callbacks
+
+  @impl true
+  @spec init(keyword()) :: {:ok, state}
+  def init(opts) do
+    board = Keyword.fetch!(opts, :board)
+    tile = Keyword.fetch!(opts, :tile)
+
+    Registry.register(Registry.Game, "board", [])
+
+    {:ok, %State{board: board, tile: tile}}
+  end
+
+  @spec handle_call(request, GenServer.from(), state) :: {:reply, result | noop, state}
+  def handle_call(msg, from, state)
+
+  @impl true
+  # Update to Elixir 1.11 `map.field` syntax in guards
+  def handle_call(_action, _from, %State{alive: false} = state) do
+    {:reply, :noop, state}
+  end
+
+  @impl true
+  def handle_call({:attack, launcher}, _from, state) do
+    launcher.(self(), state.tile)
+    {:reply, :released, state}
+  end
+
+  @impl true
+  def handle_call({move, updater}, _from, %State{tile: tile, board: board} = state) do
+    result = board.play(tile, move)
+    updater.(result)
+    {:reply, result, %{state | tile: result}}
+  end
+
+  @impl true
+  def handle_info({:fire, enemy_tile}, state) do
+    state =
+      case Board.attack_distance?(state.tile, enemy_tile) do
+        true -> %{state | alive: false}
+        false -> state
+      end
+
+    {:noreply, state}
+  end
 end

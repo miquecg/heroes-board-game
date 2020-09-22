@@ -4,7 +4,7 @@ defmodule Web.AcceptanceTest do
 
   import Wallaby.Query, only: [button: 1, css: 2]
 
-  feature "User visits /game and an empty board is loaded", context do
+  feature "User visits /game and the board is loaded without heroes", context do
     context.session
     |> visit(@game)
     |> refute_has(active_heroes())
@@ -13,13 +13,13 @@ defmodule Web.AcceptanceTest do
     |> assert_has(css(".cell.wall", count: 7))
   end
 
-  feature "User clicks start button and the hero appears in the board", context do
+  feature "User clicks start button and a hero appears in the board", context do
     context.session
     |> click_start()
     |> assert_has(active_heroes(count: 1))
   end
 
-  feature "JavaScript client updates board when new players join and leave",
+  feature "JavaScript client updates board when players join and leave",
           %{session: player_1} do
     player_1
     |> click_start()

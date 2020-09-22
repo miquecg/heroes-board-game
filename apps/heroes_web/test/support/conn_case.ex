@@ -7,8 +7,8 @@ defmodule HeroesWeb.ConnCase do
 
   using do
     quote do
-      import Plug.Conn
       import Phoenix.ConnTest
+      import Plug.Conn
 
       alias Web.Router.Helpers, as: Routes
 
