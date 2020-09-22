@@ -5,19 +5,18 @@ defmodule Web.GameController do
 
   plug :authenticate when action in [:index]
   plug :put_game_token when action in [:index]
+  plug :join when action in [:start]
 
   def index(conn, _params) do
-    render(conn, "index.html", board: Endpoint.config(:board))
+    render(conn, "index.html", board: config(:board))
   end
 
   def start(conn, _params) do
     delete_csrf_token()
 
-    id = Game.join()
     game_path = Routes.game_path(conn, :index)
 
     conn
-    |> put_session("player_id", id)
     |> put_status(303)
     |> redirect(to: game_path)
     |> halt()
@@ -41,4 +40,11 @@ defmodule Web.GameController do
       conn
     end
   end
+
+  defp join(conn, _opts) do
+    {board, dice} = {config(:board), config(:dice)}
+    put_session(conn, "player_id", Game.join(board, dice))
+  end
+
+  defp config(key), do: Endpoint.config(key)
 end
