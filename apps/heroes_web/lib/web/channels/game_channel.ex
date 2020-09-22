@@ -5,6 +5,7 @@ defmodule Web.GameChannel do
 
   use HeroesWeb, :channel
 
+  alias Phoenix.Socket
   alias Web.Presence
 
   @impl true
