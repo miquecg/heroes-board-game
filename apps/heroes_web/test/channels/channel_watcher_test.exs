@@ -42,7 +42,7 @@ defmodule Web.ChannelWatcherTest do
     leave_channel(socket)
 
     assert_receive {:DOWN, ^ref, :process, _pid, :normal}, 300
-    assert {:error, %{reason: "join crashed"}} = join(socket, @topics.board)
+    assert {:error, %{reason: "game over"}} = join(socket, @topics.board)
   end
 
   defp player_socket do

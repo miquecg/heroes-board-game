@@ -76,10 +76,14 @@ defmodule Web.GameChannelTest do
     end
   end
 
-  test "Unauthorized join on a second connection for same player", %{socket: socket} do
-    {:ok, _, _} = join(socket, @topics.board)
+  test "Player cannot join game on a second channel", %{socket: socket} do
+    Process.flag(:trap_exit, true)
 
-    assert {:error, %{reason: "unauthorized"}} = join(socket, @topics.board)
+    assert {:ok, _, _} = join(socket, @topics.board)
+
+    catch_exit do
+      join(socket, @topics.board)
+    end
   end
 
   defp socket_mock(%{socket: socket}) do
