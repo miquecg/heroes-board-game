@@ -5,25 +5,25 @@ defmodule Web.GameChannelTest do
 
   describe "Topic game:board" do
     setup context do
-      socket = subscribe_and_join!(context.socket, @topics.board)
+      {:ok, %{hero: hero}, socket} = subscribe_and_join(context.socket, @topics.board)
 
-      [socket: socket, player_id: socket.assigns.player_id]
+      [socket: socket, hero: hero]
     end
 
-    test "presence joining channel", %{player_id: id} do
+    test "presence joining channel", %{hero: id} do
       assert_push "presence_state", %{}
 
       assert_broadcast "presence_diff", %{joins: %{^id => %{metas: metas}}, leaves: %{}}
-      assert [%{phx_ref: _, x: 5, y: 3}] = metas
+      assert [%{x: 5, y: 3}] = metas
     end
 
-    test "presence leaving channel", %{socket: socket, player_id: id} do
+    test "presence leaving channel", %{socket: socket, hero: id} do
       leave_channel(socket)
 
       assert_broadcast "presence_diff", %{joins: %{}, leaves: %{^id => _metas}}
     end
 
-    test "presence closing socket", %{socket: socket, player_id: id} do
+    test "presence closing socket", %{socket: socket, hero: id} do
       close_socket(socket)
 
       assert_broadcast "presence_diff", %{joins: %{}, leaves: %{^id => _metas}}
@@ -35,10 +35,10 @@ defmodule Web.GameChannelTest do
       @endpoint.subscribe(@topics.lobby)
       {:ok, _, socket} = join(context.socket, @topics.board)
 
-      [socket: socket, player_id: socket.assigns.player_id]
+      [socket: socket, player: socket.assigns.player]
     end
 
-    test "presence joining channel", %{player_id: id} do
+    test "presence joining channel", %{player: id} do
       assert_receive %Phoenix.Socket.Broadcast{
         event: "presence_diff",
         payload: %{
@@ -49,7 +49,7 @@ defmodule Web.GameChannelTest do
       }
     end
 
-    test "presence leaving channel", %{socket: socket, player_id: id} do
+    test "presence leaving channel", %{socket: socket, player: id} do
       leave_channel(socket)
 
       assert_receive %Phoenix.Socket.Broadcast{
@@ -62,7 +62,7 @@ defmodule Web.GameChannelTest do
       }
     end
 
-    test "presence closing socket", %{socket: socket, player_id: id} do
+    test "presence closing socket", %{socket: socket, player: id} do
       close_socket(socket)
 
       assert_receive %Phoenix.Socket.Broadcast{
@@ -84,8 +84,8 @@ defmodule Web.GameChannelTest do
 
   defp socket_mock(%{socket: socket}) do
     assigns = %{
-      player_id: GameMock.join(),
-      game: GameMock
+      game: GameMock,
+      player: GameMock.join()
     }
 
     [socket: Phoenix.Socket.assign(socket, assigns)]

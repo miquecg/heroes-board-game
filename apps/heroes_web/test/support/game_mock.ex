@@ -2,7 +2,7 @@ defmodule GameMock do
   @moduledoc false
   @behaviour GameBehaviour
 
-  @test_player "test_player_id"
+  @test_player "test_player"
 
   def join, do: join(nil, nil)
 

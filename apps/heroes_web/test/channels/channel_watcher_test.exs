@@ -62,7 +62,7 @@ defmodule Web.ChannelWatcherTest do
 
   defp monitor_hero(%{socket: socket}) do
     ref =
-      socket.assigns.player_id
+      socket.assigns.player
       |> (&GenServer.whereis({:via, Registry, {Registry.Heroes, &1}})).()
       |> Process.monitor()
 
@@ -71,8 +71,8 @@ defmodule Web.ChannelWatcherTest do
 
   defp assign_player(socket) do
     assigns = %{
-      player_id: Game.join(GameBoards.Test4x4, fn _ -> {0, 0} end),
-      game: Game
+      game: Game,
+      player: Game.join(GameBoards.Test4x4, fn _ -> {0, 0} end)
     }
 
     Phoenix.Socket.assign(socket, assigns)
