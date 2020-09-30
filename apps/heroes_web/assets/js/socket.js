@@ -9,7 +9,7 @@ class App {
     let $board = document.querySelector("#grid")
 
     socket.onOpen( () => console.log("socket OPEN") )
-    socket.onError( ev => console.log("socket ERROR", e) )
+    socket.onError( e => console.log("socket ERROR", e) )
     socket.onClose( () => console.log("socket CLOSE") )
 
     let channel = socket.channel("game:board", {})
@@ -23,7 +23,7 @@ class App {
                socket.disconnect()
              }
            })
-    channel.onError( ev => console.log("channel ERROR", ev) )
+    channel.onError( e => console.log("channel ERROR", e) )
     channel.onClose( () => console.log("channel CLOSE") )
 
     let presences = {}
