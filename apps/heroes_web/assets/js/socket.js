@@ -18,7 +18,7 @@ class App {
            .receive("error", resp => {
              console.log("Unable to join", resp)
 
-             if (resp.reason == "join crashed") {
+             if (resp.reason == "game over") {
                // TODO: call server to clear session cookie
                socket.disconnect()
              }
