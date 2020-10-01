@@ -7,50 +7,55 @@ class App {
     socket.connect()
 
     let $board = document.querySelector("#grid")
+    let hero = ""
 
     socket.onOpen( () => console.log("socket OPEN") )
-    socket.onError( ev => console.log("socket ERROR", e) )
+    socket.onError( e => console.log("socket ERROR", e) )
     socket.onClose( () => console.log("socket CLOSE") )
 
     let channel = socket.channel("game:board", {})
     channel.join()
-           .receive("ok", () => { console.log("Joined successfully") })
+           .receive("ok", resp => {
+             hero = resp.hero
+             console.log(`id:${hero} joined successfully`)
+           })
            .receive("error", resp => {
              console.log("Unable to join", resp)
 
-             if (resp.reason == "join crashed") {
+             if (resp.reason == "game over") {
                // TODO: call server to clear session cookie
                socket.disconnect()
              }
            })
-    channel.onError( ev => console.log("channel ERROR", ev) )
+    channel.onError( e => console.log("channel ERROR", e) )
     channel.onClose( () => console.log("channel CLOSE") )
 
     let presences = {}
     channel.on("presence_state", state => {
       presences = Presence.syncState(presences, state)
-      this.render(presences, $board)
+      this.render(presences, $board, hero)
     })
     channel.on("presence_diff", diff => {
       presences = Presence.syncDiff(presences, diff)
-      this.render(presences, $board)
+      this.render(presences, $board, hero)
     })
   }
 
-  static render(presences, $board){
+  static render(presences, $board, id){
     let template = document.createElement('template')
-    template.innerHTML = this.htmlTemplate(presences)
+    template.innerHTML = this.htmlTemplate(presences, id)
 
     let $heroes = $board.querySelector(".hero-cells")
     $heroes.replaceWith(template.content)
   }
 
-  static htmlTemplate(presences){
-    let heroes = Presence.list(presences, (_id, {metas: [hero, ...rest]}) => {
+  static htmlTemplate(presences, id){
+    let heroes = Presence.list(presences, (key, {metas: [hero, ...rest]}) => {
       let position = this.gridPlot(hero)
-      let style = `grid-column: ${position.col}; grid-row: span 1 / ${position.row};`
+      let css = `grid-column: ${position.col}; grid-row: span 1 / ${position.row};`
+      let htmlClass = (id == key ? "hero player" : "hero")
 
-      return `<div class="hero" style="${style}"></div>`
+      return `<div class="${htmlClass}" style="${css}"></div>`
     })
 
     return [`<div class="hero-cells">`, ...heroes, `</div>`].join("")

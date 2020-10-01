@@ -12,13 +12,13 @@ defmodule Web.ChannelWatcherTest do
   test "Remove hero after leaving channel", %{socket: socket, ref: ref} do
     leave_channel(socket)
 
-    assert_receive {:DOWN, ^ref, :process, _pid, :normal}, 300
+    assert_receive {:DOWN, ^ref, :process, _pid, :normal}, 500
   end
 
   test "Remove hero after closing socket", %{socket: socket, ref: ref} do
     close_socket(socket)
 
-    assert_receive {:DOWN, ^ref, :process, _pid, :normal}, 300
+    assert_receive {:DOWN, ^ref, :process, _pid, :normal}, 500
   end
 
   test "Do not remove hero when player reconnects", %{socket: socket, ref: ref} do
@@ -35,14 +35,14 @@ defmodule Web.ChannelWatcherTest do
     second_player_socket = player_socket()
     {:ok, _, _} = join(second_player_socket, @topics.board)
 
-    assert_receive {:DOWN, ^ref, :process, _pid, :normal}, 300
+    assert_receive {:DOWN, ^ref, :process, _pid, :normal}, 500
   end
 
   test "Reconnect is not possible after removing hero", %{socket: socket, ref: ref} do
     leave_channel(socket)
 
-    assert_receive {:DOWN, ^ref, :process, _pid, :normal}, 300
-    assert {:error, %{reason: "join crashed"}} = join(socket, @topics.board)
+    assert_receive {:DOWN, ^ref, :process, _pid, :normal}, 500
+    assert {:error, %{reason: "game over"}} = join(socket, @topics.board)
   end
 
   defp player_socket do
@@ -62,7 +62,7 @@ defmodule Web.ChannelWatcherTest do
 
   defp monitor_hero(%{socket: socket}) do
     ref =
-      socket.assigns.player_id
+      socket.assigns.player
       |> (&GenServer.whereis({:via, Registry, {Registry.Heroes, &1}})).()
       |> Process.monitor()
 
@@ -71,8 +71,8 @@ defmodule Web.ChannelWatcherTest do
 
   defp assign_player(socket) do
     assigns = %{
-      player_id: Game.join(GameBoards.Test4x4, fn _ -> {0, 0} end),
-      game: Game
+      game: Game,
+      player: Game.join(GameBoards.Test4x4, fn _ -> {0, 0} end)
     }
 
     Phoenix.Socket.assign(socket, assigns)
