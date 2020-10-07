@@ -1,7 +1,14 @@
 defmodule Web.GameChannelTest do
   use HeroesWeb.ChannelCase, async: true
 
-  setup :socket_mock
+  import Mox
+
+  setup do
+    expect(GameMock, :position, fn _ -> {5, 3} end)
+    :ok
+  end
+
+  setup :verify_on_exit!
 
   describe "Topic game:board" do
     setup context do
@@ -77,21 +84,13 @@ defmodule Web.GameChannelTest do
   end
 
   test "Player cannot join game on a second channel", %{socket: socket} do
-    Process.flag(:trap_exit, true)
-
     assert {:ok, _, _} = join(socket, @topics.board)
 
+    Process.flag(:trap_exit, true)
+
     catch_exit do
+      stub(GameMock, :position, fn _ -> {0, 0} end)
       join(socket, @topics.board)
     end
-  end
-
-  defp socket_mock(%{socket: socket}) do
-    assigns = %{
-      game: GameMock,
-      player: GameMock.join()
-    }
-
-    [socket: Phoenix.Socket.assign(socket, assigns)]
   end
 end

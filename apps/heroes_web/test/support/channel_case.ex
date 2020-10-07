@@ -23,7 +23,12 @@ defmodule HeroesWeb.ChannelCase do
   end
 
   setup do
-    [socket: socket(Web.PlayerSocket)]
+    assigns = %{
+      game: GameMock,
+      player: "test_player"
+    }
+
+    [socket: socket(Web.PlayerSocket, "test", assigns)]
   end
 
   def leave_channel(socket) do
