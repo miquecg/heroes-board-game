@@ -1,7 +1,11 @@
 defmodule Web.PlayerSocketTest do
-  use HeroesWeb.ChannelCase, async: true
+  use ExUnit.Case, async: true
+
+  import Phoenix.ChannelTest, only: [connect: 2]
 
   alias Web.PlayerSocket, as: Socket
+
+  @endpoint Web.Endpoint
 
   test "Socket connection requires a valid token" do
     assert :error = connect(Socket, %{})
