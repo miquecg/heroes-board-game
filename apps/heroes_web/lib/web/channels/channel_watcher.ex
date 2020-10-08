@@ -19,6 +19,9 @@ defmodule Web.ChannelWatcher do
   Start GenServer under supervision.
 
   Requires option `:reconnect_timeout`.
+
+  A module implementing the game behaviour
+  can be passed with option `:game`.
   """
   @spec start_link(keyword()) :: GenServer.on_start()
   def start_link(opts), do: GenServer.start_link(__MODULE__, opts, name: __MODULE__)
@@ -28,12 +31,12 @@ defmodule Web.ChannelWatcher do
   @impl true
   @spec init(keyword()) :: {:ok, map()}
   def init(opts) do
-    PubSub.subscribe(Web.PubSub, "game:lobby")
-
     state = %{
+      game: Keyword.get(opts, :game, Game),
       time: Keyword.fetch!(opts, :reconnect_timeout),
       refs: %{}
     }
+    PubSub.subscribe(Web.PubSub, "game:lobby")
 
     {:ok, state}
   end
@@ -49,11 +52,11 @@ defmodule Web.ChannelWatcher do
   end
 
   @impl true
-  def handle_info({:timeout, player}, state) do
+  def handle_info({:timeout, player}, %{game: game} = state) do
     {timer, refs} = Map.pop(state.refs, player)
 
     if timer do
-      Game.remove(player)
+      game.remove(player)
     end
 
     {:noreply, %{state | refs: refs}}
