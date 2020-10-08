@@ -3,8 +3,10 @@ defmodule Web.GameChannelTest do
 
   import Mox
 
+  @game GameMock
+
   setup do
-    expect(GameMock, :position, fn _ -> {5, 3} end)
+    stub(@game, :position, fn _ -> {0, 0} end)
     :ok
   end
 
@@ -12,11 +14,20 @@ defmodule Web.GameChannelTest do
 
   describe "Topic game:board" do
     setup context do
+      if tile = context[:position] do
+        expect(@game, :position, fn _ -> tile end)
+      end
+
+      :ok
+    end
+
+    setup context do
       {:ok, %{hero: hero}, socket} = subscribe_and_join(context.socket, @topics.board)
 
       [socket: socket, hero: hero]
     end
 
+    @tag position: {5, 3}
     test "presence joining channel", %{hero: id} do
       assert_push "presence_state", %{}
 
@@ -89,8 +100,13 @@ defmodule Web.GameChannelTest do
     Process.flag(:trap_exit, true)
 
     catch_exit do
-      stub(GameMock, :position, fn _ -> {0, 0} end)
       join(socket, @topics.board)
     end
+  end
+
+  test "Player cannot join when hero is no longer in the board", %{socket: socket} do
+    expect(@game, :position, fn _ -> {} end)
+
+    assert {:error, %{reason: "game over"}} = join(socket, @topics.board)
   end
 end
