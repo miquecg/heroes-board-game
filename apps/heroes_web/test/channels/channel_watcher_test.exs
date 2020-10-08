@@ -1,73 +1,89 @@
 defmodule Web.ChannelWatcherTest do
   use HeroesWeb.ChannelCase
 
-  setup [:join_game, :monitor_hero]
+  import Mox
+
+  @game GameMock
+
+  setup do
+    opts = [
+      game: @game,
+      reconnect_timeout: 50
+    ]
+    {:ok, child} = start_supervised({Web.ChannelWatcher, opts})
+
+    [watcher_pid: child]
+  end
 
   setup context do
-    timeout = Map.get(context, :reconnect, 50)
-    start_supervised!({Web.ChannelWatcher, reconnect_timeout: timeout})
+    stub(@game, :position, fn _ -> {0, 0} end)
+    allow(@game, self(), context.watcher_pid)
     :ok
   end
 
-  test "Remove hero after leaving channel", %{socket: socket, ref: ref} do
-    leave_channel(socket)
-
-    assert_receive {:DOWN, ^ref, :process, _pid, :normal}, 500
-  end
-
-  test "Remove hero after closing socket", %{socket: socket, ref: ref} do
-    close_socket(socket)
-
-    assert_receive {:DOWN, ^ref, :process, _pid, :normal}, 500
-  end
-
-  test "Do not remove hero when player reconnects", %{socket: socket, ref: ref} do
-    leave_channel(socket)
-    {:ok, _, _} = join(socket, @topics.board)
-
-    refute_receive {:DOWN, ^ref, :process, _pid, :normal}, 500
-  end
-
-  @tag reconnect: 100
-  test "Track different players correctly", %{socket: socket, ref: ref} do
-    leave_channel(socket)
-
-    second_player_socket = player_socket()
-    {:ok, _, _} = join(second_player_socket, @topics.board)
-
-    assert_receive {:DOWN, ^ref, :process, _pid, :normal}, 500
-  end
-
-  defp player_socket do
-    Web.PlayerSocket
-    |> socket()
-    |> assign_player()
-  end
-
-  defp join_game(context) do
-    {:ok, _, socket} =
-      context.socket
-      |> assign_player()
-      |> join(@topics.board)
+  setup context do
+    {:ok, _, socket} = join(context.socket, @topics.board)
 
     [socket: socket]
   end
 
-  defp monitor_hero(%{socket: socket}) do
-    ref =
-      socket.assigns.player
-      |> (&GenServer.whereis({:via, Registry, {Registry.Heroes, &1}})).()
-      |> Process.monitor()
+  setup :verify_on_exit!
 
-    [ref: ref]
+  test "Remove hero after leaving channel", %{socket: socket} do
+    reply = expect_call_remove_once()
+
+    leave_channel(socket)
+
+    assert_receive ^reply, 200
   end
 
-  defp assign_player(socket) do
-    assigns = %{
-      game: Game,
-      player: Game.join(GameBoards.Test4x4, fn _ -> {0, 0} end)
-    }
+  test "Remove hero after closing socket", %{socket: socket} do
+    reply = expect_call_remove_once()
 
-    Phoenix.Socket.assign(socket, assigns)
+    close_socket(socket)
+
+    assert_receive ^reply, 200
+  end
+
+  test "Do not remove hero when player reconnects", %{socket: socket} do
+    expect_not_call_remove()
+
+    leave_channel(socket)
+    {:ok, _, _} = join(socket, @topics.board)
+
+    :timer.sleep(200)
+  end
+
+  test "Track different players correctly", %{socket: socket} do
+    {msg, fun} = remove_callback()
+    expect(@game, :remove, fn "test_player" = arg -> fun.(arg) end)
+
+    leave_channel(socket)
+    {:ok, _, _} =
+      "second_player"
+      |> player_socket()
+      |> join(@topics.board)
+
+    assert_receive ^msg, 200
+  end
+
+  defp expect_call_remove_once do
+    {msg, fun} = remove_callback()
+    expect(@game, :remove, fun)
+    msg
+  end
+
+  defp expect_not_call_remove, do: expect(@game, :remove, 0, fn _ -> :ok end)
+
+  defp remove_callback do
+    parent = self()
+    msg = {make_ref(), :done}
+
+    fun = fn _ ->
+      send(parent, msg)
+      :ok
+    end
+
+    {msg, fun}
   end
 end
