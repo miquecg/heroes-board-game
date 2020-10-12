@@ -10,6 +10,7 @@ defmodule Web.ChannelWatcherTest do
       game: @game,
       reconnect_timeout: 50
     ]
+
     {:ok, child} = start_supervised({Web.ChannelWatcher, opts})
 
     [watcher_pid: child]
@@ -59,6 +60,7 @@ defmodule Web.ChannelWatcherTest do
     expect(@game, :remove, fn "test_player" = arg -> fun.(arg) end)
 
     leave_channel(socket)
+
     {:ok, _, _} =
       "second_player"
       |> player_socket()

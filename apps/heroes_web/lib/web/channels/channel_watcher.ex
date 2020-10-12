@@ -36,6 +36,7 @@ defmodule Web.ChannelWatcher do
       time: Keyword.fetch!(opts, :reconnect_timeout),
       refs: %{}
     }
+
     PubSub.subscribe(Web.PubSub, "game:lobby")
 
     {:ok, state}

@@ -31,6 +31,7 @@ defmodule HeroesWeb.ChannelCase do
       game: GameMock,
       player: player
     }
+
     socket(Web.PlayerSocket, "player", assigns)
   end
 
