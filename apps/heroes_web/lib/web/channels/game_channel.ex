@@ -34,6 +34,16 @@ defmodule Web.GameChannel do
     end
   end
 
+  @impl true
+  def terminate({:shutdown, reason}, %{assigns: %{game: game, player: player}})
+      when reason in [:left, :closed] do
+    game.remove(player)
+    {:ok, _} = Presence.update(self(), "game:lobby", player, %{logout: true})
+  end
+
+  @impl true
+  def terminate(_, _), do: :ok
+
   @spec hero_id :: binary()
   defp hero_id do
     bytes = :crypto.strong_rand_bytes(8)

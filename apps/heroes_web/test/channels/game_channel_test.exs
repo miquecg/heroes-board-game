@@ -68,26 +68,30 @@ defmodule Web.GameChannelTest do
     end
 
     test "presence leaving channel", %{socket: socket, player: id} do
+      expect(@game, :remove, fn ^id -> :ok end)
+
       leave_channel(socket)
 
       assert_receive %Phoenix.Socket.Broadcast{
         event: "presence_diff",
         payload: %{
           joins: %{},
-          leaves: %{^id => _metas}
+          leaves: %{^id => %{metas: [%{logout: true}]}}
         },
         topic: "game:lobby"
       }
     end
 
     test "presence closing socket", %{socket: socket, player: id} do
+      expect(@game, :remove, fn ^id -> :ok end)
+
       close_socket(socket)
 
       assert_receive %Phoenix.Socket.Broadcast{
         event: "presence_diff",
         payload: %{
           joins: %{},
-          leaves: %{^id => _metas}
+          leaves: %{^id => %{metas: [%{logout: true}]}}
         },
         topic: "game:lobby"
       }
