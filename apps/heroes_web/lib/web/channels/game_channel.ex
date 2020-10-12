@@ -26,7 +26,7 @@ defmodule Web.GameChannel do
   def handle_info({:after_join, position}, socket) do
     push(socket, "presence_state", Presence.list(socket))
 
-    with {:ok, _} <- authorize(socket),
+    with {:ok, _} <- authorize_player(socket),
          {:ok, _} <- track_hero(socket, position) do
       no_reply(socket)
     else
@@ -50,8 +50,8 @@ defmodule Web.GameChannel do
     Base.encode16(bytes, case: :lower)
   end
 
-  @spec authorize(Socket.t()) :: {:ok, ref :: binary()} | {:error, reason :: term()}
-  defp authorize(%{assigns: %{player: id}}) do
+  @spec authorize_player(Socket.t()) :: {:ok, ref :: binary()} | {:error, reason :: term()}
+  defp authorize_player(%{assigns: %{player: id}}) do
     case Presence.get_by_key("game:lobby", id) do
       [] -> Presence.track(self(), "game:lobby", id, %{})
       _ -> {:error, :max_connections}
