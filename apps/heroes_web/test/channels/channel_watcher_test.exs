@@ -28,29 +28,28 @@ defmodule Web.ChannelWatcherTest do
 
   setup :verify_on_exit!
 
-  test "Remove hero after leaving channel", %{socket: socket} do
-    reply = expect_call_remove_once()
+  describe "Expect one single call to Game.remove/1 when" do
+    setup do
+      {msg, fun} = remove_callback()
 
-    leave_channel(socket)
+      @game
+      |> expect(:remove, fn _ -> :ok end)
+      |> stub(:remove, fun)
 
-    assert_receive ^reply, 200
-  end
+      [reply: msg]
+    end
 
-  test "Remove hero after closing socket", %{socket: socket} do
-    reply = expect_call_remove_once()
+    test "client leaves channel", %{socket: socket, reply: reply} do
+      leave_channel(socket)
 
-    close_socket(socket)
+      refute_receive ^reply, 200
+    end
 
-    assert_receive ^reply, 200
-  end
+    test "socket is closed", %{socket: socket, reply: reply} do
+      close_socket(socket)
 
-  test "Do not remove hero when player reconnects", %{socket: socket} do
-    expect_not_call_remove()
-
-    leave_channel(socket)
-    {:ok, _, _} = join(socket, @topics.board)
-
-    :timer.sleep(200)
+      refute_receive ^reply, 200
+    end
   end
 
   describe "Timer set after channel shutdown" do
