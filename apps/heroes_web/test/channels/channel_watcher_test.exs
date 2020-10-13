@@ -5,10 +5,10 @@ defmodule Web.ChannelWatcherTest do
 
   @game GameMock
 
-  setup do
+  setup context do
     opts = [
       game: @game,
-      reconnect_timeout: 50
+      reconnect_timeout: Map.get(context, :timer, 0)
     ]
 
     {:ok, child} = start_supervised({Web.ChannelWatcher, opts})
@@ -17,12 +17,10 @@ defmodule Web.ChannelWatcherTest do
   end
 
   setup context do
-    stub(@game, :position, fn _ -> {0, 0} end)
-    allow(@game, self(), context.watcher_pid)
-    :ok
-  end
+    @game
+    |> stub(:position, fn _ -> {0, 0} end)
+    |> allow(self(), context.watcher_pid)
 
-  setup context do
     {:ok, _, socket} = join(context.socket, @topics.board)
 
     [socket: socket]
@@ -55,27 +53,33 @@ defmodule Web.ChannelWatcherTest do
     :timer.sleep(200)
   end
 
-  test "Track different players correctly", %{socket: socket} do
-    {msg, fun} = remove_callback()
-    expect(@game, :remove, fn "test_player" = arg -> fun.(arg) end)
+  describe "Timer set after channel shutdown" do
+    @describetag timer: 20
 
-    leave_channel(socket)
+    setup %{socket: socket} do
+      {msg, fun} = remove_callback()
+      stub(@game, :remove, fun)
 
-    {:ok, _, _} =
-      "second_player"
-      |> player_socket()
-      |> join(@topics.board)
+      shutdown_channel(socket)
 
-    assert_receive ^msg, 200
+      [reply: msg]
+    end
+
+    test "is cancelled when player reconnects", %{socket: socket, reply: reply} do
+      {:ok, _, _} = join(socket, @topics.board)
+
+      refute_receive ^reply, 400
+    end
+
+    test "continues when other player joins", %{reply: reply} do
+      {:ok, _, _} =
+        "second_player"
+        |> player_socket()
+        |> join(@topics.board)
+
+      assert_receive ^reply, 400
+    end
   end
-
-  defp expect_call_remove_once do
-    {msg, fun} = remove_callback()
-    expect(@game, :remove, fun)
-    msg
-  end
-
-  defp expect_not_call_remove, do: expect(@game, :remove, 0, fn _ -> :ok end)
 
   defp remove_callback do
     parent = self()
@@ -87,5 +91,10 @@ defmodule Web.ChannelWatcherTest do
     end
 
     {msg, fun}
+  end
+
+  defp shutdown_channel(socket) do
+    Process.flag(:trap_exit, true)
+    Process.exit(socket.channel_pid, :shutdown)
   end
 end
