@@ -75,15 +75,9 @@ defmodule Web.ChannelWatcher do
 
   @spec cancel_timers(timers, map()) :: timers()
   defp cancel_timers(timers, joins) do
-    Enum.reduce(joins, timers, fn
-      {id, _}, acc when is_map_key(acc, id) ->
-        {ref, acc} = Map.pop(acc, id)
-        Process.cancel_timer(ref)
-        acc
-
-      _, acc ->
-        acc
-    end)
+    {cancelled, rest} = Map.split(timers, Map.keys(joins))
+    Enum.each(cancelled, fn {_, ref} -> Process.cancel_timer(ref) end)
+    rest
   end
 
   @spec start_timers(timers, map(), non_neg_integer()) :: timers
