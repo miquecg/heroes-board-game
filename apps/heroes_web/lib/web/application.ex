@@ -12,7 +12,7 @@ defmodule Web.Application do
       {Phoenix.PubSub, name: Web.PubSub},
       Web.Presence,
       {Web.ChannelWatcher, reconnect_timeout: timeout_ms()},
-      {Web.Endpoint, board: board(), dice: dice()}
+      {Web.Endpoint, board: board(), dice: &Enum.random/1}
     ]
 
     opts = [strategy: :one_for_one, name: Web.Supervisor]
@@ -30,14 +30,6 @@ defmodule Web.Application do
     |> String.capitalize()
     |> (&("Elixir.GameBoards." <> &1)).()
     |> String.to_existing_atom()
-  end
-
-  @spec dice :: fun()
-  defp dice do
-    case Application.get_env(@app, :player_spawn, :randomized) do
-      :randomized -> &Enum.random/1
-      :first_tile -> &Enum.at(&1, 0)
-    end
   end
 
   @impl true
