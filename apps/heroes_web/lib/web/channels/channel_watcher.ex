@@ -8,10 +8,9 @@ defmodule Web.ChannelWatcher do
   alias Phoenix.PubSub
   alias Phoenix.Socket.Broadcast
 
-  @typep player_id :: GameBehaviour.player_id()
-
-  @typep time :: non_neg_integer()
-  @typep timers :: %{optional(player_id) => reference()}
+  @typep presences :: Phoenix.Presence.presences()
+  @typep diff :: %{joins: presences, leaves: presences}
+  @typep timers :: %{optional(binary()) => reference()}
 
   ## Client
 
@@ -19,6 +18,9 @@ defmodule Web.ChannelWatcher do
   Start GenServer under supervision.
 
   Requires option `:reconnect_timeout`.
+
+  A module implementing the game behaviour
+  can be passed with option `:game`.
   """
   @spec start_link(keyword()) :: GenServer.on_start()
   def start_link(opts), do: GenServer.start_link(__MODULE__, opts, name: __MODULE__)
@@ -28,48 +30,65 @@ defmodule Web.ChannelWatcher do
   @impl true
   @spec init(keyword()) :: {:ok, map()}
   def init(opts) do
-    PubSub.subscribe(Web.PubSub, "game:lobby")
-
     state = %{
-      time: Keyword.fetch!(opts, :reconnect_timeout),
-      refs: %{}
+      game: Keyword.get(opts, :game, Game),
+      timeout: Keyword.fetch!(opts, :reconnect_timeout),
+      timers: %{}
     }
+
+    PubSub.subscribe(Web.PubSub, "game:lobby")
 
     {:ok, state}
   end
 
   @impl true
-  def handle_info(%Broadcast{event: "presence_diff", payload: payload}, %{time: time} = state) do
-    refs =
-      state.refs
-      |> cancel_timers(payload.joins)
-      |> start_timers(payload.leaves, time)
+  def handle_info(%Broadcast{event: "presence_diff", payload: payload}, %{timeout: time} = state) do
+    %{joins: joins, leaves: leaves} = remove_updates(payload)
 
-    {:noreply, %{state | refs: refs}}
+    timers =
+      state.timers
+      |> cancel_timers(joins)
+      |> start_timers(leaves, time)
+
+    {:noreply, %{state | timers: timers}}
   end
 
   @impl true
-  def handle_info({:timeout, player}, state) do
-    {timer, refs} = Map.pop(state.refs, player)
+  def handle_info({:timeout, id}, %{game: game, timers: timers} = state)
+      when is_map_key(timers, id) do
+    game.remove(id)
+    timers = Map.delete(timers, id)
 
-    if timer do
-      Game.remove(player)
-    end
-
-    {:noreply, %{state | refs: refs}}
+    {:noreply, %{state | timers: timers}}
   end
 
-  @spec cancel_timers(timers(), map()) :: timers()
-  defp cancel_timers(refs, joins) do
-    players = Map.keys(joins)
-    Map.drop(refs, players)
+  @impl true
+  def handle_info({:timeout, _}, state), do: {:noreply, state}
+
+  @spec remove_updates(diff) :: diff
+  defp remove_updates(%{joins: joins, leaves: leaves}) do
+    {duplicates, joins_deduped} = Map.split(joins, Map.keys(leaves))
+    leaves_deduped = Map.drop(leaves, Map.keys(duplicates))
+
+    %{joins: joins_deduped, leaves: leaves_deduped}
   end
 
-  @spec start_timers(timers(), map(), time) :: timers()
-  defp start_timers(refs, leaves, time) do
-    for {player, _meta} <- leaves, into: refs do
-      ref = Process.send_after(self(), {:timeout, player}, time)
-      {player, ref}
-    end
+  @spec cancel_timers(timers, map()) :: timers()
+  defp cancel_timers(timers, joins) do
+    {cancelled, rest} = Map.split(timers, Map.keys(joins))
+    Enum.each(cancelled, fn {_, ref} -> Process.cancel_timer(ref) end)
+    rest
+  end
+
+  @spec start_timers(timers, map(), non_neg_integer()) :: timers
+  defp start_timers(timers, leaves, time) do
+    Enum.reduce(leaves, timers, fn
+      {_, %{metas: [%{logout: true}]}}, acc ->
+        acc
+
+      {id, _}, acc ->
+        ref = Process.send_after(self(), {:timeout, id}, time)
+        Map.put(acc, id, ref)
+    end)
   end
 end

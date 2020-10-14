@@ -124,7 +124,7 @@ defmodule Game do
           {^attacker, _} -> :ok
           # :erlang.send/2 is asynchronous and safe
           # https://erlang.org/doc/reference_manual/processes.html#message-sending
-          {pid, _} -> send(pid, {:fire, from})
+          {enemy, _} -> send(enemy, {:fire, from})
         end)
       )
     end

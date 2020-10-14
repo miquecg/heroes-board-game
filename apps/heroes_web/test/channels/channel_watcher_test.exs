@@ -1,80 +1,99 @@
 defmodule Web.ChannelWatcherTest do
   use HeroesWeb.ChannelCase
 
-  setup [:join_game, :monitor_hero]
+  import Mox
+
+  @game GameMock
 
   setup context do
-    timeout = Map.get(context, :reconnect, 50)
-    start_supervised!({Web.ChannelWatcher, reconnect_timeout: timeout})
-    :ok
+    opts = [
+      game: @game,
+      reconnect_timeout: Map.get(context, :timer, 0)
+    ]
+
+    {:ok, child} = start_supervised({Web.ChannelWatcher, opts})
+
+    [watcher_pid: child]
   end
 
-  test "Remove hero after leaving channel", %{socket: socket, ref: ref} do
-    leave_channel(socket)
+  setup context do
+    @game
+    |> stub(:position, fn _ -> {0, 0} end)
+    |> allow(self(), context.watcher_pid)
 
-    assert_receive {:DOWN, ^ref, :process, _pid, :normal}, 500
-  end
-
-  test "Remove hero after closing socket", %{socket: socket, ref: ref} do
-    close_socket(socket)
-
-    assert_receive {:DOWN, ^ref, :process, _pid, :normal}, 500
-  end
-
-  test "Do not remove hero when player reconnects", %{socket: socket, ref: ref} do
-    leave_channel(socket)
-    {:ok, _, _} = join(socket, @topics.board)
-
-    refute_receive {:DOWN, ^ref, :process, _pid, :normal}, 500
-  end
-
-  @tag reconnect: 100
-  test "Track different players correctly", %{socket: socket, ref: ref} do
-    leave_channel(socket)
-
-    second_player_socket = player_socket()
-    {:ok, _, _} = join(second_player_socket, @topics.board)
-
-    assert_receive {:DOWN, ^ref, :process, _pid, :normal}, 500
-  end
-
-  test "Reconnect is not possible after removing hero", %{socket: socket, ref: ref} do
-    leave_channel(socket)
-
-    assert_receive {:DOWN, ^ref, :process, _pid, :normal}, 500
-    assert {:error, %{reason: "game over"}} = join(socket, @topics.board)
-  end
-
-  defp player_socket do
-    Web.PlayerSocket
-    |> socket()
-    |> assign_player()
-  end
-
-  defp join_game(context) do
-    {:ok, _, socket} =
-      context.socket
-      |> assign_player()
-      |> join(@topics.board)
+    {:ok, _, socket} = join(context.socket, @topics.board)
 
     [socket: socket]
   end
 
-  defp monitor_hero(%{socket: socket}) do
-    ref =
-      socket.assigns.player
-      |> (&GenServer.whereis({:via, Registry, {Registry.Heroes, &1}})).()
-      |> Process.monitor()
+  setup :verify_on_exit!
 
-    [ref: ref]
+  describe "Expect one single call to Game.remove/1 when" do
+    setup do
+      {msg, fun} = remove_callback()
+
+      @game
+      |> expect(:remove, fn _ -> :ok end)
+      |> stub(:remove, fun)
+
+      [reply: msg]
+    end
+
+    test "client leaves channel", %{socket: socket, reply: reply} do
+      leave_channel(socket)
+
+      refute_receive ^reply, 200
+    end
+
+    test "socket is closed", %{socket: socket, reply: reply} do
+      close_socket(socket)
+
+      refute_receive ^reply, 200
+    end
   end
 
-  defp assign_player(socket) do
-    assigns = %{
-      game: Game,
-      player: Game.join(GameBoards.Test4x4, fn _ -> {0, 0} end)
-    }
+  describe "Timer set after channel shutdown" do
+    @describetag timer: 20
 
-    Phoenix.Socket.assign(socket, assigns)
+    setup %{socket: socket} do
+      {msg, fun} = remove_callback()
+      stub(@game, :remove, fun)
+
+      shutdown_channel(socket)
+
+      [reply: msg]
+    end
+
+    test "is cancelled when player reconnects", %{socket: socket, reply: reply} do
+      {:ok, _, _} = join(socket, @topics.board)
+
+      refute_receive ^reply, 400
+    end
+
+    test "continues when other player joins", %{reply: reply} do
+      {:ok, _, _} =
+        "second_player"
+        |> player_socket()
+        |> join(@topics.board)
+
+      assert_receive ^reply, 400
+    end
+  end
+
+  defp remove_callback do
+    parent = self()
+    msg = {make_ref(), :done}
+
+    fun = fn _ ->
+      send(parent, msg)
+      :ok
+    end
+
+    {msg, fun}
+  end
+
+  defp shutdown_channel(socket) do
+    Process.flag(:trap_exit, true)
+    Process.exit(socket.channel_pid, :shutdown)
   end
 end
