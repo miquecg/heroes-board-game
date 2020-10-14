@@ -99,7 +99,8 @@ defmodule Web.GameChannelTest do
   end
 
   test "Player cannot join game on a second channel", %{socket: socket} do
-    assert {:ok, _, _} = join(socket, @topics.board)
+    expect(@game, :remove, 0, fn _ -> :ok end)
+    {:ok, _, _} = join(socket, @topics.board)
 
     Process.flag(:trap_exit, true)
 
