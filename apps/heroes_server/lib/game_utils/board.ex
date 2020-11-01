@@ -16,21 +16,17 @@ defmodule GameUtils.Board do
     board = Board.new(opts)
     tiles = Board.generate(board)
 
-    quote do
+    quote bind_quoted: [board: Macro.escape(board), tiles: tiles] do
       @behaviour GameUtils.Board
 
       alias Game.Board
 
-      @board unquote(Macro.escape(board))
+      @board board
 
-      @impl true
-      def x_axis, do: @board.x_axis
-
-      @impl true
-      def y_axis, do: @board.y_axis
-
-      @impl true
-      def walls, do: @board.walls
+      for key when key != :__struct__ <- Map.keys(@board) do
+        @impl true
+        def unquote(key)(), do: @board.unquote(key)
+      end
 
       @impl true
       def tiles, do: unquote(tiles)
