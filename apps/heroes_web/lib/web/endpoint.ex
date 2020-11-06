@@ -7,7 +7,7 @@ defmodule Web.Endpoint do
     signing_salt: "+ZZP18W1"
   ]
 
-  socket "/play", Web.PlayerSocket,
+  socket "/game/socket", Web.PlayerSocket,
     websocket: true,
     longpoll: false
 

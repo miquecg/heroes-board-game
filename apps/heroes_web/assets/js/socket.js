@@ -3,7 +3,7 @@ import {Socket, Presence} from "phoenix"
 class App {
 
   static init(){
-    let socket = new Socket("/play", {params: {token: window.gameToken}})
+    let socket = new Socket("/game/socket", {params: {token: window.gameToken}})
     socket.connect()
 
     let $board = document.querySelector("#grid")

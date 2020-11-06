@@ -6,7 +6,7 @@ defmodule Web.AcceptanceTest do
 
   feature "User visits /game and the board is loaded without heroes", context do
     context.session
-    |> visit(@game)
+    |> visit(@index)
     |> assert_has(button("Start"))
     |> assert_has(css("#grid .cell", count: 48))
     |> assert_has(css(".cell.wall", count: 7))
@@ -35,7 +35,7 @@ defmodule Web.AcceptanceTest do
 
   defp click_start(session) do
     session
-    |> visit(@game)
+    |> visit(@index)
     |> click(button("Start"))
   end
 
