@@ -13,7 +13,10 @@ defmodule HeroesWeb.ConnCase do
       alias Web.Router.Helpers, as: Routes
 
       @endpoint Web.Endpoint
-      @game Routes.game_path(@endpoint, :index)
+      @game %{
+        index: Routes.game_path(@endpoint, :index),
+        start: Routes.game_path(@endpoint, :start)
+      }
     end
   end
 

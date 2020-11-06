@@ -1,6 +1,8 @@
 defmodule Web.Router do
   use HeroesWeb, :router
 
+  alias Web.Plugs.Redirect
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -12,8 +14,8 @@ defmodule Web.Router do
     pipe_through :browser
 
     get "/game", GameController, :index
-    post "/game", GameController, :start
+    post "/game/start", GameController, :start
   end
 
-  get "/*path", Web.WildcardController, :route
+  get "/", Redirect, to: "/game"
 end

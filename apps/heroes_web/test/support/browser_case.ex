@@ -14,7 +14,7 @@ defmodule HeroesWeb.BrowserCase do
       alias Web.Router.Helpers, as: Routes
 
       @endpoint Web.Endpoint
-      @game Routes.game_path(@endpoint, :index)
+      @index Routes.game_path(@endpoint, :index)
     end
   end
 
