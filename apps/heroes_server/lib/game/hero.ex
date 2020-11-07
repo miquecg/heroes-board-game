@@ -48,7 +48,7 @@ defmodule Game.Hero do
     board = Keyword.fetch!(opts, :board)
     tile = Keyword.fetch!(opts, :tile)
 
-    Registry.register(Registry.Game, "board", [])
+    {:ok, _} = Registry.register(Registry.Game, "board", [])
 
     {:ok, %State{board: board, tile: tile}}
   end

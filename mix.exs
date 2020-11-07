@@ -8,7 +8,8 @@ defmodule HeroesGame.MixProject do
       aliases: aliases(),
       deps: deps(),
       dialyzer: [
-        plt_file: {:no_warn, "priv/plts/dialyzer.plt"}
+        plt_file: {:no_warn, "priv/plts/dialyzer.plt"},
+        flags: dialyzer_flags()
       ]
     ]
   end
@@ -23,6 +24,15 @@ defmodule HeroesGame.MixProject do
     [
       {:credo, "~> 1.4", only: :dev, runtime: false},
       {:dialyxir, "~> 1.0", only: :dev, runtime: false}
+    ]
+  end
+
+  defp dialyzer_flags do
+    [
+      :unmatched_returns,
+      :error_handling,
+      :race_conditions,
+      :underspecs
     ]
   end
 end

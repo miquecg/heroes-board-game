@@ -61,7 +61,7 @@ defmodule Game.Board do
     }
   end
 
-  @spec fetch!(keyword(), atom()) :: pos_integer()
+  @spec fetch!(keyword(), :cols | :rows) :: pos_integer()
   defp fetch!(opts, size) do
     value = Keyword.fetch!(opts, size)
 
