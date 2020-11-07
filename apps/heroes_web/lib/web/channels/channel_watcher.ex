@@ -36,7 +36,7 @@ defmodule Web.ChannelWatcher do
       timers: %{}
     }
 
-    PubSub.subscribe(Web.PubSub, "game:lobby")
+    :ok = PubSub.subscribe(Web.PubSub, "game:lobby")
 
     {:ok, state}
   end
