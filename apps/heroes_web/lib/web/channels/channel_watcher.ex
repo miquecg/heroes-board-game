@@ -11,6 +11,11 @@ defmodule Web.ChannelWatcher do
   @typep presences :: Phoenix.Presence.presences()
   @typep diff :: %{joins: presences, leaves: presences}
   @typep timers :: %{optional(binary()) => reference()}
+  @typep state :: %{
+           game: module(),
+           timeout: non_neg_integer(),
+           timers: timers
+         }
 
   ## Client
 
@@ -28,7 +33,7 @@ defmodule Web.ChannelWatcher do
   ## Server (callbacks)
 
   @impl true
-  @spec init(keyword()) :: {:ok, map()}
+  @spec init(keyword()) :: {:ok, state}
   def init(opts) do
     state = %{
       game: Keyword.get(opts, :game, Game),
@@ -73,7 +78,7 @@ defmodule Web.ChannelWatcher do
     %{joins: joins_deduped, leaves: leaves_deduped}
   end
 
-  @spec cancel_timers(timers, map()) :: timers()
+  @spec cancel_timers(timers, map()) :: timers
   defp cancel_timers(timers, joins) do
     {cancelled, rest} = Map.split(timers, Map.keys(joins))
     Enum.each(cancelled, fn {_, ref} -> Process.cancel_timer(ref) end)

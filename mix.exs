@@ -31,7 +31,8 @@ defmodule HeroesGame.MixProject do
     [
       :unmatched_returns,
       :error_handling,
-      :race_conditions
+      :race_conditions,
+      :underspecs
     ]
   end
 end
