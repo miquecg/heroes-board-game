@@ -30,7 +30,8 @@ defmodule HeroesGame.MixProject do
   defp dialyzer_flags do
     [
       :unmatched_returns,
-      :error_handling
+      :error_handling,
+      :race_conditions
     ]
   end
 end
