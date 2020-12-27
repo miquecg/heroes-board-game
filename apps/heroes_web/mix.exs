@@ -6,7 +6,7 @@ defmodule HeroesWeb.MixProject do
       app: :heroes_web,
       version: "0.1.0",
       build_path: "../../_build",
-      elixir: "~> 1.10",
+      elixir: "~> 1.11",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:phoenix] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
@@ -31,8 +31,8 @@ defmodule HeroesWeb.MixProject do
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
-      {:wallaby, "~> 0.26.0", only: :test, runtime: false},
-      {:hammox, "~> 0.2.5", only: :test}
+      {:wallaby, "~> 0.28.0", only: :test, runtime: false},
+      {:hammox, "~> 0.3.1", only: :test}
     ]
   end
 end
