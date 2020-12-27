@@ -19,7 +19,7 @@ defmodule HeroesServer.MixProject do
   def application do
     [
       mod: {Game.Application, []},
-      extra_applications: [:sasl, :logger]
+      extra_applications: [:crypto, :logger, :sasl]
     ]
   end
 
