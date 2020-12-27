@@ -6,7 +6,7 @@ defmodule HeroesServer.MixProject do
       app: :heroes_server,
       version: "0.1.0",
       build_path: "../../_build",
-      elixir: "~> 1.10",
+      elixir: "~> 1.11",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps()
