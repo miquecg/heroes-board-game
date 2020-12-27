@@ -15,9 +15,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        elixir: [1.10.4]
-        erlang: [22.3.4.5]
-        os: [debian-buster-20200607]
+        elixir: [1.11.2]
+        erlang: [23.2.1]
+        os: [debian-buster-20201012]
     container:
       image: hexpm/elixir-amd64:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-${{ matrix.os }}
     outputs:
@@ -62,9 +62,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        elixir: [1.10.4]
-        erlang: [22.3.4.5]
-        os: [debian-buster-20200607]
+        elixir: [1.11.2]
+        erlang: [23.2.1]
+        os: [debian-buster-20201012]
     container:
       image: hexpm/elixir-amd64:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-${{ matrix.os }}
     steps:
@@ -93,9 +93,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        elixir: [1.10.4]
-        erlang: [22.3.4.5]
-        os: [debian-buster-20200607]
+        elixir: [1.11.2]
+        erlang: [23.2.1]
+        os: [debian-buster-20201012]
     container:
       image: hexpm/elixir-amd64:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-${{ matrix.os }}
     steps:
@@ -115,9 +115,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        elixir: [1.10.4]
-        erlang: [22.3.4.5]
-        os: [debian-buster-20200607]
+        elixir: [1.11.2]
+        erlang: [23.2.1]
+        os: [debian-buster-20201012]
     container:
       image: hexpm/elixir-amd64:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-${{ matrix.os }}
     steps:
