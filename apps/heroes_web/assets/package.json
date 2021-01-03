@@ -1,7 +1,5 @@
 {
-  "repository": {},
-  "description": " ",
-  "license": "MIT",
+  "private": true,
   "scripts": {
     "deploy": "webpack --mode production",
     "watch": "webpack --mode development --watch"
@@ -10,17 +8,16 @@
     "phoenix": "file:../../../deps/phoenix"
   },
   "devDependencies": {
-    "@babel/core": "^7.12.3",
-    "@babel/preset-env": "^7.12.1",
-    "babel-loader": "^8.0.0",
-    "copy-webpack-plugin": "^6.2.1",
-    "css-loader": "^3.4.2",
-    "mini-css-extract-plugin": "^0.9.0",
-    "node-sass": "^4.13.1",
-    "optimize-css-assets-webpack-plugin": "^5.0.4",
-    "sass-loader": "^8.0.2",
-    "terser-webpack-plugin": "^2.3.8",
-    "webpack": "4.41.5",
-    "webpack-cli": "^3.3.2"
+    "@babel/core": "^7.x",
+    "@babel/preset-env": "^7.x",
+    "babel-loader": "^8.x",
+    "copy-webpack-plugin": "^6.x",
+    "css-loader": "^5.x",
+    "css-minimizer-webpack-plugin": "^1.x",
+    "mini-css-extract-plugin": "^1.x",
+    "sass": "^1.x",
+    "sass-loader": "^10.x",
+    "webpack": "5.x",
+    "webpack-cli": "^4.x"
   }
 }
