@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        elixir: [1.11.2]
+        elixir: [1.11.3]
         erlang: [23.2.1]
         os: [debian-buster-20201012]
     container:
@@ -62,7 +62,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        elixir: [1.11.2]
+        elixir: [1.11.3]
         erlang: [23.2.1]
         os: [debian-buster-20201012]
     container:
@@ -93,7 +93,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        elixir: [1.11.2]
+        elixir: [1.11.3]
         erlang: [23.2.1]
         os: [debian-buster-20201012]
     container:
@@ -115,7 +115,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        elixir: [1.11.2]
+        elixir: [1.11.3]
         erlang: [23.2.1]
         os: [debian-buster-20201012]
     container:
