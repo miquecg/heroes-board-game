@@ -9,6 +9,8 @@ defmodule Web.GameChannel do
   alias Phoenix.Socket
   alias Web.Presence
 
+  @typep game_update :: {:ok, ref :: binary()} | {:error, reason :: term()}
+
   @impl true
   def join("game:board", _msg, %{assigns: %{game: game, player: player}} = socket) do
     case game.position(player) do
@@ -35,6 +37,19 @@ defmodule Web.GameChannel do
   end
 
   @impl true
+  def handle_in(
+        "game:board",
+        %{"cmd" => input},
+        %{assigns: %{game: game, player: player}} = socket
+      ) do
+    with {:ok, command} <- validate_command(input),
+         {:ok, result} <- game.play(player, command),
+         {:ok, _} <- update_board(socket, result) do
+      no_reply(socket)
+    end
+  end
+
+  @impl true
   def terminate({:shutdown, reason}, %{assigns: %{game: game, player: player}})
       when reason in [:left, :closed] do
     game.remove(player)
@@ -50,7 +65,7 @@ defmodule Web.GameChannel do
     Base.encode16(bytes, case: :lower)
   end
 
-  @spec authorize_player(Socket.t()) :: {:ok, ref :: binary()} | {:error, reason :: term()}
+  @spec authorize_player(Socket.t()) :: game_update
   defp authorize_player(%{assigns: %{player: id}}) do
     case Presence.get_by_key("game:lobby", id) do
       [] -> Presence.track(self(), "game:lobby", id, %{})
@@ -58,11 +73,21 @@ defmodule Web.GameChannel do
     end
   end
 
-  @spec track_hero(Socket.t(), Board.tile()) ::
-          {:ok, ref :: binary()} | {:error, reason :: term()}
+  @spec track_hero(Socket.t(), Board.tile()) :: game_update
   defp track_hero(%{assigns: %{hero: id}} = socket, {x, y}) do
     Presence.track(socket, id, %{x: x, y: y})
   end
+
+  @spec update_board(Socket.t(), Board.tile()) :: game_update
+  defp update_board(%{assigns: %{hero: id}} = socket, {x, y}) do
+    Presence.update(socket, id, %{x: x, y: y})
+  end
+
+  @spec validate_command(String.t()) :: {:ok, Board.move()}
+  defp validate_command("↑"), do: {:ok, :up}
+  defp validate_command("↓"), do: {:ok, :down}
+  defp validate_command("←"), do: {:ok, :left}
+  defp validate_command("→"), do: {:ok, :right}
 
   defp no_reply(socket), do: {:noreply, socket}
   defp shutdown(socket), do: {:stop, :shutdown, socket}
