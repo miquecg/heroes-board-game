@@ -39,6 +39,35 @@ class App {
       presences = Presence.syncDiff(presences, diff)
       this.render(presences, $board, hero)
     })
+
+    window.addEventListener("keydown", e => {
+      if (e.defaultPrevented) {
+        return
+      }
+
+      if (e.repeat) {
+        return
+      }
+
+      switch (e.key) {
+        case "ArrowUp":
+          channel.push("game:board", {cmd: "↑"})
+          break
+        case "ArrowDown":
+          channel.push("game:board", {cmd: "↓"})
+          break
+        case "ArrowLeft":
+          channel.push("game:board", {cmd: "←"})
+          break
+        case "ArrowRight":
+          channel.push("game:board", {cmd: "→"})
+          break
+        default:
+          return
+      }
+
+      event.preventDefault()
+    }, true)
   }
 
   static render(presences, $board, id){
