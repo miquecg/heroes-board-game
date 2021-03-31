@@ -8,7 +8,7 @@ defmodule HeroesGame.MixProject do
       aliases: aliases(),
       deps: deps(),
       dialyzer: [
-        plt_file: {:no_warn, "priv/plts/dialyzer.plt"},
+        plt_local_path: "priv/plts",
         flags: dialyzer_flags()
       ]
     ]
