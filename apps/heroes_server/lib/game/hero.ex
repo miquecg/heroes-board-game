@@ -8,8 +8,7 @@ defmodule Game.Hero do
   alias Game.Board
 
   @type request :: {:attack, Game.attack()} | {Board.move(), Game.update()}
-  @type result :: Board.tile() | :released
-  @type noop :: :noop
+  @type reply :: Board.tile() | :released | :dead
 
   @typep state :: %__MODULE__.State{
            board: module(),
@@ -53,12 +52,12 @@ defmodule Game.Hero do
     {:ok, %State{board: board, tile: tile}}
   end
 
-  @spec handle_call(request, GenServer.from(), state) :: {:reply, result | noop, state}
+  @spec handle_call(request, GenServer.from(), state) :: {:reply, reply, state}
   def handle_call(msg, from, state)
 
   @impl true
   def handle_call(_action, _from, %State{} = state) when not state.alive do
-    {:reply, :noop, state}
+    {:reply, :dead, state}
   end
 
   @impl true

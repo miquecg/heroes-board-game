@@ -31,12 +31,12 @@ defmodule GameBehaviour do
 
   Errors:
 
-  - `:noop`: hero is dead and cannot execute any further actions
+  - `:dead`
   - `GameError.BadCommand`
   """
   @callback play(player_id, cmd :: term()) :: {:ok, result} | {:error, error}
             when result: Board.tile() | :released,
-                 error: :noop | %BadCommand{}
+                 error: :dead | %BadCommand{}
 
   @doc """
   Get current position of hero.
@@ -153,7 +153,7 @@ defmodule Game do
 
   defp call_hero(hero, request) do
     case GenServer.call(hero, request) do
-      :noop -> {:error, :noop}
+      :dead -> {:error, :dead}
       reply -> {:ok, reply}
     end
   end
