@@ -42,6 +42,11 @@ defmodule GameBehaviour do
   Get current hero position.
   """
   @callback position(player_id) :: Board.tile() | {}
+
+  @doc """
+  Subscribe to a hero event in the game via callback.
+  """
+  @callback subscribe(player_id, event :: :killed, callback :: (() -> any())) :: :ok
 end
 
 defmodule Game do
@@ -92,6 +97,13 @@ defmodule Game do
       [{_pid, position}] -> position
       [] -> {}
     end
+  end
+
+  @impl true
+  def subscribe(id, :killed, callback) when is_function(callback) do
+    [{pid, _}] = Registry.lookup(Registry.Heroes, id)
+    request = {:register, callback, pid}
+    :ok = GenServer.call(Game.BoardSubscriber, request)
   end
 
   @spec generate_id :: binary()

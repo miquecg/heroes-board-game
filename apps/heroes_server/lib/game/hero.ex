@@ -48,7 +48,7 @@ defmodule Game.Hero do
     board = Keyword.fetch!(opts, :board)
     tile = Keyword.fetch!(opts, :tile)
 
-    {:ok, _} = Registry.register(Registry.Game, "board", [])
+    {:ok, _} = Registry.register(Registry.Game, "board", nil)
 
     {:ok, %State{board: board, tile: tile}}
   end
@@ -76,13 +76,24 @@ defmodule Game.Hero do
   end
 
   @impl true
-  def handle_info({:fire, enemy_tile}, state) do
-    state =
-      case Board.attack_distance?(state.tile, enemy_tile) do
-        true -> %{state | alive: false}
-        false -> state
-      end
-
+  @spec handle_info({:fire, Board.tile()}, state) :: {:noreply, state}
+  def handle_info({:fire, enemy_tile}, %State{} = state) do
+    state = compute_attack(state, enemy_tile)
+    :ok = maybe_leave_board(state)
     {:noreply, state}
   end
+
+  @spec compute_attack(state, Board.tile()) :: state
+  defp compute_attack(state, enemy_tile) do
+    if Board.attack_distance?(state.tile, enemy_tile),
+      do: %{state | alive: false},
+      else: state
+  end
+
+  @spec maybe_leave_board(state) :: :ok
+  defp maybe_leave_board(state) when not state.alive do
+    Registry.unregister(Registry.Game, "board")
+  end
+
+  defp maybe_leave_board(_), do: :ok
 end
