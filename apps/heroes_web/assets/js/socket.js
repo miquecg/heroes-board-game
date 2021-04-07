@@ -62,6 +62,9 @@ class App {
         case "ArrowRight":
           channel.push("game:board", {cmd: "→"})
           break
+        case " ":
+          channel.push("game:board", {cmd: "⚔"})
+          break
         default:
           return
       }

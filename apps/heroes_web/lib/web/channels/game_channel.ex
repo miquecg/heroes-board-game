@@ -44,7 +44,7 @@ defmodule Web.GameChannel do
       ) do
     with {:ok, command} <- validate_command(input),
          {:ok, result} <- game.play(player, command),
-         {:ok, _} <- update_board(socket, result) do
+         :ok <- update_board(socket, result) do
       no_reply(socket)
     end
   end
@@ -78,16 +78,20 @@ defmodule Web.GameChannel do
     Presence.track(socket, id, %{x: x, y: y})
   end
 
-  @spec update_board(Socket.t(), Board.tile()) :: game_update
+  @spec update_board(Socket.t(), Board.tile() | :released) :: :ok
   defp update_board(%{assigns: %{hero: id}} = socket, {x, y}) do
-    Presence.update(socket, id, %{x: x, y: y})
+    {:ok, _} = Presence.update(socket, id, %{x: x, y: y})
+    :ok
   end
+
+  defp update_board(_, :released), do: :ok
 
   @spec validate_command(String.t()) :: {:ok, Board.move()}
   defp validate_command("↑"), do: {:ok, :up}
   defp validate_command("↓"), do: {:ok, :down}
   defp validate_command("←"), do: {:ok, :left}
   defp validate_command("→"), do: {:ok, :right}
+  defp validate_command("⚔"), do: {:ok, :attack}
 
   defp no_reply(socket), do: {:noreply, socket}
   defp shutdown(socket), do: {:stop, :shutdown, socket}
