@@ -7,8 +7,11 @@ defmodule Game.Hero do
 
   alias Game.Board
 
-  @type request :: {:attack, Game.attack()} | {Board.move(), Game.update()}
-  @type reply :: Board.tile() | :released | :dead
+  @typep attack_callback :: (pid(), Board.tile() -> :ok)
+  @typep move_callback :: (Board.tile() -> :ok)
+
+  @typep request :: {:attack, attack_callback} | {Board.move(), move_callback}
+  @typep reply :: Board.tile() | :released | :dead
 
   @typep state :: %__MODULE__.State{
            board: module(),

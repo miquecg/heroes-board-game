@@ -5,16 +5,30 @@ defmodule GameBehaviour do
   alias GameError.BadCommand
 
   @typedoc """
-  Unique identifier for every active player.
+  Unique identifier of each player.
 
   Base 32 hex encoded string of 26 characters.
   """
   @type player_id :: <<_::208>>
 
+  @typep board :: module()
+  @typep tile :: Board.tile()
+  @typep empty_tile :: {}
+
+  @typedoc """
+  Randomly choose a tile to start.
+  """
+  @type dice :: (list(tile) -> tile)
+
+  @typep command :: any()
+  @typep command_error :: %GameError.BadCommand{}
+
+  @typep event_callback :: (() -> any())
+
   @doc """
   Join a new player to the game.
   """
-  @callback join(board :: module(), dice :: fun()) :: player_id
+  @callback join(board, dice) :: player_id
 
   @doc """
   Remove player from the game.
@@ -34,19 +48,19 @@ defmodule GameBehaviour do
   - `:dead`
   - `GameError.BadCommand`
   """
-  @callback play(player_id, cmd :: any()) :: {:ok, result} | {:error, error}
-            when result: Board.tile() | :released,
-                 error: :dead | %BadCommand{}
+  @callback play(player_id, command) :: {:ok, result} | {:error, error}
+            when result: tile | :released,
+                 error: command_error | :dead
 
   @doc """
   Get current position of hero.
   """
-  @callback position(player_id) :: Board.tile() | {}
+  @callback position(player_id) :: tile | empty_tile
 
   @doc """
-  Subscribe to a hero event in the game via callback.
+  Subscribe an event callback to know when hero gets killed.
   """
-  @callback subscribe(player_id, event :: :killed, callback :: (() -> any())) :: :ok
+  @callback subscribe(player_id, event_callback) :: :ok
 end
 
 defmodule Game do
@@ -60,8 +74,8 @@ defmodule Game do
   alias Game.{Board, Hero, HeroSupervisor}
   alias GameError.BadCommand
 
-  @type update :: (Board.tile() -> :ok)
-  @type attack :: (pid(), Board.tile() -> :ok)
+  @typep dice :: GameBehaviour.dice()
+  @typep tile :: Board.tile()
 
   @impl true
   def join(board, dice) do
@@ -83,10 +97,32 @@ defmodule Game do
   def remove(id), do: call_hero(id, :stop)
 
   @impl true
-  def play(id, cmd) when Board.is_move(cmd), do: call_hero(id, {cmd, update_callback(id)})
+  def play(id, command) when Board.is_move(command) do
+    callback = fn tile ->
+      {^tile, _} = Registry.update_value(Registry.Heroes, id, fn _old -> tile end)
+      :ok
+    end
+
+    call_hero(id, {command, callback})
+  end
 
   @impl true
-  def play(id, :attack), do: call_hero(id, {:attack, attack_callback()})
+  def play(id, :attack) do
+    callback = fn attacker, from ->
+      Registry.dispatch(
+        Registry.Game,
+        "board",
+        &Enum.each(&1, fn
+          {^attacker, _} -> :ok
+          # :erlang.send/2 is asynchronous and safe
+          # https://erlang.org/doc/reference_manual/processes.html#message-sending
+          {enemy, _} -> send(enemy, {:fire, from})
+        end)
+      )
+    end
+
+    call_hero(id, {:attack, callback})
+  end
 
   @impl true
   def play(_, _), do: {:error, %BadCommand{}}
@@ -100,7 +136,7 @@ defmodule Game do
   end
 
   @impl true
-  def subscribe(id, :killed, callback) when is_function(callback) do
+  def subscribe(id, callback) when is_function(callback) do
     [{pid, _}] = Registry.lookup(Registry.Heroes, id)
     request = {:register, callback, pid}
     :ok = GenServer.call(Game.BoardSubscriber, request)
@@ -112,34 +148,10 @@ defmodule Game do
     Base.hex_encode32(random_bytes, padding: false)
   end
 
-  @spec choose_tile(module(), fun()) :: Board.tile()
+  @spec choose_tile(module(), dice) :: tile
   defp choose_tile(board, dice) do
     tiles = board.tiles()
     dice.(tiles)
-  end
-
-  @spec update_callback(binary()) :: update
-  defp update_callback(id) do
-    fn tile ->
-      {^tile, _} = Registry.update_value(Registry.Heroes, id, fn _old -> tile end)
-      :ok
-    end
-  end
-
-  @spec attack_callback :: attack
-  defp attack_callback do
-    fn attacker, from ->
-      Registry.dispatch(
-        Registry.Game,
-        "board",
-        &Enum.each(&1, fn
-          {^attacker, _} -> :ok
-          # :erlang.send/2 is asynchronous and safe
-          # https://erlang.org/doc/reference_manual/processes.html#message-sending
-          {enemy, _} -> send(enemy, {:fire, from})
-        end)
-      )
-    end
   end
 
   defp call_hero(id, request) when is_binary(id) do
