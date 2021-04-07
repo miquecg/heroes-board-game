@@ -12,34 +12,34 @@ defmodule GameBehaviour do
   @type player_id :: <<_::208>>
 
   @doc """
-  Join a new player to the game creating a hero.
+  Join a new player to the game.
   """
   @callback join(board :: module(), dice :: fun()) :: player_id
 
   @doc """
-  Remove player's hero from the game.
+  Remove player from the game.
   """
   @callback remove(player_id) :: :ok
 
   @doc """
-  Send command to player's hero.
+  Send command to hero.
 
-  Valid commands:
+  Commands:
 
   - `t:Game.Board.move/0`
   - `:attack`
 
-  Error values:
+  Errors:
 
   - `:noop`: hero is dead and cannot execute any further actions
-  - `%GameError.BadCommand{}`
+  - `GameError.BadCommand`
   """
   @callback play(player_id, cmd :: term()) :: {:ok, result} | {:error, error}
             when result: Board.tile() | :released,
                  error: :noop | %BadCommand{}
 
   @doc """
-  Get current hero position.
+  Get current position of hero.
   """
   @callback position(player_id) :: Board.tile() | {}
 

@@ -30,7 +30,7 @@ defmodule Game.Hero do
 
   Requires options `:board` and `:tile`.
 
-  Can be registered under a `:name`.
+  Process can be registered with `:name`.
   """
   @spec start_link(keyword()) :: GenServer.on_start()
   def start_link(opts) do
