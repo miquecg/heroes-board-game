@@ -9,7 +9,7 @@ defmodule Web.GameChannel do
   alias Phoenix.Socket
   alias Web.Presence
 
-  @typep game_update :: {:ok, ref :: binary()} | {:error, reason :: term()}
+  @typep game_update :: {:ok, ref :: binary()} | {:error, reason :: any()}
 
   @impl true
   def join("game:board", _msg, %{assigns: %{game: game, player: player}} = socket) do

@@ -34,7 +34,7 @@ defmodule GameBehaviour do
   - `:dead`
   - `GameError.BadCommand`
   """
-  @callback play(player_id, cmd :: term()) :: {:ok, result} | {:error, error}
+  @callback play(player_id, cmd :: any()) :: {:ok, result} | {:error, error}
             when result: Board.tile() | :released,
                  error: :dead | %BadCommand{}
 
