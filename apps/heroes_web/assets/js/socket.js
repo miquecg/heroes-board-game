@@ -10,7 +10,7 @@ class App {
     let hero = ""
 
     socket.onOpen( () => console.log("socket OPEN") )
-    socket.onError( e => console.log("socket ERROR", e) )
+    socket.onError( e => console.error("socket ERROR", e) )
     socket.onClose( () => console.log("socket CLOSE") )
 
     let channel = socket.channel("game:board", {})
@@ -20,14 +20,14 @@ class App {
              console.log(`id:${hero} joined successfully`)
            })
            .receive("error", resp => {
-             console.log("Unable to join", resp)
+             console.error("Unable to join", resp)
 
              if (resp.reason == "game_over") {
                // TODO: call server to clear session cookie
                socket.disconnect()
              }
            })
-    channel.onError( e => console.log("channel ERROR", e) )
+    channel.onError( e => console.error("channel ERROR", e) )
     channel.onClose( () => console.log("channel CLOSE") )
 
     let presences = {}
