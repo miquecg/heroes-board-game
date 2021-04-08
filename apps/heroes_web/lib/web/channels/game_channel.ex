@@ -31,7 +31,8 @@ defmodule Web.GameChannel do
     push(socket, "presence_state", Presence.list(socket))
 
     with {:ok, _} <- authorize_player(socket),
-         {:ok, _} <- track_hero(socket, position) do
+         {:ok, _} <- track_hero(socket, position),
+         :ok <- subscribe_to_game(socket) do
       no_reply(socket)
     else
       {:error, _} -> shutdown(socket)
@@ -49,6 +50,7 @@ defmodule Web.GameChannel do
          :ok <- update_board(socket, result) do
       no_reply(socket)
     else
+      {:error, :dead} -> no_reply(socket)
       {:error, reason} -> error_reply(reason, socket)
     end
   end
@@ -82,6 +84,14 @@ defmodule Web.GameChannel do
     Presence.track(socket, id, %{x: x, y: y})
   end
 
+  @spec subscribe_to_game(Socket.t()) :: :ok
+  defp subscribe_to_game(%{assigns: %{game: game, player: player, hero: hero}} = socket) do
+    game.subscribe(player, fn ->
+      {:ok, _} = Presence.update(socket, hero, &Map.put(&1, :state, "dead"))
+      push(socket, "game_over", %{})
+    end)
+  end
+
   @spec update_board(Socket.t(), Board.tile() | :released) :: :ok
   defp update_board(%{assigns: %{hero: id}} = socket, {x, y}) do
     {:ok, _} = Presence.update(socket, id, %{x: x, y: y})
@@ -102,7 +112,7 @@ defmodule Web.GameChannel do
   defp error_reply(reason, socket), do: {:reply, {:error, response(reason)}, socket}
   defp shutdown(socket), do: {:stop, :shutdown, socket}
 
-  defp response(reason) when reason in [:dead, :game_over] do
+  defp response(:game_over) do
     %{
       reason: "game_over",
       message: "GAME OVER"
