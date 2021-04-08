@@ -1,5 +1,5 @@
 defmodule GameError.BadSize do
-  alias __MODULE__
+  @type t :: %__MODULE__{}
 
   defexception [:message]
 
@@ -9,6 +9,6 @@ defmodule GameError.BadSize do
     {:ok, value} = Keyword.fetch(info, :value)
 
     msg = "Invalid board dimensions, got #{size}: #{inspect(value)}"
-    %BadSize{message: msg}
+    %__MODULE__{message: msg}
   end
 end
