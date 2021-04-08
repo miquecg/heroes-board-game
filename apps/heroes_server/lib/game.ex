@@ -11,19 +11,13 @@ defmodule GameBehaviour do
   """
   @type player_id :: <<_::208>>
 
-  @typep board :: module()
-  @typep tile :: Board.tile()
-  @typep empty_tile :: {}
-
   @typedoc """
   Randomly choose a tile to start.
   """
   @type dice :: (list(tile) -> tile)
 
-  @typep command :: any()
-  @typep command_error :: %GameError.BadCommand{}
-
-  @typep event_callback :: (() -> any())
+  @typep tile :: Board.tile()
+  @typep board :: module()
 
   @doc """
   Join a new player to the game.
@@ -34,6 +28,9 @@ defmodule GameBehaviour do
   Remove player from the game.
   """
   @callback remove(player_id) :: :ok
+
+  @typep command_result :: tile | :released
+  @typep command_error :: BadCommand.t() | :dead
 
   @doc """
   Send command to hero.
@@ -46,16 +43,18 @@ defmodule GameBehaviour do
   Errors:
 
   - `:dead`
-  - `GameError.BadCommand`
+  - `t:GameError.BadCommand/0`
   """
-  @callback play(player_id, command) :: {:ok, result} | {:error, error}
-            when result: tile | :released,
-                 error: command_error | :dead
+  @callback play(player_id, command :: any()) :: {:ok, command_result} | {:error, command_error}
+
+  @typep empty_tile :: {}
 
   @doc """
   Get current position of hero.
   """
   @callback position(player_id) :: tile | empty_tile
+
+  @typep event_callback :: (() -> any())
 
   @doc """
   Subscribe an event callback to know when hero gets killed.
