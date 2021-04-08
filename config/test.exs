@@ -6,7 +6,7 @@ config :heroes_web, Web.Endpoint,
 
 config :logger,
   handle_sasl_reports: false,
-  level: :warn
+  level: :error
 
 config :wallaby,
   base_url: "http://localhost:4002",
