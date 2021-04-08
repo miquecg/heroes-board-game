@@ -22,7 +22,7 @@ class App {
            .receive("error", resp => {
              console.log("Unable to join", resp)
 
-             if (resp.reason == "game over") {
+             if (resp.reason == "game_over") {
                // TODO: call server to clear session cookie
                socket.disconnect()
              }
@@ -40,7 +40,22 @@ class App {
       this.render(presences, $board, hero)
     })
 
-    window.addEventListener("keydown", e => {
+    window.addEventListener("keydown", function handler(e) {
+      function sendCommand(cmd){
+        let action = {cmd: cmd}
+        channel.push("game:board", action)
+               .receive("error", resp => {
+
+                 if (resp.reason == "game_over") {
+                   console.log(resp.message)
+                   window.removeEventListener(e.type, handler, true)
+                   return
+                 }
+
+                 console.error(resp.message, action)
+               })
+      }
+
       if (e.defaultPrevented) {
         return
       }
@@ -51,19 +66,19 @@ class App {
 
       switch (e.key) {
         case "ArrowUp":
-          channel.push("game:board", {cmd: "↑"})
+          sendCommand("↑")
           break
         case "ArrowDown":
-          channel.push("game:board", {cmd: "↓"})
+          sendCommand("↓")
           break
         case "ArrowLeft":
-          channel.push("game:board", {cmd: "←"})
+          sendCommand("←")
           break
         case "ArrowRight":
-          channel.push("game:board", {cmd: "→"})
+          sendCommand("→")
           break
         case " ":
-          channel.push("game:board", {cmd: "⚔"})
+          sendCommand("⚔")
           break
         default:
           return

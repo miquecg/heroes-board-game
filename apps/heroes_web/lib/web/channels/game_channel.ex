@@ -6,6 +6,8 @@ defmodule Web.GameChannel do
   use HeroesWeb, :channel
 
   alias Game.Board
+  alias GameError.BadCommand
+
   alias Phoenix.Socket
   alias Web.Presence
 
@@ -20,7 +22,7 @@ defmodule Web.GameChannel do
         {:ok, hero, assign(socket, hero)}
 
       {} ->
-        {:error, %{reason: "game over"}}
+        {:error, response(:game_over)}
     end
   end
 
@@ -46,6 +48,8 @@ defmodule Web.GameChannel do
          {:ok, result} <- game.play(player, command),
          :ok <- update_board(socket, result) do
       no_reply(socket)
+    else
+      {:error, reason} -> error_reply(reason, socket)
     end
   end
 
@@ -86,13 +90,29 @@ defmodule Web.GameChannel do
 
   defp update_board(_, :released), do: :ok
 
-  @spec validate_command(String.t()) :: {:ok, Board.move()}
+  @spec validate_command(String.t()) :: {:ok, Board.move()} | {:error, BadCommand.t()}
   defp validate_command("↑"), do: {:ok, :up}
   defp validate_command("↓"), do: {:ok, :down}
   defp validate_command("←"), do: {:ok, :left}
   defp validate_command("→"), do: {:ok, :right}
   defp validate_command("⚔"), do: {:ok, :attack}
+  defp validate_command(_), do: {:error, %BadCommand{}}
 
   defp no_reply(socket), do: {:noreply, socket}
+  defp error_reply(reason, socket), do: {:reply, {:error, response(reason)}, socket}
   defp shutdown(socket), do: {:stop, :shutdown, socket}
+
+  defp response(reason) when reason in [:dead, :game_over] do
+    %{
+      reason: "game_over",
+      message: "GAME OVER"
+    }
+  end
+
+  defp response(%BadCommand{message: msg}) do
+    %{
+      reason: "bad_command",
+      message: msg
+    }
+  end
 end

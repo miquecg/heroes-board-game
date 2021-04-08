@@ -112,6 +112,6 @@ defmodule Web.GameChannelTest do
   test "Player cannot join when hero is no longer in the board", %{socket: socket} do
     expect(@game, :position, fn _ -> {} end)
 
-    assert {:error, %{reason: "game over"}} = join(socket, @topics.board)
+    assert {:error, %{reason: "game_over"}} = join(socket, @topics.board)
   end
 end
