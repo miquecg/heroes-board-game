@@ -11,8 +11,6 @@ defmodule Web.GameChannel do
   alias Phoenix.Socket
   alias Web.Presence
 
-  @typep game_update :: {:ok, ref :: binary()} | {:error, reason :: any()}
-
   @impl true
   def join("game:board", _msg, %{assigns: %{game: game, player: player}} = socket) do
     case game.position(player) do
@@ -22,7 +20,7 @@ defmodule Web.GameChannel do
         {:ok, hero, assign(socket, hero)}
 
       {} ->
-        {:error, response(:game_over)}
+        {:error, response(:unauthorized)}
     end
   end
 
@@ -30,8 +28,8 @@ defmodule Web.GameChannel do
   def handle_info({:after_join, position}, socket) do
     push(socket, "presence_state", Presence.list(socket))
 
-    with {:ok, _} <- authorize_player(socket),
-         {:ok, _} <- track_hero(socket, position),
+    with :ok <- check_active_connections(socket),
+         :ok <- track_hero(socket, position),
          :ok <- subscribe_to_game(socket) do
       no_reply(socket)
     else
@@ -71,17 +69,22 @@ defmodule Web.GameChannel do
     Base.encode16(bytes, case: :lower)
   end
 
-  @spec authorize_player(Socket.t()) :: game_update
-  defp authorize_player(%{assigns: %{player: id}}) do
+  @spec check_active_connections(Socket.t()) :: :ok | {:error, :max_connections}
+  defp check_active_connections(%{assigns: %{player: id}}) do
     case Presence.get_by_key("game:lobby", id) do
-      [] -> Presence.track(self(), "game:lobby", id, %{})
-      _ -> {:error, :max_connections}
+      [] ->
+        {:ok, _} = Presence.track(self(), "game:lobby", id, %{})
+        :ok
+
+      _ ->
+        {:error, :max_connections}
     end
   end
 
-  @spec track_hero(Socket.t(), Board.tile()) :: game_update
+  @spec track_hero(Socket.t(), Board.tile()) :: :ok
   defp track_hero(%{assigns: %{hero: id}} = socket, {x, y}) do
-    Presence.track(socket, id, %{x: x, y: y})
+    {:ok, _} = Presence.track(socket, id, %{x: x, y: y})
+    :ok
   end
 
   @spec subscribe_to_game(Socket.t()) :: :ok
@@ -112,10 +115,10 @@ defmodule Web.GameChannel do
   defp error_reply(reason, socket), do: {:reply, {:error, response(reason)}, socket}
   defp shutdown(socket), do: {:stop, :shutdown, socket}
 
-  defp response(:game_over) do
+  defp response(:unauthorized) do
     %{
-      reason: "game_over",
-      message: "GAME OVER"
+      reason: "unauthorized",
+      message: "Authorization invalid"
     }
   end
 

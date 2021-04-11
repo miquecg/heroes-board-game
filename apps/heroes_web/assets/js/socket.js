@@ -22,7 +22,7 @@ class App {
            .receive("error", resp => {
              console.error(`reason:${resp.reason} message:${resp.message}`)
 
-             if (resp.reason == "game_over") {
+             if (resp.reason == "unauthorized") {
                // TODO: clear session cookie
                socket.disconnect()
              }
