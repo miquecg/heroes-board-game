@@ -18,6 +18,7 @@ defmodule Web.GameChannelTest do
         expect(@game, :position, fn _ -> tile end)
       end
 
+      expect(@game, :subscribe, fn _, _ -> :ok end)
       :ok
     end
 
@@ -49,6 +50,11 @@ defmodule Web.GameChannelTest do
   end
 
   describe "Topic game:lobby" do
+    setup do
+      expect(@game, :subscribe, fn _, _ -> :ok end)
+      :ok
+    end
+
     setup context do
       @endpoint.subscribe(@topics.lobby)
       {:ok, _, socket} = join(context.socket, @topics.board)
@@ -99,7 +105,10 @@ defmodule Web.GameChannelTest do
   end
 
   test "Player cannot join game on a second channel", %{socket: socket} do
-    expect(@game, :remove, 0, fn _ -> :ok end)
+    @game
+    |> expect(:subscribe, fn _, _ -> :ok end)
+    |> expect(:remove, 0, fn _ -> :ok end)
+
     {:ok, _, _} = join(socket, @topics.board)
 
     Process.flag(:trap_exit, true)
@@ -110,7 +119,9 @@ defmodule Web.GameChannelTest do
   end
 
   test "Player cannot join when hero is no longer in the board", %{socket: socket} do
-    expect(@game, :position, fn _ -> {} end)
+    @game
+    |> expect(:position, fn _ -> {} end)
+    |> expect(:subscribe, 0, fn _, _ -> :ok end)
 
     assert {:error, %{reason: "unauthorized"}} = join(socket, @topics.board)
   end
