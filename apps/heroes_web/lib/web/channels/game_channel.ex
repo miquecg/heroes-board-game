@@ -5,6 +5,8 @@ defmodule Web.GameChannel do
 
   use HeroesWeb, :channel
 
+  require Logger
+
   alias Game.Board
   alias GameError.BadCommand
 
@@ -33,9 +35,12 @@ defmodule Web.GameChannel do
          :ok <- subscribe_to_game(socket) do
       no_reply(socket)
     else
-      {:error, _} -> shutdown(socket)
+      {:error, :max_connections} = reason -> stop(reason, socket)
     end
   end
+
+  @impl true
+  def handle_info(:timeout, socket), do: stop(:timeout, socket)
 
   @impl true
   def handle_in(
@@ -54,10 +59,10 @@ defmodule Web.GameChannel do
   end
 
   @impl true
-  def terminate({:shutdown, reason}, %{assigns: %{game: game, player: player}})
-      when reason in [:left, :closed] do
+  def terminate({:shutdown, reason}, %{assigns: %{game: game, player: player}}) do
     game.remove(player)
     {:ok, _} = Presence.update(self(), "game:lobby", player, %{logout: true})
+    Logger.info("Channel terminated with reason #{reason}")
   end
 
   @impl true
@@ -92,6 +97,7 @@ defmodule Web.GameChannel do
     game.subscribe(player, fn ->
       {:ok, _} = Presence.update(socket, hero, &Map.put(&1, :state, "dead"))
       push(socket, "game_over", %{})
+      Process.send_after(socket.channel_pid, :timeout, 5_000)
     end)
   end
 
@@ -113,7 +119,9 @@ defmodule Web.GameChannel do
 
   defp no_reply(socket), do: {:noreply, socket}
   defp error_reply(reason, socket), do: {:reply, {:error, response(reason)}, socket}
-  defp shutdown(socket), do: {:stop, :shutdown, socket}
+
+  defp stop({_, _} = reason, socket), do: {:stop, reason, socket}
+  defp stop(reason, socket), do: {:stop, {:shutdown, reason}, socket}
 
   defp response(:unauthorized) do
     %{
