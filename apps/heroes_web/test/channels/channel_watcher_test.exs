@@ -19,6 +19,7 @@ defmodule Web.ChannelWatcherTest do
   setup context do
     @game
     |> stub(:position, fn _ -> {0, 0} end)
+    |> stub(:subscribe, fn _, _ -> :ok end)
     |> allow(self(), context.watcher_pid)
 
     {:ok, _, socket} = join(context.socket, @topics.board)

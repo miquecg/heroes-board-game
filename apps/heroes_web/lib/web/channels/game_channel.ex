@@ -5,11 +5,13 @@ defmodule Web.GameChannel do
 
   use HeroesWeb, :channel
 
+  require Logger
+
   alias Game.Board
+  alias GameError.BadCommand
+
   alias Phoenix.Socket
   alias Web.Presence
-
-  @typep game_update :: {:ok, ref :: binary()} | {:error, reason :: term()}
 
   @impl true
   def join("game:board", _msg, %{assigns: %{game: game, player: player}} = socket) do
@@ -20,7 +22,7 @@ defmodule Web.GameChannel do
         {:ok, hero, assign(socket, hero)}
 
       {} ->
-        {:error, %{reason: "game over"}}
+        {:error, response(:unauthorized)}
     end
   end
 
@@ -28,13 +30,17 @@ defmodule Web.GameChannel do
   def handle_info({:after_join, position}, socket) do
     push(socket, "presence_state", Presence.list(socket))
 
-    with {:ok, _} <- authorize_player(socket),
-         {:ok, _} <- track_hero(socket, position) do
+    with :ok <- check_active_connections(socket),
+         :ok <- track_hero(socket, position),
+         :ok <- subscribe_to_game(socket) do
       no_reply(socket)
     else
-      {:error, _} -> shutdown(socket)
+      {:error, :max_connections} = reason -> stop(reason, socket)
     end
   end
+
+  @impl true
+  def handle_info(:timeout, socket), do: stop(:timeout, socket)
 
   @impl true
   def handle_in(
@@ -44,16 +50,19 @@ defmodule Web.GameChannel do
       ) do
     with {:ok, command} <- validate_command(input),
          {:ok, result} <- game.play(player, command),
-         {:ok, _} <- update_board(socket, result) do
+         :ok <- update_board(socket, result) do
       no_reply(socket)
+    else
+      {:error, :dead} -> no_reply(socket)
+      {:error, reason} -> error_reply(reason, socket)
     end
   end
 
   @impl true
-  def terminate({:shutdown, reason}, %{assigns: %{game: game, player: player}})
-      when reason in [:left, :closed] do
+  def terminate({:shutdown, reason}, %{assigns: %{game: game, player: player}}) do
     game.remove(player)
     {:ok, _} = Presence.update(self(), "game:lobby", player, %{logout: true})
+    Logger.info("Channel terminated with reason #{reason}")
   end
 
   @impl true
@@ -65,30 +74,66 @@ defmodule Web.GameChannel do
     Base.encode16(bytes, case: :lower)
   end
 
-  @spec authorize_player(Socket.t()) :: game_update
-  defp authorize_player(%{assigns: %{player: id}}) do
+  @spec check_active_connections(Socket.t()) :: :ok | {:error, :max_connections}
+  defp check_active_connections(%{assigns: %{player: id}}) do
     case Presence.get_by_key("game:lobby", id) do
-      [] -> Presence.track(self(), "game:lobby", id, %{})
-      _ -> {:error, :max_connections}
+      [] ->
+        {:ok, _} = Presence.track(self(), "game:lobby", id, %{})
+        :ok
+
+      _ ->
+        {:error, :max_connections}
     end
   end
 
-  @spec track_hero(Socket.t(), Board.tile()) :: game_update
+  @spec track_hero(Socket.t(), Board.tile()) :: :ok
   defp track_hero(%{assigns: %{hero: id}} = socket, {x, y}) do
-    Presence.track(socket, id, %{x: x, y: y})
+    {:ok, _} = Presence.track(socket, id, %{x: x, y: y})
+    :ok
   end
 
-  @spec update_board(Socket.t(), Board.tile()) :: game_update
+  @spec subscribe_to_game(Socket.t()) :: :ok
+  defp subscribe_to_game(%{assigns: %{game: game, player: player, hero: hero}} = socket) do
+    game.subscribe(player, fn ->
+      {:ok, _} = Presence.update(socket, hero, &Map.put(&1, :state, "dead"))
+      push(socket, "game_over", %{})
+      Process.send_after(socket.channel_pid, :timeout, 5_000)
+    end)
+  end
+
+  @spec update_board(Socket.t(), Board.tile() | :released) :: :ok
   defp update_board(%{assigns: %{hero: id}} = socket, {x, y}) do
-    Presence.update(socket, id, %{x: x, y: y})
+    {:ok, _} = Presence.update(socket, id, %{x: x, y: y})
+    :ok
   end
 
-  @spec validate_command(String.t()) :: {:ok, Board.move()}
+  defp update_board(_, :released), do: :ok
+
+  @spec validate_command(String.t()) :: {:ok, Board.move()} | {:error, BadCommand.t()}
   defp validate_command("↑"), do: {:ok, :up}
   defp validate_command("↓"), do: {:ok, :down}
   defp validate_command("←"), do: {:ok, :left}
   defp validate_command("→"), do: {:ok, :right}
+  defp validate_command("⚔"), do: {:ok, :attack}
+  defp validate_command(_), do: {:error, %BadCommand{}}
 
   defp no_reply(socket), do: {:noreply, socket}
-  defp shutdown(socket), do: {:stop, :shutdown, socket}
+  defp error_reply(reason, socket), do: {:reply, {:error, response(reason)}, socket}
+
+  defp stop({_, _} = reason, socket), do: {:stop, reason, socket}
+  defp stop(reason, socket), do: {:stop, {:shutdown, reason}, socket}
+
+  defp response(:unauthorized) do
+    %{
+      reason: "unauthorized",
+      message: "Authorization invalid"
+    }
+  end
+
+  defp response(%BadCommand{message: msg}) do
+    %{
+      reason: "bad_command",
+      message: msg
+    }
+  end
 end

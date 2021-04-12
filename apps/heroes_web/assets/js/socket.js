@@ -10,24 +10,24 @@ class App {
     let hero = ""
 
     socket.onOpen( () => console.log("socket OPEN") )
-    socket.onError( e => console.log("socket ERROR", e) )
+    socket.onError( e => console.error("socket ERROR", e) )
     socket.onClose( () => console.log("socket CLOSE") )
 
     let channel = socket.channel("game:board", {})
     channel.join()
            .receive("ok", resp => {
              hero = resp.hero
-             console.log(`id:${hero} joined successfully`)
+             console.log(`id:${hero} Joined successfully`)
            })
            .receive("error", resp => {
-             console.log("Unable to join", resp)
+             console.error(`reason:${resp.reason} message:${resp.message}`)
 
-             if (resp.reason == "game over") {
-               // TODO: call server to clear session cookie
+             if (resp.reason == "unauthorized") {
+               // TODO: clear session cookie
                socket.disconnect()
              }
            })
-    channel.onError( e => console.log("channel ERROR", e) )
+    channel.onError( e => console.error("channel ERROR", e) )
     channel.onClose( () => console.log("channel CLOSE") )
 
     let presences = {}
@@ -40,7 +40,65 @@ class App {
       this.render(presences, $board, hero)
     })
 
-    window.addEventListener("keydown", e => {
+    let handler = this.keyboardHandler( cmd => {
+      channel.push("game:board", {cmd: cmd})
+             .receive("error", error => {
+               console.error(`command:${cmd} message:${error.message}`)
+               throw error.reason
+             })
+    })
+    window.addEventListener("keydown", handler, true)
+
+    channel.on("game_over", _ => {
+      console.log(`id:${hero} GAME OVER`)
+      window.removeEventListener("keydown", handler, true)
+      // TODO: show game over message
+    })
+  }
+
+  static render(presences, $board, id){
+    let fragment = this.htmlFragment(presences, id)
+
+    $board.querySelector(".hero-cells")
+          .replaceChildren(fragment)
+  }
+
+  static htmlFragment(presences, id){
+    let fragment = new DocumentFragment()
+
+    let heroes = Presence.list(presences, (key, {metas: [hero, ...rest]}) => {
+      hero = {...hero, isPlayer: id == key}
+
+      let div = document.createElement("div")
+      div.className = this.divClass(hero)
+      div.style = this.divGridStyle(hero)
+
+      fragment.appendChild(div)
+    })
+
+    return fragment
+  }
+
+  static divClass(hero){
+    let className = "hero"
+
+    if (hero.state == "dead") {
+      return className += " dead"
+    }
+
+    if (hero.isPlayer) {
+      return className += " player"
+    }
+
+    return className
+  }
+
+  static divGridStyle(hero){
+    return `grid-column: ${1 + hero.x}; grid-row: span 1 / ${-1 - hero.y};`
+  }
+
+  static keyboardHandler(sendCommand){
+    return e => {
       if (e.defaultPrevented) {
         return
       }
@@ -51,50 +109,26 @@ class App {
 
       switch (e.key) {
         case "ArrowUp":
-          channel.push("game:board", {cmd: "↑"})
+          sendCommand("↑")
           break
         case "ArrowDown":
-          channel.push("game:board", {cmd: "↓"})
+          sendCommand("↓")
           break
         case "ArrowLeft":
-          channel.push("game:board", {cmd: "←"})
+          sendCommand("←")
           break
         case "ArrowRight":
-          channel.push("game:board", {cmd: "→"})
+          sendCommand("→")
+          break
+        case " ":
+          sendCommand("⚔")
           break
         default:
           return
       }
 
       event.preventDefault()
-    }, true)
-  }
-
-  static render(presences, $board, id){
-    let template = document.createElement('template')
-    template.innerHTML = this.htmlTemplate(presences, id)
-
-    let $heroes = $board.querySelector(".hero-cells")
-    $heroes.replaceWith(template.content)
-  }
-
-  static htmlTemplate(presences, id){
-    let heroes = Presence.list(presences, (key, {metas: [hero, ...rest]}) => {
-      let position = this.gridPlot(hero)
-      let css = `grid-column: ${position.col}; grid-row: span 1 / ${position.row};`
-      let htmlClass = (id == key ? "hero player" : "hero")
-
-      return `<div class="${htmlClass}" style="${css}"></div>`
-    })
-
-    return [`<div class="hero-cells">`, ...heroes, `</div>`].join("")
-  }
-
-  static gridPlot(hero){
-    const cols_start = 1
-    const rows_end = -1
-
-    return {col: cols_start + hero.x, row: rows_end - hero.y}
+    }
   }
 }
 

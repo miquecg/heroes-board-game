@@ -5,43 +5,61 @@ defmodule GameBehaviour do
   alias GameError.BadCommand
 
   @typedoc """
-  Unique identifier for every active player.
+  Unique identifier of each player.
 
   Base 32 hex encoded string of 26 characters.
   """
   @type player_id :: <<_::208>>
 
-  @doc """
-  Join a new player to the game creating a hero.
+  @typedoc """
+  Randomly choose a tile to start.
   """
-  @callback join(board :: module(), dice :: fun()) :: player_id
+  @type dice :: (list(tile) -> tile)
+
+  @typep tile :: Board.tile()
+  @typep board :: module()
 
   @doc """
-  Remove player's hero from the game.
+  Join a new player to the game.
+  """
+  @callback join(board, dice) :: player_id
+
+  @doc """
+  Remove player from the game.
   """
   @callback remove(player_id) :: :ok
 
-  @doc """
-  Send command to player's hero.
+  @typep command_result :: tile | :released
+  @typep command_error :: BadCommand.t() | :dead
 
-  Valid commands:
+  @doc """
+  Send command to hero.
+
+  Commands:
 
   - `t:Game.Board.move/0`
   - `:attack`
 
-  Error values:
+  Errors:
 
-  - `:noop`: hero is dead and cannot execute any further actions
-  - `%GameError.BadCommand{}`
+  - `:dead`
+  - `t:GameError.BadCommand/0`
   """
-  @callback play(player_id, cmd :: term()) :: {:ok, result} | {:error, error}
-            when result: Board.tile() | :released,
-                 error: :noop | %BadCommand{}
+  @callback play(player_id, command :: any()) :: {:ok, command_result} | {:error, command_error}
+
+  @typep empty_tile :: {}
 
   @doc """
-  Get current hero position.
+  Get current position of hero.
   """
-  @callback position(player_id) :: Board.tile() | {}
+  @callback position(player_id) :: tile | empty_tile
+
+  @typep event_callback :: (() -> any())
+
+  @doc """
+  Subscribe an event callback to know when hero gets killed.
+  """
+  @callback subscribe(player_id, event_callback) :: :ok
 end
 
 defmodule Game do
@@ -55,8 +73,8 @@ defmodule Game do
   alias Game.{Board, Hero, HeroSupervisor}
   alias GameError.BadCommand
 
-  @type update :: (Board.tile() -> :ok)
-  @type attack :: (pid(), Board.tile() -> :ok)
+  @typep dice :: GameBehaviour.dice()
+  @typep tile :: Board.tile()
 
   @impl true
   def join(board, dice) do
@@ -78,10 +96,32 @@ defmodule Game do
   def remove(id), do: call_hero(id, :stop)
 
   @impl true
-  def play(id, cmd) when Board.is_move(cmd), do: call_hero(id, {cmd, update_callback(id)})
+  def play(id, command) when Board.is_move(command) do
+    callback = fn tile ->
+      {^tile, _} = Registry.update_value(Registry.Heroes, id, fn _old -> tile end)
+      :ok
+    end
+
+    call_hero(id, {command, callback})
+  end
 
   @impl true
-  def play(id, :attack), do: call_hero(id, {:attack, attack_callback()})
+  def play(id, :attack) do
+    callback = fn attacker, from ->
+      Registry.dispatch(
+        Registry.Game,
+        "board",
+        &Enum.each(&1, fn
+          {^attacker, _} -> :ok
+          # :erlang.send/2 is asynchronous and safe
+          # https://erlang.org/doc/reference_manual/processes.html#message-sending
+          {enemy, _} -> send(enemy, {:fire, from})
+        end)
+      )
+    end
+
+    call_hero(id, {:attack, callback})
+  end
 
   @impl true
   def play(_, _), do: {:error, %BadCommand{}}
@@ -94,40 +134,23 @@ defmodule Game do
     end
   end
 
+  @impl true
+  def subscribe(id, callback) when is_function(callback) do
+    [{pid, _}] = Registry.lookup(Registry.Heroes, id)
+    request = {:register, callback, pid}
+    :ok = GenServer.call(Game.BoardSubscriber, request)
+  end
+
   @spec generate_id :: binary()
   defp generate_id do
     random_bytes = :crypto.strong_rand_bytes(16)
     Base.hex_encode32(random_bytes, padding: false)
   end
 
-  @spec choose_tile(module(), fun()) :: Board.tile()
+  @spec choose_tile(module(), dice) :: tile
   defp choose_tile(board, dice) do
     tiles = board.tiles()
     dice.(tiles)
-  end
-
-  @spec update_callback(binary()) :: update
-  defp update_callback(id) do
-    fn tile ->
-      {^tile, _} = Registry.update_value(Registry.Heroes, id, fn _old -> tile end)
-      :ok
-    end
-  end
-
-  @spec attack_callback :: attack
-  defp attack_callback do
-    fn attacker, from ->
-      Registry.dispatch(
-        Registry.Game,
-        "board",
-        &Enum.each(&1, fn
-          {^attacker, _} -> :ok
-          # :erlang.send/2 is asynchronous and safe
-          # https://erlang.org/doc/reference_manual/processes.html#message-sending
-          {enemy, _} -> send(enemy, {:fire, from})
-        end)
-      )
-    end
   end
 
   defp call_hero(id, request) when is_binary(id) do
@@ -141,7 +164,7 @@ defmodule Game do
 
   defp call_hero(hero, request) do
     case GenServer.call(hero, request) do
-      :noop -> {:error, :noop}
+      :dead -> {:error, :dead}
       reply -> {:ok, reply}
     end
   end

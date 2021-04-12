@@ -7,9 +7,11 @@ defmodule Game.Hero do
 
   alias Game.Board
 
-  @type request :: {:attack, Game.attack()} | {Board.move(), Game.update()}
-  @type result :: Board.tile() | :released
-  @type noop :: :noop
+  @typep attack_callback :: (pid(), Board.tile() -> :ok)
+  @typep move_callback :: (Board.tile() -> :ok)
+
+  @typep request :: {:attack, attack_callback} | {Board.move(), move_callback}
+  @typep reply :: Board.tile() | :released | :dead
 
   @typep state :: %__MODULE__.State{
            board: module(),
@@ -30,7 +32,7 @@ defmodule Game.Hero do
 
   Requires options `:board` and `:tile`.
 
-  Can be registered under a `:name`.
+  Process can be registered with `:name`.
   """
   @spec start_link(keyword()) :: GenServer.on_start()
   def start_link(opts) do
@@ -48,22 +50,21 @@ defmodule Game.Hero do
     board = Keyword.fetch!(opts, :board)
     tile = Keyword.fetch!(opts, :tile)
 
-    {:ok, _} = Registry.register(Registry.Game, "board", [])
+    {:ok, _} = Registry.register(Registry.Game, "board", nil)
 
     {:ok, %State{board: board, tile: tile}}
   end
 
-  @spec handle_call(request, GenServer.from(), state) :: {:reply, result | noop, state}
+  @spec handle_call(request, GenServer.from(), state) :: {:reply, reply, state}
   def handle_call(msg, from, state)
 
   @impl true
-  # Update to Elixir 1.11 `map.field` syntax in guards
-  def handle_call(_action, _from, %State{alive: false} = state) do
-    {:reply, :noop, state}
+  def handle_call(_action, _from, %State{} = state) when not state.alive do
+    {:reply, :dead, state}
   end
 
   @impl true
-  def handle_call({:attack, launcher}, _from, state) do
+  def handle_call({:attack, launcher}, _from, %State{} = state) do
     launcher.(self(), state.tile)
     {:reply, :released, state}
   end
@@ -76,13 +77,24 @@ defmodule Game.Hero do
   end
 
   @impl true
-  def handle_info({:fire, enemy_tile}, state) do
-    state =
-      case Board.attack_distance?(state.tile, enemy_tile) do
-        true -> %{state | alive: false}
-        false -> state
-      end
-
+  @spec handle_info({:fire, Board.tile()}, state) :: {:noreply, state}
+  def handle_info({:fire, enemy_tile}, %State{} = state) do
+    state = compute_attack(state, enemy_tile)
+    :ok = maybe_leave_board(state)
     {:noreply, state}
   end
+
+  @spec compute_attack(state, Board.tile()) :: state
+  defp compute_attack(state, enemy_tile) do
+    if Board.attack_distance?(state.tile, enemy_tile),
+      do: %{state | alive: false},
+      else: state
+  end
+
+  @spec maybe_leave_board(state) :: :ok
+  defp maybe_leave_board(state) when not state.alive do
+    Registry.unregister(Registry.Game, "board")
+  end
+
+  defp maybe_leave_board(_), do: :ok
 end

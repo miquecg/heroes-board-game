@@ -117,8 +117,8 @@ defmodule Game.HeroTest do
     test "cannot move or attack other heroes", %{hero: hero} do
       refute alive?(hero)
 
-      assert :noop = control(hero, :right)
-      assert :noop = control(hero, :attack)
+      assert :dead = control(hero, :right)
+      assert :dead = control(hero, :attack)
     end
   end
 
