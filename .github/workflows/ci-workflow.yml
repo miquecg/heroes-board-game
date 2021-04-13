@@ -126,9 +126,9 @@ jobs:
           apt update
           apt --yes install chromium-driver
       - name: Setup Node.js
-        uses: actions/setup-node@v2-beta
+        uses: actions/setup-node@v2
         with:
-          node-version: '14.x'
+          node-version: '15.x'
       - uses: actions/checkout@v2
       - name: Restore build cache
         uses: actions/cache@v2
