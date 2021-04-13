@@ -10,12 +10,13 @@ defmodule Web.Router do
     plug :put_secure_browser_headers
   end
 
-  scope "/", Web do
+  get "/", Redirect, to: "/game"
+
+  scope "/game", Web do
     pipe_through :browser
 
-    get "/game", GameController, :index
-    post "/game/start", GameController, :start
+    get "/", GameController, :index
+    post "/start", GameController, :start
+    delete "/session", GameController, :logout
   end
-
-  get "/", Redirect, to: "/game"
 end
