@@ -3,17 +3,17 @@ import {Socket, Presence} from "phoenix"
 class App {
 
   static init(){
-    let socket = new Socket("/game/socket", {params: {token: window.gameToken}})
+    const socket = new Socket("/game/socket", {params: {token: window.gameToken}})
     socket.connect()
 
-    let $board = document.querySelector("#grid")
+    const $board = document.querySelector("#grid")
     let hero = ""
 
     socket.onOpen( () => console.log("socket OPEN") )
     socket.onError( e => console.error("socket ERROR", e) )
     socket.onClose( () => console.log("socket CLOSE") )
 
-    let channel = socket.channel("game:board", {})
+    const channel = socket.channel("game:board", {})
     channel.join()
            .receive("ok", resp => {
              hero = resp.hero
@@ -23,8 +23,11 @@ class App {
              console.error(`reason:${resp.reason} message:${resp.message}`)
 
              if (resp.reason == "unauthorized") {
-               // TODO: clear session cookie
                socket.disconnect()
+               this.clearSession()
+                   .then( () => {
+                     window.location.reload()
+                   })
              }
            })
     channel.onError( e => console.error("channel ERROR", e) )
@@ -40,36 +43,40 @@ class App {
       this.render(presences, $board, hero)
     })
 
-    let handler = this.keyboardHandler( cmd => {
+    const handler = this.keyboardHandler( cmd => {
       channel.push("game:board", {cmd: cmd})
              .receive("error", error => {
                console.error(`command:${cmd} message:${error.message}`)
-               throw error.reason
+               throw new Error(error.reason)
              })
     })
     window.addEventListener("keydown", handler, true)
 
-    channel.on("game_over", _ => {
-      console.log(`id:${hero} GAME OVER`)
+    channel.on("game_over", () => {
       window.removeEventListener("keydown", handler, true)
-      // TODO: show game over message
+      this.clearSession()
+          .then( () => {
+            if (window.confirm("\t    GAME OVER\n\n\nDo you want to play again?")) {
+              window.location.reload()
+            }
+          })
     })
   }
 
   static render(presences, $board, id){
-    let fragment = this.htmlFragment(presences, id)
+    const fragment = this.htmlFragment(presences, id)
 
     $board.querySelector(".hero-cells")
           .replaceChildren(fragment)
   }
 
   static htmlFragment(presences, id){
-    let fragment = new DocumentFragment()
+    const fragment = new DocumentFragment()
 
-    let heroes = Presence.list(presences, (key, {metas: [hero, ...rest]}) => {
+    Presence.list(presences, (key, {metas: [hero, ...rest]}) => {
       hero = {...hero, isPlayer: id == key}
 
-      let div = document.createElement("div")
+      const div = document.createElement("div")
       div.className = this.divClass(hero)
       div.style = this.divGridStyle(hero)
 
@@ -129,6 +136,21 @@ class App {
 
       event.preventDefault()
     }
+  }
+
+  static async clearSession(){
+    const response = await fetch("/game/session", {
+      method: "DELETE",
+      headers: {
+        "x-csrf-token": window.csrfToken
+      }
+    })
+
+    if (!response.ok) {
+      throw new Error("Cannot clear session")
+    }
+
+    return response
   }
 }
 

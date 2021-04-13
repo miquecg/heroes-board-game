@@ -22,6 +22,12 @@ defmodule Web.GameController do
     |> halt()
   end
 
+  def logout(conn, _params) do
+    conn
+    |> clear_session()
+    |> send_resp(204, "")
+  end
+
   defp authenticate(conn, _opts) do
     if id = get_session(conn, "player_id") do
       conn

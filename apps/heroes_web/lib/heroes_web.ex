@@ -57,6 +57,7 @@ defmodule HeroesWeb do
     quote do
       use Phoenix.HTML
 
+      import Phoenix.Controller, only: [get_csrf_token: 0]
       import Phoenix.View
       import Web.ErrorHelpers
 

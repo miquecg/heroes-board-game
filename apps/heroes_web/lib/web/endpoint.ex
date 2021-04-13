@@ -4,7 +4,8 @@ defmodule Web.Endpoint do
   @session_options [
     store: :cookie,
     key: "_heroes_web_key",
-    signing_salt: "+ZZP18W1"
+    signing_salt: "+ZZP18W1",
+    same_site: "Strict"
   ]
 
   socket "/game/socket", Web.PlayerSocket,
