@@ -3,17 +3,17 @@ import {Socket, Presence} from "phoenix"
 class App {
 
   static init(){
-    let socket = new Socket("/game/socket", {params: {token: window.gameToken}})
+    const socket = new Socket("/game/socket", {params: {token: window.gameToken}})
     socket.connect()
 
-    let $board = document.querySelector("#grid")
+    const $board = document.querySelector("#grid")
     let hero = ""
 
     socket.onOpen( () => console.log("socket OPEN") )
     socket.onError( e => console.error("socket ERROR", e) )
     socket.onClose( () => console.log("socket CLOSE") )
 
-    let channel = socket.channel("game:board", {})
+    const channel = socket.channel("game:board", {})
     channel.join()
            .receive("ok", resp => {
              hero = resp.hero
@@ -43,7 +43,7 @@ class App {
       this.render(presences, $board, hero)
     })
 
-    let handler = this.keyboardHandler( cmd => {
+    const handler = this.keyboardHandler( cmd => {
       channel.push("game:board", {cmd: cmd})
              .receive("error", error => {
                console.error(`command:${cmd} message:${error.message}`)
@@ -64,19 +64,19 @@ class App {
   }
 
   static render(presences, $board, id){
-    let fragment = this.htmlFragment(presences, id)
+    const fragment = this.htmlFragment(presences, id)
 
     $board.querySelector(".hero-cells")
           .replaceChildren(fragment)
   }
 
   static htmlFragment(presences, id){
-    let fragment = new DocumentFragment()
+    const fragment = new DocumentFragment()
 
-    let heroes = Presence.list(presences, (key, {metas: [hero, ...rest]}) => {
+    Presence.list(presences, (key, {metas: [hero, ...rest]}) => {
       hero = {...hero, isPlayer: id == key}
 
-      let div = document.createElement("div")
+      const div = document.createElement("div")
       div.className = this.divClass(hero)
       div.style = this.divGridStyle(hero)
 
