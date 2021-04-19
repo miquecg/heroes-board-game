@@ -10,6 +10,13 @@ defmodule HeroesGame.MixProject do
       dialyzer: [
         plt_local_path: "priv/plts",
         flags: dialyzer_flags()
+      ],
+      releases: [
+        web: [
+          applications: [heroes_web: :permanent],
+          version: {:from_app, :heroes_web},
+          include_executables_for: [:unix]
+        ]
       ]
     ]
   end
