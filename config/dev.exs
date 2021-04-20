@@ -25,8 +25,7 @@ config :heroes_web, Web.Endpoint,
     ]
   ]
 
-config :logger, :console,
-  format: "[$level] $message\n"
+config :logger, :console, format: "[$level] $message\n"
 
 config :phoenix, :plug_init_mode, :runtime
 
