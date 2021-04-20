@@ -17,7 +17,7 @@ jobs:
       matrix:
         elixir: [1.11.4]
         erlang: [23.3.1]
-        os: [debian-buster-20210326]
+        os: [ubuntu-focal-20210325]
     container:
       image: hexpm/elixir:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-${{ matrix.os }}
     outputs:
@@ -64,7 +64,7 @@ jobs:
       matrix:
         elixir: [1.11.4]
         erlang: [23.3.1]
-        os: [debian-buster-20210326]
+        os: [ubuntu-focal-20210325]
     container:
       image: hexpm/elixir:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-${{ matrix.os }}
     steps:
@@ -95,7 +95,7 @@ jobs:
       matrix:
         elixir: [1.11.4]
         erlang: [23.3.1]
-        os: [debian-buster-20210326]
+        os: [ubuntu-focal-20210325]
     container:
       image: hexpm/elixir:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-${{ matrix.os }}
     steps:
@@ -117,7 +117,7 @@ jobs:
       matrix:
         elixir: [1.11.4]
         erlang: [23.3.1]
-        os: [debian-buster-20210326]
+        os: [ubuntu-focal-20210325]
     container:
       image: hexpm/elixir:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-${{ matrix.os }}
     steps:
