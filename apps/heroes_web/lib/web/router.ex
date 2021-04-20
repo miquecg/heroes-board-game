@@ -11,6 +11,7 @@ defmodule Web.Router do
   end
 
   get "/", Redirect, to: "/game"
+  head "/ping", Web.StatusController, :ping
 
   scope "/game", Web do
     pipe_through :browser
