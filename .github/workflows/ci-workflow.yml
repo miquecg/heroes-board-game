@@ -121,10 +121,18 @@ jobs:
     container:
       image: hexpm/elixir:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-${{ matrix.os }}
     steps:
-      - name: Install webdriver
+      - name: Install chromedriver from official Ubuntu 18.04 sources
         run: |
+          echo "deb http://archive.ubuntu.com/ubuntu/ bionic-updates universe" >> /etc/apt/sources.list.d/bionic-updates.list
+          cat <<EOF | tee /etc/apt/preferences.d/chromium-deb-bionic-updates
+          Package: chromium-browser chromium-browser-l10n chromium-chromedriver chromium-codecs-ffmpeg chromium-codecs-ffmpeg-extra
+          Pin: release a=bionic-updates
+          Pin-Priority: 900
+          EOF
           apt update
-          apt --yes install chromium-driver
+          apt install -y chromium-browser chromium-chromedriver
+        env:
+          DEBIAN_FRONTEND: noninteractive
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
