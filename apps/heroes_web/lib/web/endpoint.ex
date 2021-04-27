@@ -9,7 +9,7 @@ defmodule Web.Endpoint do
   ]
 
   socket "/game/socket", Web.PlayerSocket,
-    websocket: true,
+    websocket: [max_frame_size: 100],
     longpoll: false
 
   plug Plug.Static,
@@ -24,7 +24,9 @@ defmodule Web.Endpoint do
     plug Phoenix.CodeReloader
   end
 
-  plug Plug.Parsers, parsers: [:urlencoded]
+  plug Plug.Parsers,
+    parsers: [{:urlencoded, length: 200, read_length: 200}],
+    query_string_length: 0
 
   plug Plug.Session, @session_options
   plug Web.Router
