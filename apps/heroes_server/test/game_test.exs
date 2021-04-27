@@ -78,10 +78,10 @@ defmodule GameTest do
     end
   end
 
-  defp join({_, _} = tile), do: Game.join(@board, fn _ -> tile end)
-
-  defp join(_context) do
-    dice = fn _ -> {1, 1} end
-    [player_id: Game.join(@board, dice)]
+  defp join({_, _} = tile) do
+    {:ok, id} = Game.join(@board, fn _ -> tile end)
+    id
   end
+
+  defp join(_context), do: [player_id: join({1, 1})]
 end

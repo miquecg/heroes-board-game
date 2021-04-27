@@ -48,8 +48,13 @@ defmodule Web.GameController do
   end
 
   defp join(conn, _opts) do
-    {board, dice} = {config(:board), config(:dice)}
-    put_session(conn, "player_id", Game.join(board, dice))
+    board = config(:board)
+    dice = config(:dice)
+
+    case Game.join(board, dice) do
+      {:ok, id} -> put_session(conn, "player_id", id)
+      {:error, :max_heroes} -> conn
+    end
   end
 
   defp config(key), do: Endpoint.config(key)

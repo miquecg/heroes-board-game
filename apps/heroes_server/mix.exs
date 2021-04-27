@@ -22,6 +22,7 @@ defmodule HeroesServer.MixProject do
   def application do
     [
       mod: {Game.Application, []},
+      env: [max_heroes: 5],
       extra_applications: [:crypto, :logger, :sasl]
     ]
   end

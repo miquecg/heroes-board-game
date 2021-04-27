@@ -22,7 +22,7 @@ defmodule GameBehaviour do
   @doc """
   Join a new player to the game.
   """
-  @callback join(board, dice) :: player_id
+  @callback join(board, dice) :: {:ok, player_id} | {:error, :max_heroes}
 
   @doc """
   Remove player from the game.
@@ -87,9 +87,10 @@ defmodule Game do
       tile: tile
     ]
 
-    {:ok, _pid} = DynamicSupervisor.start_child(HeroSupervisor, {Hero, opts})
-
-    player_id
+    case DynamicSupervisor.start_child(HeroSupervisor, {Hero, opts}) do
+      {:ok, _} -> {:ok, player_id}
+      {:error, :max_children} -> {:error, :max_heroes}
+    end
   end
 
   @impl true
