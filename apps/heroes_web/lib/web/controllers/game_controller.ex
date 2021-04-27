@@ -4,7 +4,6 @@ defmodule Web.GameController do
   alias Web.Endpoint
 
   plug :authenticate when action in [:index]
-  plug :put_game_token when action in [:index]
   plug :join when action in [:start]
 
   def index(conn, _params) do
@@ -30,20 +29,13 @@ defmodule Web.GameController do
 
   defp authenticate(conn, _opts) do
     if id = get_session(conn, "player_id") do
+      token = Phoenix.Token.sign(conn, "player socket", id)
+
       conn
+      |> assign(:game_token, token)
       |> assign(:signed_in?, true)
-      |> assign(:player_id, id)
     else
       assign(conn, :signed_in?, false)
-    end
-  end
-
-  defp put_game_token(conn, _opts) do
-    if id = conn.assigns[:player_id] do
-      token = Phoenix.Token.sign(conn, "player socket", id)
-      assign(conn, :game_token, token)
-    else
-      conn
     end
   end
 
