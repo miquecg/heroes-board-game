@@ -1,7 +1,7 @@
 defmodule Web.GameController do
   use HeroesWeb, :controller
 
-  alias Web.Endpoint
+  alias Web.{Endpoint, ErrorView}
 
   plug :authenticate when action in [:index]
   plug :join when action in [:start]
@@ -11,14 +11,17 @@ defmodule Web.GameController do
   end
 
   def start(conn, _params) do
-    delete_csrf_token()
+    if id = conn.assigns[:player_id] do
+      delete_csrf_token()
 
-    game_path = Routes.game_path(conn, :index)
-
-    conn
-    |> put_status(303)
-    |> redirect(to: game_path)
-    |> halt()
+      conn
+      |> put_session("player_id", id)
+      |> redirect_index()
+    else
+      conn
+      |> put_status(503)
+      |> render_error()
+    end
   end
 
   def logout(conn, _params) do
@@ -44,10 +47,26 @@ defmodule Web.GameController do
     dice = config(:dice)
 
     case Game.join(board, dice) do
-      {:ok, id} -> put_session(conn, "player_id", id)
+      {:ok, id} -> assign(conn, :player_id, id)
       {:error, :max_heroes} -> conn
     end
   end
 
   defp config(key), do: Endpoint.config(key)
+
+  defp redirect_index(conn) do
+    game_path = Routes.game_path(conn, :index)
+
+    conn
+    |> put_status(303)
+    |> redirect(to: game_path)
+    |> halt()
+  end
+
+  defp render_error(conn) do
+    conn
+    |> put_layout(false)
+    |> put_view(ErrorView)
+    |> render(:"#{conn.status}")
+  end
 end
