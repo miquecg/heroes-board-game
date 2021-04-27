@@ -6,9 +6,7 @@ defmodule Web.GameController do
   plug :authenticate when action in [:index]
   plug :join when action in [:start]
 
-  def index(conn, _params) do
-    render(conn, "index.html", board: config(:board))
-  end
+  def index(conn, _params), do: render(conn, board: config(:board))
 
   def start(conn, _params) do
     if id = conn.assigns[:player_id] do
