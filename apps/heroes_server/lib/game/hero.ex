@@ -72,18 +72,18 @@ defmodule Game.Hero do
     {:reply, result, %{state | tile: result}}
   end
 
-  @impl true
   @spec handle_info({:fire, Board.tile()}, state) :: {:stop, :shutdown, state} | {:noreply, state}
+  def handle_info(msg, state)
+
+  @impl true
   def handle_info({:fire, enemy_tile}, %State{} = state) do
     if Board.attack_distance?(state.tile, enemy_tile),
       do: {:stop, :shutdown, state},
       else: {:noreply, state}
   end
 
-  @spec terminate(term(), state) :: :ok
-  def terminate(reason, state)
-
   @impl true
+  @spec terminate(term(), state) :: :ok
   def terminate(:shutdown, %State{tile: {x, y}}) do
     Registry.unregister(Registry.Game, "board")
     Logger.info("Killed hero in position x:#{x} y:#{y}")
