@@ -15,9 +15,10 @@ defmodule GameTest do
 
   test "Create and remove hero from the game", %{player_id: id} do
     hero = GenServer.whereis({:via, Registry, {Registry.Heroes, id}})
-    assert Process.alive?(hero)
-
     ref = Process.monitor(hero)
+
+    refute_received {:DOWN, ^ref, :process, _pid, _reason}
+
     :ok = Game.remove(id)
 
     assert_receive {:DOWN, ^ref, :process, _pid, :normal}

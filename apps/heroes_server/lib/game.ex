@@ -164,9 +164,11 @@ defmodule Game do
   end
 
   defp call_hero(hero, request) do
-    case GenServer.call(hero, request) do
-      :dead -> {:error, :dead}
-      reply -> {:ok, reply}
+    try do
+      reply = GenServer.call(hero, request)
+      {:ok, reply}
+    catch
+      :exit, _ -> {:error, :dead}
     end
   end
 end
