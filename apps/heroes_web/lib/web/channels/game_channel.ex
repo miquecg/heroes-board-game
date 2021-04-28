@@ -117,7 +117,7 @@ defmodule Web.GameChannel do
   defp validate_command("⚔"), do: {:ok, :attack}
   defp validate_command(_), do: {:error, %BadCommand{}}
 
-  defp no_reply(socket), do: {:noreply, socket}
+  defp no_reply(socket), do: {:noreply, socket, 60_000}
   defp error_reply(reason, socket), do: {:reply, {:error, response(reason)}, socket}
 
   defp stop({_, _} = reason, socket), do: {:stop, reason, socket}
