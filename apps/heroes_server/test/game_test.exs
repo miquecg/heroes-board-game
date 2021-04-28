@@ -21,7 +21,7 @@ defmodule GameTest do
 
     :ok = Game.remove(id)
 
-    assert_receive {:DOWN, ^ref, :process, _pid, :normal}
+    assert_receive {:DOWN, ^ref, :process, _pid, :shutdown}
   end
 
   test "Call Game.remove/1 with non existent hero is safe" do

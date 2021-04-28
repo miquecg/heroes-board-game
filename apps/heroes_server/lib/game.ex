@@ -76,6 +76,8 @@ defmodule Game do
   @typep dice :: GameBehaviour.dice()
   @typep tile :: Board.tile()
 
+  @typep maybe_pid :: pid() | nil
+
   @impl true
   def join(board, dice) do
     player_id = generate_id()
@@ -159,8 +161,8 @@ defmodule Game do
   end
 
   defp call_hero(hero, :stop) do
-    {:ok, _pid} = Task.start(GenServer, :stop, [hero])
-    :ok
+    maybe_pid = GenServer.whereis(hero)
+    terminate_hero(maybe_pid)
   end
 
   defp call_hero(hero, request) do
@@ -171,4 +173,12 @@ defmodule Game do
       :exit, _ -> {:error, :dead}
     end
   end
+
+  @spec terminate_hero(maybe_pid) :: :ok
+  defp terminate_hero(child) when is_pid(child) do
+    _ = DynamicSupervisor.terminate_child(HeroSupervisor, child)
+    :ok
+  end
+
+  defp terminate_hero(nil), do: :ok
 end
