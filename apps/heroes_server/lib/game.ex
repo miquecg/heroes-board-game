@@ -54,12 +54,11 @@ defmodule GameBehaviour do
   """
   @callback position(player_id) :: tile | empty_tile
 
-  @typep event_callback :: (() -> any())
-
   @doc """
-  Subscribe an event callback to know when hero gets killed.
+  Subscribe a `t:pid/0` to receive a `:game_over` message
+  when player's hero gets killed.
   """
-  @callback subscribe(player_id, event_callback) :: :ok
+  @callback subscribe(player_id, pid()) :: :ok | {:error, :not_found}
 end
 
 defmodule Game do
@@ -75,6 +74,8 @@ defmodule Game do
 
   @typep dice :: GameBehaviour.dice()
   @typep tile :: Board.tile()
+
+  @typep player_id :: GameBehaviour.player_id()
 
   @typep maybe_pid :: pid() | nil
 
@@ -96,7 +97,14 @@ defmodule Game do
   end
 
   @impl true
-  def remove(id), do: call_hero(id, :stop)
+  def remove(id) do
+    maybe_pid =
+      id
+      |> get_hero()
+      |> List.first()
+
+    terminate_hero(maybe_pid)
+  end
 
   @impl true
   def play(id, command) when Board.is_move(command) do
@@ -131,17 +139,23 @@ defmodule Game do
 
   @impl true
   def position(id) do
-    case Registry.lookup(Registry.Heroes, id) do
-      [{_pid, position}] -> position
+    case get_position(id) do
+      [position] -> position
       [] -> {}
     end
   end
 
   @impl true
-  def subscribe(id, callback) when is_function(callback) do
-    [{pid, _}] = Registry.lookup(Registry.Heroes, id)
-    request = {:register, callback, pid}
-    :ok = GenServer.call(Game.BoardSubscriber, request)
+  def subscribe(id, subscriber) when is_pid(subscriber) do
+    case get_hero(id) do
+      [hero] ->
+        callback = fn -> send(subscriber, :game_over) end
+        request = {:register, callback, hero}
+        :ok = GenServer.call(Game.BoardSubscriber, request)
+
+      [] ->
+        {:error, :not_found}
+    end
   end
 
   @spec generate_id :: binary()
@@ -156,13 +170,18 @@ defmodule Game do
     dice.(tiles)
   end
 
-  defp call_hero(id, request) when is_binary(id) do
-    call_hero({:via, Registry, {Registry.Heroes, id}}, request)
+  @spec get_hero(player_id) :: [pid()]
+  defp get_hero(id), do: select(id, :"$2")
+
+  @spec get_position(player_id) :: [tile]
+  defp get_position(id), do: select(id, :"$3")
+
+  defp select(key, entry) do
+    Registry.select(Registry.Heroes, [{{key, :"$2", :"$3"}, [], [entry]}])
   end
 
-  defp call_hero(hero, :stop) do
-    maybe_pid = GenServer.whereis(hero)
-    terminate_hero(maybe_pid)
+  defp call_hero(id, request) when is_binary(id) do
+    call_hero({:via, Registry, {Registry.Heroes, id}}, request)
   end
 
   defp call_hero(hero, request) do
