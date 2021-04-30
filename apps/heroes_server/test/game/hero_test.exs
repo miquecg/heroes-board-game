@@ -53,73 +53,48 @@ defmodule Game.HeroTest do
 
   describe "Hero in {1, 1} being attacked from" do
     setup %{hero: hero, from: from} do
+      ref = Process.monitor(hero)
       attack(hero, from)
-      :ok
+
+      [monitor_ref: ref]
     end
 
     @tag from: {0, 0}
-    test "{0, 0}", context do
-      refute alive?(context.hero)
+    test "{0, 0}", %{monitor_ref: ref} do
+      assert_receive {:DOWN, ^ref, :process, _pid, _reason}
     end
 
     @tag from: {0, 2}
-    test "{0, 2}", context do
-      refute alive?(context.hero)
+    test "{0, 2}", %{monitor_ref: ref} do
+      assert_receive {:DOWN, ^ref, :process, _pid, _reason}
     end
 
     @tag from: {1, 1}
-    test "{1, 1}", context do
-      refute alive?(context.hero)
+    test "{1, 1}", %{monitor_ref: ref} do
+      assert_receive {:DOWN, ^ref, :process, _pid, _reason}
     end
 
     @tag from: {1, 3}
-    test "{1, 3}", context do
-      assert alive?(context.hero)
+    test "{1, 3}", %{hero: hero} do
+      assert {0, 1} = control(hero, :left)
     end
 
     @tag from: {2, 1}
-    test "{2, 1}", context do
-      refute alive?(context.hero)
+    test "{2, 1}", %{monitor_ref: ref} do
+      assert_receive {:DOWN, ^ref, :process, _pid, _reason}
     end
   end
 
   @tag from: {3, 3}
   test "Attacks to different targets from {3, 3}", %{hero: hero, from: from} do
     attack(hero, from)
-
-    assert alive?(hero)
-
     {2, 1} = control(hero, :right)
+
     attack(hero, from)
-
-    assert alive?(hero)
-
     {2, 2} = control(hero, :up)
+
     attack(hero, from)
-
-    refute alive?(hero)
-  end
-
-  describe "A dead hero" do
-    setup context do
-      attack(context.hero, {1, 2})
-      :ok
-    end
-
-    test "does not come back from the dead", %{hero: hero} do
-      refute alive?(hero)
-
-      attack(hero, {3, 0})
-
-      refute alive?(hero)
-    end
-
-    test "cannot move or attack other heroes", %{hero: hero} do
-      refute alive?(hero)
-
-      assert :dead = control(hero, :right)
-      assert :dead = control(hero, :attack)
-    end
+    catch_exit(control(hero, :up))
   end
 
   test "Restart strategy is :transient so heroes can be stopped" do
@@ -140,16 +115,11 @@ defmodule Game.HeroTest do
 
   defp attack(hero, from), do: send(hero, {:fire, from})
 
-  defp alive?(hero) do
-    state = :sys.get_state(hero)
-    state.alive
-  end
-
   defp create_hero(context) do
     board = Map.get(context, :board, @board_4x4)
     tile = Map.get(context, :tile, {1, 1})
-
     opts = [board: board, tile: tile]
+
     [hero: start_supervised!({Hero, opts})]
   end
 end

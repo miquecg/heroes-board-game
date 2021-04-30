@@ -1,9 +1,11 @@
 defmodule Game.Hero do
   @moduledoc """
-  Holds hero status and current tile on the board.
+  Entity the player uses to play the game.
   """
 
   use GenServer, restart: :transient
+
+  require Logger
 
   alias Game.Board
 
@@ -11,12 +13,11 @@ defmodule Game.Hero do
   @typep move_callback :: (Board.tile() -> :ok)
 
   @typep request :: {:attack, attack_callback} | {Board.move(), move_callback}
-  @typep reply :: Board.tile() | :released | :dead
+  @typep reply(t) :: {:reply, t, state}
 
   @typep state :: %__MODULE__.State{
            board: module(),
-           tile: Board.tile(),
-           alive: boolean()
+           tile: Board.tile()
          }
 
   defmodule State do
@@ -24,7 +25,7 @@ defmodule Game.Hero do
 
     @enforce_keys [:board, :tile]
 
-    defstruct [alive: true] ++ @enforce_keys
+    defstruct @enforce_keys
   end
 
   @doc """
@@ -55,13 +56,8 @@ defmodule Game.Hero do
     {:ok, %State{board: board, tile: tile}}
   end
 
-  @spec handle_call(request, GenServer.from(), state) :: {:reply, reply, state}
+  @spec handle_call(request, GenServer.from(), state) :: reply(Board.tile() | :released)
   def handle_call(msg, from, state)
-
-  @impl true
-  def handle_call(_action, _from, %State{} = state) when not state.alive do
-    {:reply, :dead, state}
-  end
 
   @impl true
   def handle_call({:attack, launcher}, _from, %State{} = state) do
@@ -76,25 +72,23 @@ defmodule Game.Hero do
     {:reply, result, %{state | tile: result}}
   end
 
+  @spec handle_info({:fire, Board.tile()}, state) :: {:stop, :shutdown, state} | {:noreply, state}
+  def handle_info(msg, state)
+
   @impl true
-  @spec handle_info({:fire, Board.tile()}, state) :: {:noreply, state}
   def handle_info({:fire, enemy_tile}, %State{} = state) do
-    state = compute_attack(state, enemy_tile)
-    :ok = maybe_leave_board(state)
-    {:noreply, state}
-  end
-
-  @spec compute_attack(state, Board.tile()) :: state
-  defp compute_attack(state, enemy_tile) do
     if Board.attack_distance?(state.tile, enemy_tile),
-      do: %{state | alive: false},
-      else: state
+      do: {:stop, :shutdown, state},
+      else: {:noreply, state}
   end
 
-  @spec maybe_leave_board(state) :: :ok
-  defp maybe_leave_board(state) when not state.alive do
+  @impl true
+  @spec terminate(term(), state) :: :ok
+  def terminate(:shutdown, %State{tile: {x, y}}) do
     Registry.unregister(Registry.Game, "board")
+    Logger.info("Killed hero in position x:#{x} y:#{y}")
   end
 
-  defp maybe_leave_board(_), do: :ok
+  @impl true
+  def terminate(_reason, _state), do: :ok
 end

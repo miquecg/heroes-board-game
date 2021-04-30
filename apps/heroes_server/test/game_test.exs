@@ -15,12 +15,13 @@ defmodule GameTest do
 
   test "Create and remove hero from the game", %{player_id: id} do
     hero = GenServer.whereis({:via, Registry, {Registry.Heroes, id}})
-    assert Process.alive?(hero)
-
     ref = Process.monitor(hero)
+
+    refute_received {:DOWN, ^ref, :process, _pid, _reason}
+
     :ok = Game.remove(id)
 
-    assert_receive {:DOWN, ^ref, :process, _pid, :normal}
+    assert_receive {:DOWN, ^ref, :process, _pid, :shutdown}
   end
 
   test "Call Game.remove/1 with non existent hero is safe" do
@@ -42,8 +43,8 @@ defmodule GameTest do
     :released = play(attacker, :attack)
 
     assert {0, 1} = play(attacker, :left)
-    assert :dead = play(enemy_1, :up)
-    assert :dead = play(enemy_2, :left)
+    assert :not_found = play(enemy_1, :up)
+    assert :not_found = play(enemy_2, :left)
     assert {3, 1} = play(enemy_3, :up)
   end
 
@@ -78,10 +79,10 @@ defmodule GameTest do
     end
   end
 
-  defp join({_, _} = tile), do: Game.join(@board, fn _ -> tile end)
-
-  defp join(_context) do
-    dice = fn _ -> {1, 1} end
-    [player_id: Game.join(@board, dice)]
+  defp join({_, _} = tile) do
+    {:ok, id} = Game.join(@board, fn _ -> tile end)
+    id
   end
+
+  defp join(_context), do: [player_id: join({1, 1})]
 end

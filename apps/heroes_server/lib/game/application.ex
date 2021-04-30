@@ -8,10 +8,13 @@ defmodule Game.Application do
       {Registry, keys: :unique, name: Registry.Heroes},
       Game.BoardSubscriber,
       {Registry, keys: :duplicate, name: Registry.Game, listeners: [Game.BoardSubscriber]},
-      {DynamicSupervisor, strategy: :one_for_one, name: Game.HeroSupervisor}
+      {DynamicSupervisor,
+       strategy: :one_for_one, name: Game.HeroSupervisor, max_children: max_heroes()}
     ]
 
     opts = [strategy: :rest_for_one, name: Game.Supervisor]
     Supervisor.start_link(children, opts)
   end
+
+  defp max_heroes, do: Application.get_env(:heroes_server, :max_heroes, :infinity)
 end

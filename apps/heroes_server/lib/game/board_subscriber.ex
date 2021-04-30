@@ -1,7 +1,7 @@
 defmodule Game.BoardSubscriber do
   @moduledoc """
-  This module is meant to listen `:unregister` events from `Registry.Game`
-  and allows to register callbacks to react on those.
+  Listens to `:unregister` events from `Registry.Game`
+  and allows to execute callbacks to react on those.
   """
 
   @typep callback :: (() -> any())

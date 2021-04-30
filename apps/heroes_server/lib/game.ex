@@ -17,20 +17,21 @@ defmodule GameBehaviour do
   @type dice :: (list(tile) -> tile)
 
   @typep tile :: Board.tile()
+  @typep empty_tile :: {}
   @typep board :: module()
+
+  @typep ok(result) :: {:ok, result}
+  @typep error(reason) :: {:error, reason}
 
   @doc """
   Join a new player to the game.
   """
-  @callback join(board, dice) :: player_id
+  @callback join(board, dice) :: ok(player_id) | error(:max_heroes)
 
   @doc """
   Remove player from the game.
   """
   @callback remove(player_id) :: :ok
-
-  @typep command_result :: tile | :released
-  @typep command_error :: BadCommand.t() | :dead
 
   @doc """
   Send command to hero.
@@ -40,26 +41,25 @@ defmodule GameBehaviour do
   - `t:Game.Board.move/0`
   - `:attack`
 
-  Errors:
+  Error reasons:
 
-  - `:dead`
+  - `:not_found`
   - `t:GameError.BadCommand/0`
   """
-  @callback play(player_id, command :: any()) :: {:ok, command_result} | {:error, command_error}
-
-  @typep empty_tile :: {}
+  @callback play(player_id, command :: any()) ::
+              ok(tile | :released)
+              | error(:not_found | BadCommand.t())
 
   @doc """
   Get current position of hero.
   """
   @callback position(player_id) :: tile | empty_tile
 
-  @typep event_callback :: (() -> any())
-
   @doc """
-  Subscribe an event callback to know when hero gets killed.
+  Subscribe a `t:pid/0` to receive a `:game_over` message
+  when player's hero gets killed.
   """
-  @callback subscribe(player_id, event_callback) :: :ok
+  @callback subscribe(player_id, pid()) :: :ok | error(:not_found)
 end
 
 defmodule Game do
@@ -74,7 +74,11 @@ defmodule Game do
   alias GameError.BadCommand
 
   @typep dice :: GameBehaviour.dice()
+  @typep player_id :: GameBehaviour.player_id()
+
   @typep tile :: Board.tile()
+
+  @typep maybe_pid :: pid() | nil
 
   @impl true
   def join(board, dice) do
@@ -87,13 +91,21 @@ defmodule Game do
       tile: tile
     ]
 
-    {:ok, _pid} = DynamicSupervisor.start_child(HeroSupervisor, {Hero, opts})
-
-    player_id
+    case DynamicSupervisor.start_child(HeroSupervisor, {Hero, opts}) do
+      {:ok, _} -> {:ok, player_id}
+      {:error, :max_children} -> {:error, :max_heroes}
+    end
   end
 
   @impl true
-  def remove(id), do: call_hero(id, :stop)
+  def remove(id) do
+    maybe_pid =
+      id
+      |> get_hero()
+      |> List.first()
+
+    terminate_hero(maybe_pid)
+  end
 
   @impl true
   def play(id, command) when Board.is_move(command) do
@@ -128,17 +140,23 @@ defmodule Game do
 
   @impl true
   def position(id) do
-    case Registry.lookup(Registry.Heroes, id) do
-      [{_pid, position}] -> position
+    case get_position(id) do
+      [position] -> position
       [] -> {}
     end
   end
 
   @impl true
-  def subscribe(id, callback) when is_function(callback) do
-    [{pid, _}] = Registry.lookup(Registry.Heroes, id)
-    request = {:register, callback, pid}
-    :ok = GenServer.call(Game.BoardSubscriber, request)
+  def subscribe(id, subscriber) when is_pid(subscriber) do
+    case get_hero(id) do
+      [hero] ->
+        callback = fn -> send(subscriber, :game_over) end
+        request = {:register, callback, hero}
+        :ok = GenServer.call(Game.BoardSubscriber, request)
+
+      [] ->
+        {:error, :not_found}
+    end
   end
 
   @spec generate_id :: binary()
@@ -153,19 +171,32 @@ defmodule Game do
     dice.(tiles)
   end
 
+  @spec get_hero(player_id) :: [pid()]
+  defp get_hero(id), do: select(id, :"$2")
+
+  @spec get_position(player_id) :: [tile]
+  defp get_position(id), do: select(id, :"$3")
+
+  defp select(key, entry) do
+    Registry.select(Registry.Heroes, [{{key, :"$2", :"$3"}, [], [entry]}])
+  end
+
   defp call_hero(id, request) when is_binary(id) do
     call_hero({:via, Registry, {Registry.Heroes, id}}, request)
   end
 
-  defp call_hero(hero, :stop) do
-    {:ok, _pid} = Task.start(GenServer, :stop, [hero])
+  defp call_hero(hero, request) do
+    reply = GenServer.call(hero, request)
+    {:ok, reply}
+  catch
+    :exit, _ -> {:error, :not_found}
+  end
+
+  @spec terminate_hero(maybe_pid) :: :ok
+  defp terminate_hero(child) when is_pid(child) do
+    _ = DynamicSupervisor.terminate_child(HeroSupervisor, child)
     :ok
   end
 
-  defp call_hero(hero, request) do
-    case GenServer.call(hero, request) do
-      :dead -> {:error, :dead}
-      reply -> {:ok, reply}
-    end
-  end
+  defp terminate_hero(nil), do: :ok
 end

@@ -1,25 +1,25 @@
 defmodule Web.GameController do
   use HeroesWeb, :controller
 
-  alias Web.Endpoint
+  alias Web.{Endpoint, ErrorView}
 
   plug :authenticate when action in [:index]
-  plug :put_game_token when action in [:index]
   plug :join when action in [:start]
 
-  def index(conn, _params) do
-    render(conn, "index.html", board: config(:board))
-  end
+  def index(conn, _params), do: render(conn, board: config(:board))
 
   def start(conn, _params) do
-    delete_csrf_token()
+    if id = conn.assigns[:player_id] do
+      delete_csrf_token()
 
-    game_path = Routes.game_path(conn, :index)
-
-    conn
-    |> put_status(303)
-    |> redirect(to: game_path)
-    |> halt()
+      conn
+      |> put_session("player_id", id)
+      |> redirect_index()
+    else
+      conn
+      |> put_status(503)
+      |> render_error()
+    end
   end
 
   def logout(conn, _params) do
@@ -30,27 +30,41 @@ defmodule Web.GameController do
 
   defp authenticate(conn, _opts) do
     if id = get_session(conn, "player_id") do
+      token = Phoenix.Token.sign(conn, "player socket", id)
+
       conn
+      |> assign(:game_token, token)
       |> assign(:signed_in?, true)
-      |> assign(:player_id, id)
     else
       assign(conn, :signed_in?, false)
     end
   end
 
-  defp put_game_token(conn, _opts) do
-    if id = conn.assigns[:player_id] do
-      token = Phoenix.Token.sign(conn, "player socket", id)
-      assign(conn, :game_token, token)
-    else
-      conn
+  defp join(conn, _opts) do
+    board = config(:board)
+    dice = config(:dice)
+
+    case Game.join(board, dice) do
+      {:ok, id} -> assign(conn, :player_id, id)
+      {:error, :max_heroes} -> conn
     end
   end
 
-  defp join(conn, _opts) do
-    {board, dice} = {config(:board), config(:dice)}
-    put_session(conn, "player_id", Game.join(board, dice))
+  defp config(key), do: Endpoint.config(key)
+
+  defp redirect_index(conn) do
+    game_path = Routes.game_path(conn, :index)
+
+    conn
+    |> put_status(303)
+    |> redirect(to: game_path)
+    |> halt()
   end
 
-  defp config(key), do: Endpoint.config(key)
+  defp render_error(conn) do
+    conn
+    |> put_layout(false)
+    |> put_view(ErrorView)
+    |> render(:"#{conn.status}")
+  end
 end

@@ -13,7 +13,7 @@ defmodule Web.Router do
   get "/", Redirect, to: "/game"
   head "/ping", Web.StatusController, :ping
 
-  scope "/game", Web do
+  scope "/game", Web, log: :info do
     pipe_through :browser
 
     get "/", GameController, :index

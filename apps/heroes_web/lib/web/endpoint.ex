@@ -24,6 +24,8 @@ defmodule Web.Endpoint do
     plug Phoenix.CodeReloader
   end
 
+  plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
+
   plug Plug.Parsers,
     parsers: [{:urlencoded, length: 200, read_length: 200}],
     query_string_length: 0
