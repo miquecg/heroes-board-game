@@ -58,7 +58,7 @@ defmodule Web.GameChannel do
          :ok <- update_board(socket, result) do
       no_reply(socket)
     else
-      {:error, :dead} -> game_over(socket)
+      {:error, :not_found} -> game_over(socket)
       {:error, _} = reason -> stop(reason, socket)
     end
   end

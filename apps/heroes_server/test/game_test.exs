@@ -43,8 +43,8 @@ defmodule GameTest do
     :released = play(attacker, :attack)
 
     assert {0, 1} = play(attacker, :left)
-    assert :dead = play(enemy_1, :up)
-    assert :dead = play(enemy_2, :left)
+    assert :not_found = play(enemy_1, :up)
+    assert :not_found = play(enemy_2, :left)
     assert {3, 1} = play(enemy_3, :up)
   end
 

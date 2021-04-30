@@ -17,20 +17,21 @@ defmodule GameBehaviour do
   @type dice :: (list(tile) -> tile)
 
   @typep tile :: Board.tile()
+  @typep empty_tile :: {}
   @typep board :: module()
+
+  @typep ok(result) :: {:ok, result}
+  @typep error(reason) :: {:error, reason}
 
   @doc """
   Join a new player to the game.
   """
-  @callback join(board, dice) :: {:ok, player_id} | {:error, :max_heroes}
+  @callback join(board, dice) :: ok(player_id) | error(:max_heroes)
 
   @doc """
   Remove player from the game.
   """
   @callback remove(player_id) :: :ok
-
-  @typep command_result :: tile | :released
-  @typep command_error :: BadCommand.t() | :dead
 
   @doc """
   Send command to hero.
@@ -40,14 +41,14 @@ defmodule GameBehaviour do
   - `t:Game.Board.move/0`
   - `:attack`
 
-  Errors:
+  Error reasons:
 
-  - `:dead`
+  - `:not_found`
   - `t:GameError.BadCommand/0`
   """
-  @callback play(player_id, command :: any()) :: {:ok, command_result} | {:error, command_error}
-
-  @typep empty_tile :: {}
+  @callback play(player_id, command :: any()) ::
+              ok(tile | :released)
+              | error(:not_found | BadCommand.t())
 
   @doc """
   Get current position of hero.
@@ -58,7 +59,7 @@ defmodule GameBehaviour do
   Subscribe a `t:pid/0` to receive a `:game_over` message
   when player's hero gets killed.
   """
-  @callback subscribe(player_id, pid()) :: :ok | {:error, :not_found}
+  @callback subscribe(player_id, pid()) :: :ok | error(:not_found)
 end
 
 defmodule Game do
@@ -73,9 +74,9 @@ defmodule Game do
   alias GameError.BadCommand
 
   @typep dice :: GameBehaviour.dice()
-  @typep tile :: Board.tile()
-
   @typep player_id :: GameBehaviour.player_id()
+
+  @typep tile :: Board.tile()
 
   @typep maybe_pid :: pid() | nil
 
@@ -189,7 +190,7 @@ defmodule Game do
       reply = GenServer.call(hero, request)
       {:ok, reply}
     catch
-      :exit, _ -> {:error, :dead}
+      :exit, _ -> {:error, :not_found}
     end
   end
 
