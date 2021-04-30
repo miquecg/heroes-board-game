@@ -157,6 +157,6 @@ jobs:
         run: |
           cd apps/heroes_web/assets
           npm install --unsafe-perm
-          node node_modules/webpack/bin/webpack.js --mode development
+          npm run deploy
       - name: Run tests
         run: mix test --only browser:true
