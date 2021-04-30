@@ -13,7 +13,7 @@ defmodule Game.Hero do
   @typep move_callback :: (Board.tile() -> :ok)
 
   @typep request :: {:attack, attack_callback} | {Board.move(), move_callback}
-  @typep reply :: Board.tile() | :released
+  @typep reply(t) :: {:reply, t, state}
 
   @typep state :: %__MODULE__.State{
            board: module(),
@@ -56,7 +56,7 @@ defmodule Game.Hero do
     {:ok, %State{board: board, tile: tile}}
   end
 
-  @spec handle_call(request, GenServer.from(), state) :: {:reply, reply, state}
+  @spec handle_call(request, GenServer.from(), state) :: reply(Board.tile() | :released)
   def handle_call(msg, from, state)
 
   @impl true
