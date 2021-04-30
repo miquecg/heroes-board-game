@@ -186,12 +186,10 @@ defmodule Game do
   end
 
   defp call_hero(hero, request) do
-    try do
-      reply = GenServer.call(hero, request)
-      {:ok, reply}
-    catch
-      :exit, _ -> {:error, :not_found}
-    end
+    reply = GenServer.call(hero, request)
+    {:ok, reply}
+  catch
+    :exit, _ -> {:error, :not_found}
   end
 
   @spec terminate_hero(maybe_pid) :: :ok
