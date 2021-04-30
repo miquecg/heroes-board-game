@@ -14,8 +14,8 @@ defmodule Web.GameChannel do
   alias Web.Presence
 
   @impl true
-  def join("game:board", _msg, %{assigns: %{game: game, player: player}} = socket) do
-    case game.position(player) do
+  def join("game:board", _msg, %{assigns: %{game: game} = assigns} = socket) do
+    case game.position(assigns.player) do
       {_x, _y} = position ->
         send(self(), {:after_join, position})
         hero = %{hero: hero_id()}
@@ -27,12 +27,12 @@ defmodule Web.GameChannel do
   end
 
   @impl true
-  def handle_info({:after_join, position}, %{assigns: %{game: game, player: player}} = socket) do
+  def handle_info({:after_join, position}, %{assigns: %{game: game} = assigns} = socket) do
     push(socket, "presence_state", Presence.list(socket))
 
     with :ok <- check_active_connections(socket),
          :ok <- track_hero(socket, position),
-         :ok <- game.subscribe(player, self()) do
+         :ok <- game.subscribe(assigns.player, self()) do
       no_reply(socket)
     else
       {:error, :max_connections} = reason -> stop(reason, socket)
@@ -52,13 +52,9 @@ defmodule Web.GameChannel do
   end
 
   @impl true
-  def handle_in(
-        "game:board",
-        %{"cmd" => input},
-        %{assigns: %{game: game, player: player}} = socket
-      ) do
+  def handle_in("game:board", %{"cmd" => input}, %{assigns: %{game: game} = assigns} = socket) do
     with {:ok, command} <- validate_command(input),
-         {:ok, result} <- game.play(player, command),
+         {:ok, result} <- game.play(assigns.player, command),
          :ok <- update_board(socket, result) do
       no_reply(socket)
     else
@@ -68,9 +64,9 @@ defmodule Web.GameChannel do
   end
 
   @impl true
-  def terminate({:shutdown, reason}, %{assigns: %{game: game, player: player}}) do
-    game.remove(player)
-    {:ok, _} = Presence.update(self(), "game:lobby", player, %{logout: true})
+  def terminate({:shutdown, reason}, %{assigns: %{game: game} = assigns}) do
+    game.remove(assigns.player)
+    {:ok, _} = Presence.update(self(), "game:lobby", assigns.player, %{logout: true})
     Logger.info("Channel terminated with reason #{reason}")
   end
 
@@ -84,10 +80,10 @@ defmodule Web.GameChannel do
   end
 
   @spec check_active_connections(Socket.t()) :: :ok | {:error, :max_connections}
-  defp check_active_connections(%{assigns: %{player: id}}) do
-    case Presence.get_by_key("game:lobby", id) do
+  defp check_active_connections(%{assigns: assigns}) do
+    case Presence.get_by_key("game:lobby", assigns.player) do
       [] ->
-        {:ok, _} = Presence.track(self(), "game:lobby", id, %{})
+        {:ok, _} = Presence.track(self(), "game:lobby", assigns.player, %{})
         :ok
 
       _ ->
@@ -96,14 +92,14 @@ defmodule Web.GameChannel do
   end
 
   @spec track_hero(Socket.t(), Board.tile()) :: :ok
-  defp track_hero(%{assigns: %{hero: id}} = socket, {x, y}) do
-    {:ok, _} = Presence.track(socket, id, %{x: x, y: y})
+  defp track_hero(%{assigns: assigns} = socket, {x, y}) do
+    {:ok, _} = Presence.track(socket, assigns.hero, %{x: x, y: y})
     :ok
   end
 
   @spec update_board(Socket.t(), Board.tile() | :released) :: :ok
-  defp update_board(%{assigns: %{hero: id}} = socket, {x, y}) do
-    {:ok, _} = Presence.update(socket, id, %{x: x, y: y})
+  defp update_board(%{assigns: assigns} = socket, {x, y}) do
+    {:ok, _} = Presence.update(socket, assigns.hero, %{x: x, y: y})
     :ok
   end
 
