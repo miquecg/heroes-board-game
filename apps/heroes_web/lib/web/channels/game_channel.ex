@@ -63,7 +63,7 @@ defmodule Web.GameChannel do
       no_reply(socket)
     else
       {:error, :dead} -> game_over(socket)
-      {:error, reason} -> error_reply(reason, socket)
+      {:error, _} = reason -> stop(reason, socket)
     end
   end
 
@@ -129,7 +129,6 @@ defmodule Web.GameChannel do
   defp game_over(socket), do: no_reply(socket)
 
   defp no_reply(socket), do: {:noreply, socket, 60_000}
-  defp error_reply(reason, socket), do: {:reply, {:error, response(reason)}, socket}
 
   defp stop({_, _} = reason, socket), do: {:stop, reason, socket}
   defp stop(reason, socket), do: {:stop, {:shutdown, reason}, socket}
@@ -138,13 +137,6 @@ defmodule Web.GameChannel do
     %{
       reason: "unauthorized",
       message: "Authorization invalid"
-    }
-  end
-
-  defp response(%BadCommand{message: msg}) do
-    %{
-      reason: "bad_command",
-      message: msg
     }
   end
 end

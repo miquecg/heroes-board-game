@@ -43,13 +43,7 @@ class App {
       this.render(presences, $board, hero)
     })
 
-    const handler = this.keyboardHandler( cmd => {
-      channel.push("game:board", {cmd: cmd})
-             .receive("error", error => {
-               console.error(`command:${cmd} message:${error.message}`)
-               throw new Error(error.reason)
-             })
-    })
+    const handler = this.keyboardHandler( cmd => channel.push("game:board", {cmd: cmd}) )
     window.addEventListener("keydown", handler, true)
 
     channel.on("game_over", () => {
