@@ -1,6 +1,6 @@
 defmodule Web.GameChannel do
   @moduledoc """
-  Channel for game actions and player presence updates.
+  Process game actions coming from WebSocket and updates player presence.
   """
 
   use HeroesWeb, :channel
@@ -27,12 +27,12 @@ defmodule Web.GameChannel do
   end
 
   @impl true
-  def handle_info({:after_join, position}, socket) do
+  def handle_info({:after_join, position}, %{assigns: %{game: game, player: player}} = socket) do
     push(socket, "presence_state", Presence.list(socket))
 
     with :ok <- check_active_connections(socket),
          :ok <- track_hero(socket, position),
-         :ok <- subscribe_to_game(socket) do
+         :ok <- game.subscribe(player, self()) do
       no_reply(socket)
     else
       {:error, :max_connections} = reason -> stop(reason, socket)
@@ -40,7 +40,16 @@ defmodule Web.GameChannel do
   end
 
   @impl true
-  def handle_info(:timeout, socket), do: stop(:timeout, socket)
+  def handle_info(:game_over, socket), do: game_over(socket)
+
+  @impl true
+  def handle_info({:timeout, :game_over}, socket), do: stop(:game_over, socket)
+
+  @impl true
+  def handle_info(:timeout, socket) do
+    push(socket, "game_over", %{})
+    stop(:timeout, socket)
+  end
 
   @impl true
   def handle_in(
@@ -53,7 +62,7 @@ defmodule Web.GameChannel do
          :ok <- update_board(socket, result) do
       no_reply(socket)
     else
-      {:error, :dead} -> no_reply(socket)
+      {:error, :dead} -> game_over(socket)
       {:error, reason} -> error_reply(reason, socket)
     end
   end
@@ -92,15 +101,6 @@ defmodule Web.GameChannel do
     :ok
   end
 
-  @spec subscribe_to_game(Socket.t()) :: :ok
-  defp subscribe_to_game(%{assigns: %{game: game, player: player, hero: hero}} = socket) do
-    game.subscribe(player, fn ->
-      {:ok, _} = Presence.update(socket, hero, &Map.put(&1, :state, "dead"))
-      push(socket, "game_over", %{})
-      Process.send_after(socket.channel_pid, :timeout, 5_000)
-    end)
-  end
-
   @spec update_board(Socket.t(), Board.tile() | :released) :: :ok
   defp update_board(%{assigns: %{hero: id}} = socket, {x, y}) do
     {:ok, _} = Presence.update(socket, id, %{x: x, y: y})
@@ -116,6 +116,17 @@ defmodule Web.GameChannel do
   defp validate_command("→"), do: {:ok, :right}
   defp validate_command("⚔"), do: {:ok, :attack}
   defp validate_command(_), do: {:error, %BadCommand{}}
+
+  defp game_over(%{assigns: %{hero: id} = assigns} = socket) do
+    {:ok, _} = Presence.update(socket, id, &Map.put(&1, :state, "dead"))
+    push(socket, "game_over", %{})
+
+    Process.send_after(self(), {:timeout, :game_over}, 5_000)
+
+    no_reply(%{socket | assigns: Map.delete(assigns, :hero)})
+  end
+
+  defp game_over(socket), do: no_reply(socket)
 
   defp no_reply(socket), do: {:noreply, socket, 60_000}
   defp error_reply(reason, socket), do: {:reply, {:error, response(reason)}, socket}
