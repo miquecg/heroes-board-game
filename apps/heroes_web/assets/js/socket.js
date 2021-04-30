@@ -48,12 +48,10 @@ class App {
 
     channel.on("game_over", () => {
       window.removeEventListener("keydown", handler, true)
-      this.clearSession()
-          .then( () => {
-            if (window.confirm("\t    GAME OVER\n\n\nDo you want to play again?")) {
-              window.location.reload()
-            }
-          })
+
+      if (window.confirm("\t    GAME OVER\n\n\nDo you want to play again?")) {
+        window.location.reload()
+      }
     })
   }
 
