@@ -28,14 +28,14 @@ defmodule HeroesWeb.MixProject do
 
   defp deps do
     [
+      {:hammox, "~> 0.5", only: :test},
       {:heroes_server, in_umbrella: true},
+      {:jason, "~> 1.0"},
       {:phoenix, "~> 1.5.3"},
       {:phoenix_html, "~> 2.11"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
-      {:wallaby, "~> 0.28.0", only: :test, runtime: false},
-      {:hammox, "~> 0.5", only: :test}
+      {:wallaby, "~> 0.28.0", only: :test, runtime: false}
     ]
   end
 end

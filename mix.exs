@@ -4,6 +4,7 @@ defmodule HeroesGame.MixProject do
   def project do
     [
       apps_path: "apps",
+      apps: [:heroes_server, :heroes_web],
       version: "0.1.0",
       aliases: aliases(),
       deps: deps(),
@@ -13,7 +14,11 @@ defmodule HeroesGame.MixProject do
       ],
       releases: [
         web: [
-          applications: [heroes_web: :permanent],
+          applications: [
+            runtime_tools: :load,
+            heroes_cluster: :permanent,
+            heroes_web: :permanent
+          ],
           version: {:from_app, :heroes_web},
           include_executables_for: [:unix]
         ]
@@ -30,7 +35,8 @@ defmodule HeroesGame.MixProject do
   defp deps do
     [
       {:credo, "~> 1.4", only: :dev, runtime: false},
-      {:dialyxir, "~> 1.0", only: :dev, runtime: false}
+      {:dialyxir, "~> 1.0", only: :dev, runtime: false},
+      {:heroes_cluster, path: "apps/heroes_cluster", only: :prod, runtime: false}
     ]
   end
 

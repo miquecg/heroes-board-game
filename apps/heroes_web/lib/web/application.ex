@@ -3,7 +3,6 @@ defmodule Web.Application do
 
   use Application
 
-  @app :heroes_web
   @one_minute_ms 60_000
 
   @impl true
@@ -20,7 +19,7 @@ defmodule Web.Application do
   end
 
   @spec timeout_ms :: non_neg_integer()
-  defp timeout_ms, do: Application.get_env(@app, :reconnect_timeout, @one_minute_ms)
+  defp timeout_ms, do: Application.get_env(:heroes_web, :reconnect_timeout, @one_minute_ms)
 
   @spec board :: module()
   defp board do
