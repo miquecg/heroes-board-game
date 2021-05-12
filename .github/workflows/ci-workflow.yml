@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         elixir: [1.11.4]
-        erlang: [23.3.2]
+        erlang: ['24.0']
         os: [ubuntu-focal-20210325]
     container:
       image: hexpm/elixir:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-${{ matrix.os }}
@@ -63,7 +63,7 @@ jobs:
     strategy:
       matrix:
         elixir: [1.11.4]
-        erlang: [23.3.2]
+        erlang: ['24.0']
         os: [ubuntu-focal-20210325]
     container:
       image: hexpm/elixir:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-${{ matrix.os }}
@@ -94,7 +94,7 @@ jobs:
     strategy:
       matrix:
         elixir: [1.11.4]
-        erlang: [23.3.2]
+        erlang: ['24.0']
         os: [ubuntu-focal-20210325]
     container:
       image: hexpm/elixir:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-${{ matrix.os }}
@@ -116,7 +116,7 @@ jobs:
     strategy:
       matrix:
         elixir: [1.11.4]
-        erlang: [23.3.2]
+        erlang: ['24.0']
         os: [ubuntu-focal-20210325]
     container:
       image: hexpm/elixir:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-${{ matrix.os }}
