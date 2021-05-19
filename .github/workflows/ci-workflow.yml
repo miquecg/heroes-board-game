@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        elixir: [1.11.4]
+        elixir: [1.12.0]
         erlang: ['24.0']
         os: [ubuntu-focal-20210325]
     container:
@@ -62,7 +62,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        elixir: [1.11.4]
+        elixir: [1.12.0]
         erlang: ['24.0']
         os: [ubuntu-focal-20210325]
     container:
@@ -93,7 +93,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        elixir: [1.11.4]
+        elixir: [1.12.0]
         erlang: ['24.0']
         os: [ubuntu-focal-20210325]
     container:
@@ -115,7 +115,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        elixir: [1.11.4]
+        elixir: [1.12.0]
         erlang: ['24.0']
         os: [ubuntu-focal-20210325]
     container:
