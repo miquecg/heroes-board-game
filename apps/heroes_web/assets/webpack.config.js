@@ -1,32 +1,35 @@
 const path = require('path');
 const glob = require('glob');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = (env, options) => {
   const devMode = options.mode !== 'production';
 
   return {
+    resolve: {
+      modules: ['node_modules']
+    },
+    optimization: {
+      minimizer: [
+        '...',
+        new CssMinimizerPlugin()
+      ]
+    },
     entry: {
       'app': glob.sync('./vendor/**/*.js').concat(['./js/app.js'])
     },
     output: {
-      path: path.resolve(__dirname, '../priv/static/js'),
       filename: '[name].js',
+      path: path.resolve(__dirname, '../priv/static/js'),
       publicPath: '/js/'
     },
+    devtool: devMode ? 'source-map' : undefined,
     module: {
       rules: [
         {
-          test: /\.js$/,
-          exclude: /node_modules/,
-          use: {
-            loader: 'babel-loader'
-          }
-        },
-        {
-          test: /\.[s]?css$/,
+          test: /\.css$/,
           use: [
             MiniCssExtractPlugin.loader,
             {
@@ -34,26 +37,18 @@ module.exports = (env, options) => {
               options: {
                 url: false,
               }
-            },
-            'sass-loader',
-          ],
+            }
+          ]
         }
       ]
     },
     plugins: [
       new MiniCssExtractPlugin({ filename: '../css/app.css' }),
-      new CopyWebpackPlugin({
+      new CopyPlugin({
         patterns: [
           { from: 'static/', to: '../' }
         ]
       })
-    ],
-    optimization: {
-      minimizer: [
-        '...',
-        new CssMinimizerPlugin()
-      ]
-    },
-    devtool: devMode ? 'source-map' : undefined
+    ]
   }
 };
