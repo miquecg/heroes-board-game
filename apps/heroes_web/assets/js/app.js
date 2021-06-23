@@ -1,2 +1,2 @@
-import "../css/app.scss"
+import "../css/app.css"
 import socket from "./socket"
