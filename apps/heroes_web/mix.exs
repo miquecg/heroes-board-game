@@ -32,7 +32,7 @@ defmodule HeroesWeb.MixProject do
       {:heroes_server, in_umbrella: true},
       {:jason, "~> 1.0"},
       {:phoenix, "~> 1.5.3"},
-      {:phoenix_html, "~> 2.11"},
+      {:phoenix_html, "~> 3.0"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:plug_cowboy, "~> 2.0"},
       {:wallaby, "~> 0.28.0", only: :test, runtime: false}
