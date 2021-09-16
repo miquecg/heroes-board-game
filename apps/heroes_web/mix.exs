@@ -11,7 +11,7 @@ defmodule HeroesWeb.MixProject do
       lockfile: "../../mix.lock",
       elixir: "~> 1.12",
       elixirc_paths: elixirc_paths(Mix.env()),
-      compilers: [:phoenix] ++ Mix.compilers(),
+      compilers: Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       deps: deps()
     ]
@@ -35,7 +35,7 @@ defmodule HeroesWeb.MixProject do
       {:phoenix_html, "~> 3.0"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:plug_cowboy, "~> 2.0"},
-      {:wallaby, "~> 0.28.0", only: :test, runtime: false}
+      {:wallaby, "~> 0.29.0", only: :test, runtime: false}
     ]
   end
 end
