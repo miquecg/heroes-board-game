@@ -12,6 +12,6 @@
   <%= if @signed_in? do %>
     <script>window.csrfToken="<%= get_csrf_token() %>";</script>
     <script>window.gameToken="<%= assigns[:game_token] %>";</script>
-    <script defer type="text/javascript" src={Routes.static_path(@conn, "/js/app.js")}></script>
+    <script defer type="text/javascript" src={Routes.static_path(@conn, "/assets/app.js")}></script>
   <% end %>
 </section>
