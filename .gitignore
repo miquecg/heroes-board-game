@@ -6,9 +6,7 @@
 /priv/plts/*.plt.hash
 
 **/priv/static/
-node_modules/
 
 *.ez
 erl_crash.dump
-npm-debug.log
 prod.secret.exs
