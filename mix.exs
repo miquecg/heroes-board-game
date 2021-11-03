@@ -28,6 +28,7 @@ defmodule HeroesGame.MixProject do
 
   defp aliases do
     [
+      "assets.deploy": ["esbuild default --minify", "phx.digest"],
       quality: ["format", "credo --strict", "dialyzer"]
     ]
   end
