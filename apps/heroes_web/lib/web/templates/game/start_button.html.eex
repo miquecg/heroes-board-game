@@ -1,4 +1,0 @@
-<% action = Routes.game_path(Web.Endpoint, :start) %>
-<%= form_tag(action, csrf_token: true) %>
-  <%= submit "Start" %>
-</form>

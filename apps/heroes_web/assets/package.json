@@ -1,22 +1,5 @@
 {
-  "private": true,
   "scripts": {
-    "deploy": "webpack --mode production",
-    "watch": "webpack --mode development --watch"
-  },
-  "dependencies": {
-    "phoenix": "file:../../../deps/phoenix"
-  },
-  "devDependencies": {
-    "copy-webpack-plugin": "^9.0.0",
-    "css-loader": "^6.2.0",
-    "css-minimizer-webpack-plugin": "^3.0.0",
-    "glob": "^7.2.0",
-    "mini-css-extract-plugin": "^2.1.0",
-    "webpack": "^5.41.1",
-    "webpack-cli": "^4.7.0"
-  },
-  "engines": {
-    "node": ">=17.x"
+    "deploy": "cd ../../.. && mix assets.deploy && rm -f _build/esbuild"
   }
 }

@@ -58,7 +58,7 @@ defmodule HeroesWeb do
       use Phoenix.HTML
 
       import Phoenix.Controller, only: [get_csrf_token: 0]
-      import Phoenix.View
+      import Phoenix.LiveView.Helpers
       import Web.ErrorHelpers
 
       alias Web.Router.Helpers, as: Routes

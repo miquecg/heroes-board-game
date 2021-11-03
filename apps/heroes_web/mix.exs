@@ -28,12 +28,14 @@ defmodule HeroesWeb.MixProject do
 
   defp deps do
     [
+      {:esbuild, "~> 0.3.4", runtime: Mix.env() == :dev},
       {:hammox, "~> 0.5", only: :test},
       {:heroes_server, in_umbrella: true},
       {:jason, "~> 1.0"},
-      {:phoenix, "~> 1.5.3"},
-      {:phoenix_html, "~> 3.0"},
-      {:phoenix_live_reload, "~> 1.2", only: :dev},
+      {:phoenix, "~> 1.6"},
+      {:phoenix_html, "~> 3.1"},
+      {:phoenix_live_reload, "~> 1.3", only: :dev},
+      {:phoenix_live_view, "~> 0.17.4"},
       {:plug_cowboy, "~> 2.0"},
       {:wallaby, "~> 0.29.0", only: :test, runtime: false}
     ]

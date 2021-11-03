@@ -133,10 +133,6 @@ jobs:
           apt install -y chromium-browser chromium-chromedriver
         env:
           DEBIAN_FRONTEND: noninteractive
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '17.0.1'
       - uses: actions/checkout@v2
       - name: Restore build cache
         uses: actions/cache@v2
@@ -146,17 +142,7 @@ jobs:
             _build
             deps
           key: build-v0-${{ hashFiles('mix.lock') }}-${{ needs.build.outputs.cache_timestamp }}
-      - name: Restore npm cache
-        uses: actions/cache@v2
-        with:
-          path: ~/.npm
-          key: npm-v0-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            npm-v0-
       - name: Bundle static assets
-        run: |
-          cd apps/heroes_web/assets
-          npm install --unsafe-perm
-          npm run deploy
+        run: mix assets.deploy
       - name: Run tests
         run: mix test --only browser:true

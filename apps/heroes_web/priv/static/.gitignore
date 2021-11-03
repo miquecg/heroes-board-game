@@ -1,0 +1,9 @@
+/*
+
+!.gitignore
+!favicon.ico
+!robots.txt
+
+!images/
+images/*
+!images/hero.png
