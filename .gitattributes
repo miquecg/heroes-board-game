@@ -1,18 +1,18 @@
 * text=auto
 
-*.css text
-*.eex text
-*.ex  text
-*.exs text
-*.js  text
-*.md  text
-*.txt text
-*.yml text
+*.css  text
+*.eex  text
+*.ex   text
+*.exs  text
+*.heex text
+*.js   text
+*.md   text
+*.txt  text
+*.yml  text
 
-*.ico binary
-*.png binary
+*.ico  binary
+*.png  binary
 
 # Disable auto-merge and diffs for lock files
 # https://git-scm.com/docs/gitattributes#_performing_a_three_way_merge
-*.lock            -diff -merge
-package-lock.json -diff -merge
+*.lock -diff -merge
