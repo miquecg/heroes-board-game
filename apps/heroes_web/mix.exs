@@ -28,7 +28,7 @@ defmodule HeroesWeb.MixProject do
 
   defp deps do
     [
-      {:esbuild, "~> 0.3.4", runtime: Mix.env() == :dev},
+      {:esbuild, "~> 0.4.0", runtime: Mix.env() == :dev},
       {:hammox, "~> 0.5", only: :test},
       {:heroes_server, in_umbrella: true},
       {:jason, "~> 1.0"},
